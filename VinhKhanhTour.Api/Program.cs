@@ -5,7 +5,9 @@ using VinhKhanhTour.Api.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // ── Firebase Init ──────────────────────────────────
-var keyPath = Path.Combine(AppContext.BaseDirectory, "firebase-key.json");
+var keyPath = "/etc/secrets/firebase-key.json";
+if (!File.Exists(keyPath))
+    keyPath = Path.Combine(AppContext.BaseDirectory, "firebase-key.json");
 Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", keyPath);
 FirebaseApp.Create(new AppOptions
 {
