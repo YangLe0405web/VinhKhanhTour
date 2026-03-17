@@ -5,23 +5,12 @@ using VinhKhanhTour.Api.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // ── Firebase Init ──────────────────────────────────
-var keyJson = Environment.GetEnvironmentVariable("FIREBASE_KEY_JSON");
-
-if (!string.IsNullOrEmpty(keyJson))
+var keyPath = Path.Combine(AppContext.BaseDirectory, "firebase-key.json");
+Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", keyPath);
+FirebaseApp.Create(new AppOptions
 {
-    var credential = GoogleCredential.FromJson(keyJson);
-    FirebaseApp.Create(new AppOptions { Credential = credential });
-}
-else
-{
-    var keyPath = Path.Combine(AppContext.BaseDirectory, "firebase-key.json");
-    Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", keyPath);
-    FirebaseApp.Create(new AppOptions
-    {
-        Credential = GoogleCredential.GetApplicationDefault()
-    });
-}
-
+    Credential = GoogleCredential.GetApplicationDefault()
+});
 builder.Services.AddCors(opt => opt.AddPolicy("CmsPolicy", p =>
     p.WithOrigins(
         "https://localhost:7110",
