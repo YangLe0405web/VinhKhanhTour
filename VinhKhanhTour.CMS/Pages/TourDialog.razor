@@ -1,0 +1,78 @@
+﻿@inject ISnackbar Snackbar
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            @(IsEdit ? "✏️ Sửa Tour" : "➕ Thêm Tour mới")
+        </MudText>
+    </TitleContent>
+
+    <DialogContent>
+        <MudGrid>
+            <MudItem xs="12">
+                <MudTextField @bind-Value="Tour.Name"
+                              Label="Tên Tour" Variant="Variant.Outlined"
+                              Required="true" />
+            </MudItem>
+            <MudItem xs="12">
+                <MudTextField @bind-Value="Tour.Desc"
+                              Label="Mô tả" Variant="Variant.Outlined"
+                              Lines="2" />
+            </MudItem>
+            <MudItem xs="12">
+                <MudSelect @bind-Value="Tour.QrType"
+                           Label="Loại QR Code" Variant="Variant.Outlined">
+                    <MudSelectItem Value="@("play")">
+                        🔊 Play — Quét là nghe ngay
+                    </MudSelectItem>
+                    <MudSelectItem Value="@("navigate")">
+                        🗺️ Navigate — Quét là chỉ đường
+                    </MudSelectItem>
+                </MudSelect>
+            </MudItem>
+
+            <MudItem xs="12">
+                <MudText Typo="Typo.subtitle1" Class="mb-2">
+                    📍 Chọn POI trong tour
+                </MudText>
+                @foreach (var poi in AllPois)
+                {
+                    <MudCheckBox Value="@Tour.PoiIds.Contains(poi.Id)"
+                                 ValueChanged="@((bool v) => TogglePoi(poi.Id, v))"
+                                 T="bool"
+                                 Label="@poi.Name" />
+                }
+            </MudItem>
+
+            <MudItem xs="12">
+                <MudSwitch @bind-Value="Tour.IsActive"
+                           Color="Color.Success" T="bool"
+                           Label="Kích hoạt" />
+            </MudItem>
+        </MudGrid>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton OnClick="Cancel">Hủy</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled"
+                   OnClick="Submit">Lưu</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance? MudDialog { get; set; }
+    [Parameter] public TourModel Tour { get; set; } = new();
+    [Parameter] public bool IsEdit { get; set; } = false;
+    [Parameter] public List<PoiModel> AllPois { get; set; } = new();
+
+    void TogglePoi(string poiId, bool selected)
+    {
+        if (selected && !Tour.PoiIds.Contains(poiId))
+            Tour.PoiIds.Add(poiId);
+        else if (!selected)
+            Tour.PoiIds.Remove(poiId);
+    }
+
+    void Submit() => MudDialog?.Close(DialogResult.Ok(Tour));
+    void Cancel() => MudDialog?.Cancel();
+}

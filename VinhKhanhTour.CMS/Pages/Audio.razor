@@ -1,0 +1,125 @@
+﻿@page "/audio"
+@inject CmsApiService Api
+@inject ISnackbar Snackbar
+
+<MudText Typo="Typo.h4" Class="mb-4">🎵 Quản lý Audio</MudText>
+
+@if (_loading)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary"/>
+}
+else
+{
+    <MudExpansionPanels>
+        @foreach (var poi in _pois)
+        {
+            <MudExpansionPanel>
+                <TitleContent>
+                    <MudText Typo="Typo.h6">📍 @poi.Name</MudText>
+                </TitleContent>
+                <ChildContent>
+                    <MudGrid>
+                        @foreach (var lang in _langs)
+                        {
+                            <MudItem xs="12" sm="6">
+                                <MudPaper Class="pa-3" Elevation="1">
+                                    <MudText Typo="Typo.subtitle1" Class="mb-2">
+                                        @lang.Value
+                                    </MudText>
+
+                                    @if (poi.AudioUrls.ContainsKey(lang.Key))
+                                    {
+                                        <MudText Typo="Typo.caption"
+                                                 Color="Color.Success" Class="mb-2">
+                                            ✅ Đã có audio
+                                        </MudText>
+                                        <audio controls style="width:100%">
+                                            <source src="@poi.AudioUrls[lang.Key]"/>
+                                        </audio>
+                                        <MudButton Color="Color.Error" Size="Size.Small"
+                                                   Class="mt-2"
+                                                   OnClick="() => DeleteAudio(poi, lang.Key)">
+                                            🗑️ Xóa
+                                        </MudButton>
+                                    }
+                                    else
+                                    {
+                                        <MudText Typo="Typo.caption"
+                                                 Color="Color.Warning" Class="mb-2">
+                                            ⚠️ Chưa có audio
+                                        </MudText>
+                                    }
+
+                                   <MudFileUpload T="IBrowserFile"
+               Accept=".mp3,.wav,.ogg"
+               FilesChanged="f => UploadAudio(f, poi, lang.Key)">
+    <ButtonTemplate>
+        <MudButton Variant="Variant.Outlined"
+                   Color="Color.Primary"
+                   Size="Size.Small"
+                   Class="mt-2"
+                   StartIcon="@Icons.Material.Filled.Upload">
+            Upload @lang.Value
+        </MudButton>
+    </ButtonTemplate>
+</MudFileUpload>
+                                </MudPaper>
+                            </MudItem>
+                        }
+                    </MudGrid>
+                </ChildContent>
+            </MudExpansionPanel>
+        }
+    </MudExpansionPanels>
+}
+
+@code {
+    List<PoiModel> _pois = new();
+    bool _loading = true;
+
+    readonly Dictionary<string, string> _langs = new()
+    {
+        { "vi", "🇻🇳 Tiếng Việt" },
+        { "en", "🇬🇧 English" },
+        { "zh", "🇨🇳 中文" },
+        { "ja", "🇯🇵 日本語" },
+        { "ko", "🇰🇷 한국어" },
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        _pois = await Api.GetPoisAsync() ?? new();
+        _loading = false;
+    }
+
+    async Task UploadAudio(IBrowserFile file, PoiModel poi, string lang)
+    {
+        try
+        {
+            using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
+            var url = await Api.UploadAudioAsync(
+                poi.Id, lang, stream, file.Name);
+
+            if (url != null)
+            {
+                poi.AudioUrls[lang] = url;
+                Snackbar.Add($"Upload {lang} thành công!", Severity.Success);
+            }
+            else
+            {
+                Snackbar.Add("Upload thất bại!", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Lỗi: {ex.Message}", Severity.Error);
+        }
+    }
+
+    async Task DeleteAudio(PoiModel poi, string lang)
+    {
+        poi.AudioUrls.Remove(lang);
+        await Api.SavePoiAsync(poi);
+        Snackbar.Add($"Đã xóa audio {lang}!", Severity.Success);
+    }
+}

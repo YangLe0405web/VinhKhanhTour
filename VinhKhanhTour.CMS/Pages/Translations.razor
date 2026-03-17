@@ -1,0 +1,121 @@
+﻿@page "/translations"
+@inject CmsApiService Api
+@inject ISnackbar Snackbar
+
+<MudText Typo="Typo.h4" Class="mb-4">🌐 Quản lý Bản dịch</MudText>
+
+@if (_loading)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+}
+else
+{
+    <MudTable Items="_pois" Hover="true" Striped="true">
+        <HeaderContent>
+            <MudTh Style="min-width:180px">Tên POI</MudTh>
+            <MudTh Style="min-width:80px">🇻🇳 VI</MudTh>
+            <MudTh Style="min-width:80px">🇬🇧 EN</MudTh>
+            <MudTh Style="min-width:80px">🇨🇳 ZH</MudTh>
+            <MudTh Style="min-width:80px">🇯🇵 JA</MudTh>
+            <MudTh Style="min-width:80px">🇰🇷 KO</MudTh>
+            <MudTh Style="min-width:100px">Thao tác</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd>@context.Name</MudTd>
+            @foreach (var lang in _langs)
+            {
+                <MudTd>
+                    @if (context.Content.ContainsKey(lang))
+                    {
+                        <MudIcon Icon="@Icons.Material.Filled.CheckCircle"
+                                 Color="Color.Success" Size="Size.Small" />
+                    }
+                    else
+                    {
+                        <MudIcon Icon="@Icons.Material.Filled.Cancel"
+                                 Color="Color.Error" Size="Size.Small" />
+                    }
+                </MudTd>
+            }
+            <MudTd>
+                <MudButton Variant="Variant.Outlined" Size="Size.Small"
+                           Color="Color.Primary"
+                           OnClick="() => OpenEditor(context)">
+                    ✏️ Sửa
+                </MudButton>
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+}
+
+@if (_editing != null)
+{
+    <MudPaper Class="pa-4 mt-4" Elevation="3">
+        <MudText Typo="Typo.h6" Class="mb-3">
+            ✏️ Sửa nội dung: @_editing.Name
+        </MudText>
+        <MudGrid>
+            @foreach (var lang in _langMap)
+            {
+                <MudItem xs="12">
+                    <MudTextField Value="@GetContent(_editing, lang.Key)"
+                                  ValueChanged="@((string v) => SetContent(_editing, lang.Key, v))"
+                                  Label="@lang.Value"
+                                  Variant="Variant.Outlined"
+                                  Lines="3" />
+                </MudItem>
+            }
+        </MudGrid>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled"
+                   Class="mt-3" OnClick="SaveEditing">
+            💾 Lưu
+        </MudButton>
+        <MudButton Class="mt-3 ml-2" OnClick="() => _editing = null">
+            Hủy
+        </MudButton>
+    </MudPaper>
+}
+
+@code {
+    List<PoiModel> _pois = new();
+    PoiModel? _editing = null;
+    bool _loading = true;
+
+    readonly string[] _langs = { "vi", "en", "zh", "ja", "ko" };
+
+    readonly Dictionary<string, string> _langMap = new()
+    {
+        { "vi", "🇻🇳 Tiếng Việt" },
+        { "en", "🇬🇧 English" },
+        { "zh", "🇨🇳 中文" },
+        { "ja", "🇯🇵 日本語" },
+        { "ko", "🇰🇷 한국어" },
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        _pois = await Api.GetPoisAsync() ?? new();
+        _loading = false;
+    }
+
+    void OpenEditor(PoiModel poi) => _editing = poi;
+
+    string GetContent(PoiModel poi, string lang)
+        => poi.Content.TryGetValue(lang, out var v) ? v : "";
+
+    void SetContent(PoiModel poi, string lang, string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            poi.Content.Remove(lang);
+        else
+            poi.Content[lang] = value;
+    }
+
+    async Task SaveEditing()
+    {
+        if (_editing == null) return;
+        await Api.SavePoiAsync(_editing);
+        Snackbar.Add("Đã lưu bản dịch!", Severity.Success);
+        _editing = null;
+    }
+}

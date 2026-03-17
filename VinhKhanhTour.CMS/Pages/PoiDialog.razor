@@ -1,0 +1,101 @@
+﻿@inject ISnackbar Snackbar
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            @(IsEdit ? "✏️ Sửa POI" : "➕ Thêm POI mới")
+        </MudText>
+    </TitleContent>
+
+    <DialogContent>
+        <MudGrid>
+            <MudItem xs="12">
+                <MudTextField @bind-Value="Poi.Name"
+                              Label="Tên POI" Variant="Variant.Outlined"
+                              Required="true" />
+            </MudItem>
+            <MudItem xs="6">
+                <MudSelect @bind-Value="Poi.Category"
+                           Label="Danh mục" Variant="Variant.Outlined">
+                    <MudSelectItem Value="@("food")">🍜 Ẩm thực</MudSelectItem>
+                    <MudSelectItem Value="@("drink")">🧋 Đồ uống</MudSelectItem>
+                    <MudSelectItem Value="@("landmark")">🏛️ Địa điểm</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="6">
+                <MudNumericField @bind-Value="Poi.Radius"
+                                 Label="Bán kính (m)" Variant="Variant.Outlined"
+                                 Min="10" Max="200" />
+            </MudItem>
+            <MudItem xs="6">
+                <MudNumericField @bind-Value="Poi.Latitude"
+                                 Label="Latitude" Variant="Variant.Outlined"
+                                 Format="F6" />
+            </MudItem>
+            <MudItem xs="6">
+                <MudNumericField @bind-Value="Poi.Longitude"
+                                 Label="Longitude" Variant="Variant.Outlined"
+                                 Format="F6" />
+            </MudItem>
+
+            <MudItem xs="12">
+                <MudText Typo="Typo.subtitle1" Class="mt-2 mb-2">
+                    📝 Nội dung thuyết minh
+                </MudText>
+            </MudItem>
+
+            @foreach (var lang in _langs)
+            {
+                <MudItem xs="12">
+                    <MudTextField Value="@GetContent(lang.Key)"
+                                  ValueChanged="@((string v) => SetContent(lang.Key, v))"
+                                  Label="@lang.Value"
+                                  Variant="Variant.Outlined"
+                                  Lines="3" />
+                </MudItem>
+            }
+
+            <MudItem xs="12">
+                <MudSwitch @bind-Checked="Poi.IsActive"
+                           Color="Color.Success"
+                           T="bool"
+                           Label="Kích hoạt" />
+            </MudItem>
+        </MudGrid>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton OnClick="Cancel">Hủy</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled"
+                   OnClick="Submit">Lưu</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance? MudDialog { get; set; }
+    [Parameter] public PoiModel Poi { get; set; } = new();
+    [Parameter] public bool IsEdit { get; set; } = false;
+
+    readonly Dictionary<string, string> _langs = new()
+    {
+        { "vi", "🇻🇳 Tiếng Việt" },
+        { "en", "🇬🇧 English" },
+        { "zh", "🇨🇳 中文" },
+        { "ja", "🇯🇵 日本語" },
+        { "ko", "🇰🇷 한국어" },
+    };
+
+    string GetContent(string lang)
+        => Poi.Content.TryGetValue(lang, out var v) ? v : "";
+
+    void SetContent(string lang, string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            Poi.Content.Remove(lang);
+        else
+            Poi.Content[lang] = value;
+    }
+
+    void Submit() => MudDialog?.Close(DialogResult.Ok(Poi));
+    void Cancel() => MudDialog?.Cancel();
+}

@@ -1,0 +1,117 @@
+﻿@page "/pois"
+@inject CmsApiService Api
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+
+<MudText Typo="Typo.h4" Class="mb-4">📍 Quản lý POI</MudText>
+
+<MudButton Variant="Variant.Filled" Color="Color.Primary"
+           StartIcon="@Icons.Material.Filled.Add"
+           OnClick="OpenAddDialog" Class="mb-4">
+    Thêm POI mới
+</MudButton>
+
+@if (_loading)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary"/>
+}
+else
+{
+    <MudTable Items="_pois" Hover="true" Striped="true"
+              HorizontalScrollbar="true" Breakpoint="Breakpoint.None">
+        <HeaderContent>
+            <MudTh Style="min-width:200px">Tên POI</MudTh>
+            <MudTh Style="min-width:120px">Danh mục</MudTh>
+            <MudTh Style="min-width:180px">Tọa độ</MudTh>
+            <MudTh Style="min-width:120px">Ngôn ngữ</MudTh>
+            <MudTh Style="min-width:100px">Kích hoạt</MudTh>
+            <MudTh Style="min-width:120px">Thao tác</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Tên POI">@context.Name</MudTd>
+            <MudTd DataLabel="Danh mục">
+                <MudChip T="string" Size="Size.Small" Color="Color.Info">
+                    @context.Category
+                </MudChip>
+            </MudTd>
+            <MudTd DataLabel="Tọa độ">
+                @context.Latitude.ToString("F4"), @context.Longitude.ToString("F4")
+            </MudTd>
+            <MudTd DataLabel="Ngôn ngữ">@GetFlags(context)</MudTd>
+            <MudTd DataLabel="Kích hoạt">
+                <MudSwitch @bind-Value="context.IsActive"
+                           Color="Color.Success" T="bool" />
+            </MudTd>
+            <MudTd DataLabel="Thao tác">
+                <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                               Color="Color.Primary" Size="Size.Small"
+                               OnClick="() => OpenEditDialog(context)" />
+                <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                               Color="Color.Error" Size="Size.Small"
+                               OnClick="() => DeletePoi(context.Id)" />
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+}
+
+@code {
+    List<PoiModel> _pois = new();
+    bool _loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _pois = await Api.GetPoisAsync() ?? new();
+        _loading = false;
+    }
+
+    string GetFlags(PoiModel p)
+    {
+        var flags = new[] { ("vi","🇻🇳"),("en","🇬🇧"),("zh","🇨🇳"),("ja","🇯🇵"),("ko","🇰🇷") };
+        return string.Join(" ", flags
+            .Where(f => p.Content.ContainsKey(f.Item1))
+            .Select(f => f.Item2));
+    }
+
+    async Task DeletePoi(string id)
+    {
+        await Api.DeletePoiAsync(id);
+        _pois.RemoveAll(p => p.Id == id);
+        Snackbar.Add("Đã xóa POI!", Severity.Success);
+    }
+
+    async Task OpenAddDialog()
+    {
+        var options = new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true };
+        var dialog = await DialogService.ShowAsync<PoiDialog>(
+            "Thêm POI",
+            new DialogParameters { ["Poi"] = new PoiModel(), ["IsEdit"] = false },
+            options);
+
+        var result = await dialog.Result;
+        if (!result.Canceled)
+        {
+            var poi = (PoiModel)result.Data!;
+            await Api.SavePoiAsync(poi);
+            _pois = await Api.GetPoisAsync() ?? new();
+            Snackbar.Add("Đã thêm POI!", Severity.Success);
+        }
+    }
+
+    async Task OpenEditDialog(PoiModel poi)
+    {
+        var options = new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true };
+        var dialog = await DialogService.ShowAsync<PoiDialog>(
+            "Sửa POI",
+            new DialogParameters { ["Poi"] = poi, ["IsEdit"] = true },
+            options);
+
+        var result = await dialog.Result;
+        if (!result.Canceled)
+        {
+            var updated = (PoiModel)result.Data!;
+            await Api.SavePoiAsync(updated);
+            _pois = await Api.GetPoisAsync() ?? new();
+            Snackbar.Add("Đã cập nhật POI!", Severity.Success);
+        }
+    }
+}

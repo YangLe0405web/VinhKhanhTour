@@ -1,0 +1,12 @@
+D:\Projects\VinhKhanhTour\VinhKhanhTour.Shared\bin\Release\net8.0\VinhKhanhTour.Shared.deps.json
+D:\Projects\VinhKhanhTour\VinhKhanhTour.Shared\bin\Release\net8.0\VinhKhanhTour.Shared.dll
+D:\Projects\VinhKhanhTour\VinhKhanhTour.Shared\bin\Release\net8.0\VinhKhanhTour.Shared.pdb
+D:\Projects\VinhKhanhTour\VinhKhanhTour.Shared\obj\Release\net8.0\VinhKhanhTour.Shared.csproj.AssemblyReference.cache
+D:\Projects\VinhKhanhTour\VinhKhanhTour.Shared\obj\Release\net8.0\VinhKhanhTour.Shared.GeneratedMSBuildEditorConfig.editorconfig
+D:\Projects\VinhKhanhTour\VinhKhanhTour.Shared\obj\Release\net8.0\VinhKhanhTour.Shared.AssemblyInfoInputs.cache
+D:\Projects\VinhKhanhTour\VinhKhanhTour.Shared\obj\Release\net8.0\VinhKhanhTour.Shared.AssemblyInfo.cs
+D:\Projects\VinhKhanhTour\VinhKhanhTour.Shared\obj\Release\net8.0\VinhKhanhTour.Shared.csproj.CoreCompileInputs.cache
+D:\Projects\VinhKhanhTour\VinhKhanhTour.Shared\obj\Release\net8.0\VinhKhanhTour.Shared.dll
+D:\Projects\VinhKhanhTour\VinhKhanhTour.Shared\obj\Release\net8.0\refint\VinhKhanhTour.Shared.dll
+D:\Projects\VinhKhanhTour\VinhKhanhTour.Shared\obj\Release\net8.0\VinhKhanhTour.Shared.pdb
+D:\Projects\VinhKhanhTour\VinhKhanhTour.Shared\obj\Release\net8.0\ref\VinhKhanhTour.Shared.dll

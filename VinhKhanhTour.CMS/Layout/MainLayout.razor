@@ -1,0 +1,35 @@
+﻿@inherits LayoutComponentBase
+
+<MudThemeProvider />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+    <MudAppBar Color="Color.Primary" Fixed="true">
+        <MudText Typo="Typo.h6">🍜 Vĩnh Khánh Tour CMS</MudText>
+        <MudSpacer/>
+    </MudAppBar>
+
+    <MudDrawer Open="true" Variant="DrawerVariant.Persistent">
+        <MudNavMenu>
+            <MudNavLink Href="/" Icon="@Icons.Material.Filled.Dashboard">Dashboard</MudNavLink>
+            <MudNavLink Href="/pois" Icon="@Icons.Material.Filled.Place">Quản lý POI</MudNavLink>
+            <MudNavLink Href="/audio" Icon="@Icons.Material.Filled.AudioFile">Quản lý Audio</MudNavLink>
+            <MudNavLink Href="/translations"
+                        Icon="@Icons.Material.Filled.Translate">
+                Bản dịch
+            </MudNavLink>
+            <MudNavLink Href="/history"
+                        Icon="@Icons.Material.Filled.History">
+                Lịch sử
+            </MudNavLink>
+            <MudNavLink Href="/tours" Icon="@Icons.Material.Filled.Map">Tours</MudNavLink>
+            <MudNavLink Href="/analytics" Icon="@Icons.Material.Filled.BarChart">Analytics</MudNavLink>
+        </MudNavMenu>
+    </MudDrawer>
+
+    <MudMainContent Style="padding-top:80px; padding-left:16px;">
+        @Body
+    </MudMainContent>
+</MudLayout>

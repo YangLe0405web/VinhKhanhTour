@@ -1,0 +1,126 @@
+﻿@page "/history"
+@inject CmsApiService Api
+
+<MudText Typo="Typo.h4" Class="mb-4">📋 Lịch sử ứng dụng</MudText>
+
+<MudPaper Class="pa-3 mb-4" Elevation="1">
+    <MudGrid>
+        <MudItem xs="12" sm="4">
+            <MudSelect @bind-Value="_filterAction" Label="Lọc theo hành động"
+                       Clearable="true" Variant="Variant.Outlined">
+                <MudSelectItem Value="@("")">Tất cả</MudSelectItem>
+                <MudSelectItem Value="@("open_app")">📱 Mở app</MudSelectItem>
+                <MudSelectItem Value="@("play_poi")">🔊 Nghe POI</MudSelectItem>
+                <MudSelectItem Value="@("scan_qr")">📷 Quét QR</MudSelectItem>
+                <MudSelectItem Value="@("route_start")">🗺️ Chỉ đường</MudSelectItem>
+                <MudSelectItem Value="@("language_change")">🌐 Đổi ngôn ngữ</MudSelectItem>
+            </MudSelect>
+        </MudItem>
+        <MudItem xs="12" sm="4">
+            <MudSelect @bind-Value="_filterLang" Label="Lọc theo ngôn ngữ"
+                       Clearable="true" Variant="Variant.Outlined">
+                <MudSelectItem Value="@("")">Tất cả</MudSelectItem>
+                <MudSelectItem Value="@("vi")">🇻🇳 Tiếng Việt</MudSelectItem>
+                <MudSelectItem Value="@("en")">🇬🇧 English</MudSelectItem>
+                <MudSelectItem Value="@("zh")">🇨🇳 中文</MudSelectItem>
+                <MudSelectItem Value="@("ja")">🇯🇵 日本語</MudSelectItem>
+                <MudSelectItem Value="@("ko")">🇰🇷 한국어</MudSelectItem>
+            </MudSelect>
+        </MudItem>
+        <MudItem xs="12" sm="4" Class="d-flex align-center">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                       OnClick="LoadData" StartIcon="@Icons.Material.Filled.Refresh">
+                Tải lại
+            </MudButton>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+
+@if (_loading)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+}
+else
+{
+    <MudTable Items="FilteredHistory" Hover="true" Striped="true"
+              HorizontalScrollbar="true" Breakpoint="Breakpoint.None">
+        <HeaderContent>
+            <MudTh Style="min-width:160px">Thời gian</MudTh>
+            <MudTh Style="min-width:140px">Hành động</MudTh>
+            <MudTh Style="min-width:180px">POI</MudTh>
+            <MudTh Style="min-width:100px">Ngôn ngữ</MudTh>
+            <MudTh Style="min-width:140px">Thiết bị</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd>
+                @context.Timestamp.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+            </MudTd>
+            <MudTd>
+                <MudChip T="string" Size="Size.Small"
+                         Color="GetActionColor(context.Action)">
+                    @GetActionLabel(context.Action)
+                </MudChip>
+            </MudTd>
+            <MudTd>@context.PoiName</MudTd>
+            <MudTd>@GetLangFlag(context.Language)</MudTd>
+            <MudTd>@context.Device</MudTd>
+        </RowTemplate>
+        <NoRecordsContent>
+            <MudText Class="pa-4">Chưa có dữ liệu lịch sử</MudText>
+        </NoRecordsContent>
+    </MudTable>
+
+    <MudText Typo="Typo.caption" Class="mt-2">
+        Tổng: @FilteredHistory.Count() bản ghi
+    </MudText>
+}
+
+@code {
+    List<AppHistory> _history = new();
+    bool _loading = true;
+    string _filterAction = "";
+    string _filterLang = "";
+
+    IEnumerable<AppHistory> FilteredHistory => _history
+        .Where(h => string.IsNullOrEmpty(_filterAction) || h.Action == _filterAction)
+        .Where(h => string.IsNullOrEmpty(_filterLang) || h.Language == _filterLang);
+
+    protected override async Task OnInitializedAsync() => await LoadData();
+
+    async Task LoadData()
+    {
+        _loading = true;
+        _history = await Api.GetHistoryAsync() ?? new();
+        _loading = false;
+    }
+
+    string GetActionLabel(string action) => action switch
+    {
+        "open_app" => "📱 Mở app",
+        "play_poi" => "🔊 Nghe POI",
+        "scan_qr" => "📷 Quét QR",
+        "route_start" => "🗺️ Chỉ đường",
+        "language_change" => "🌐 Đổi ngôn ngữ",
+        _ => action
+    };
+
+    Color GetActionColor(string action) => action switch
+    {
+        "open_app" => Color.Info,
+        "play_poi" => Color.Success,
+        "scan_qr" => Color.Warning,
+        "route_start" => Color.Primary,
+        "language_change" => Color.Secondary,
+        _ => Color.Default
+    };
+
+    string GetLangFlag(string lang) => lang switch
+    {
+        "vi" => "🇻🇳 VI",
+        "en" => "🇬🇧 EN",
+        "zh" => "🇨🇳 ZH",
+        "ja" => "🇯🇵 JA",
+        "ko" => "🇰🇷 KO",
+        _ => lang
+    };
+}

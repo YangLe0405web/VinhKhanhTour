@@ -1,0 +1,173 @@
+﻿@page "/tours"
+@inject CmsApiService Api
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+@inject IJSRuntime JS
+
+<MudText Typo="Typo.h4" Class="mb-4">🗺️ Quản lý Tour</MudText>
+
+<MudButton Variant="Variant.Filled" Color="Color.Primary"
+           StartIcon="@Icons.Material.Filled.Add"
+           OnClick="OpenAddDialog" Class="mb-4">
+    Thêm Tour mới
+</MudButton>
+
+@if (_loading)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+}
+else
+{
+    <MudTable Items="_tours" Hover="true" Striped="true"
+              HorizontalScrollbar="true" Breakpoint="Breakpoint.None">
+        <HeaderContent>
+            <MudTh Style="min-width:200px">Tên Tour</MudTh>
+            <MudTh Style="min-width:120px">Số POI</MudTh>
+            <MudTh Style="min-width:100px">Loại QR</MudTh>
+            <MudTh Style="min-width:100px">Lượt quét</MudTh>
+            <MudTh Style="min-width:100px">Kích hoạt</MudTh>
+            <MudTh Style="min-width:180px">Thao tác</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd>@context.Name</MudTd>
+            <MudTd>@context.PoiIds.Count POI</MudTd>
+            <MudTd>
+                <MudChip T="string" Size="Size.Small"
+                         Color="@(context.QrType == "play" ? Color.Success : Color.Info)">
+                    @(context.QrType == "play" ? "🔊 Play" : "🗺️ Navigate")
+                </MudChip>
+            </MudTd>
+            <MudTd>@context.QrScans</MudTd>
+            <MudTd>
+                <MudSwitch @bind-Value="context.IsActive"
+                           Color="Color.Success" T="bool" />
+            </MudTd>
+            <MudTd>
+                <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                               Color="Color.Primary" Size="Size.Small"
+                               OnClick="() => OpenEditDialog(context)" />
+                <MudIconButton Icon="@Icons.Material.Filled.QrCode"
+                               Color="Color.Secondary" Size="Size.Small"
+                               OnClick="() => ShowQr(context)" />
+                <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                               Color="Color.Error" Size="Size.Small"
+                               OnClick="() => DeleteTour(context.Id)" />
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+}
+
+@if (_qrTour != null)
+{
+    <MudPaper Class="pa-4 mt-4" Elevation="3" Style="max-width:400px">
+        <MudText Typo="Typo.h6" Class="mb-2">
+            📷 QR Code — @_qrTour.Name
+        </MudText>
+        <MudText Typo="Typo.caption" Class="mb-2" Color="Color.Secondary">
+            URL: @GetQrUrl(_qrTour)
+        </MudText>
+        <img src="@_qrImageBase64" style="width:100%; max-width:300px" />
+        <br />
+        <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                   Class="mt-2" OnClick="DownloadQr"
+                   StartIcon="@Icons.Material.Filled.Download">
+            Tải QR PNG
+        </MudButton>
+        <MudButton Class="mt-2 ml-2" OnClick="() => _qrTour = null">
+            Đóng
+        </MudButton>
+    </MudPaper>
+}
+
+@code {
+    List<TourModel> _tours = new();
+    List<PoiModel> _pois = new();
+    bool _loading = true;
+    TourModel? _qrTour = null;
+    string _qrImageBase64 = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        _tours = await Api.GetToursAsync() ?? new();
+        _pois = await Api.GetPoisAsync() ?? new();
+        _loading = false;
+    }
+
+    string GetQrUrl(TourModel tour)
+        => tour.QrType == "play"
+            ? $"vinhkhanh://play/{tour.Id}"
+            : $"vinhkhanh://navigate/{tour.Id}";
+
+    void ShowQr(TourModel tour)
+    {
+        _qrTour = tour;
+        var url = GetQrUrl(tour);
+
+        using var qrGenerator = new QRCoder.QRCodeGenerator();
+        var qrData = qrGenerator.CreateQrCode(url, QRCoder.QRCodeGenerator.ECCLevel.M);
+        using var qrCode = new QRCoder.PngByteQRCode(qrData);
+        var pngBytes = qrCode.GetGraphic(20);
+        _qrImageBase64 = $"data:image/png;base64,{Convert.ToBase64String(pngBytes)}";
+    }
+
+    async Task DownloadQr()
+    {
+        if (_qrTour == null) return;
+        var fileName = $"qr_{_qrTour.Id}_{_qrTour.QrType}.png";
+        await JS.InvokeVoidAsync("downloadBase64File",
+            _qrImageBase64, fileName);
+    }
+
+    async Task DeleteTour(string id)
+    {
+        await Api.DeleteTourAsync(id);
+        _tours.RemoveAll(t => t.Id == id);
+        Snackbar.Add("Đã xóa tour!", Severity.Success);
+    }
+
+    async Task OpenAddDialog()
+    {
+        var options = new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true };
+        var dialog = await DialogService.ShowAsync<TourDialog>(
+            "Thêm Tour",
+            new DialogParameters
+            {
+                ["Tour"] = new TourModel(),
+                ["IsEdit"] = false,
+                ["AllPois"] = _pois
+            },
+            options);
+
+        var result = await dialog.Result;
+        if (!result.Canceled)
+        {
+            var tour = (TourModel)result.Data!;
+            await Api.SaveTourAsync(tour);
+            _tours = await Api.GetToursAsync() ?? new();
+            Snackbar.Add("Đã thêm tour!", Severity.Success);
+        }
+    }
+
+    async Task OpenEditDialog(TourModel tour)
+    {
+        var options = new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true };
+        var dialog = await DialogService.ShowAsync<TourDialog>(
+            "Sửa Tour",
+            new DialogParameters
+            {
+                ["Tour"] = tour,
+                ["IsEdit"] = true,
+                ["AllPois"] = _pois
+            },
+            options);
+
+        var result = await dialog.Result;
+        if (!result.Canceled)
+        {
+            var updated = (TourModel)result.Data!;
+            await Api.SaveTourAsync(updated);
+            _tours = await Api.GetToursAsync() ?? new();
+            Snackbar.Add("Đã cập nhật tour!", Severity.Success);
+        }
+    }
+}
