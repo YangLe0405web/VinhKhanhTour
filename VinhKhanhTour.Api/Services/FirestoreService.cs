@@ -12,9 +12,28 @@ public class FirestoreService
     const string PROJECT_ID = "vinhkhanhtour-c8e3f";
 
     public FirestoreService()
-     => _db = FirestoreDb.Create(PROJECT_ID);
-    
-   
+    {
+        var keyPath = Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS");
+        if (!string.IsNullOrEmpty(keyPath) && File.Exists(keyPath))
+        {
+            var keyJson = File.ReadAllText(keyPath);
+            var credential = GoogleCredential.FromJson(keyJson)
+                .CreateScoped("https://www.googleapis.com/auth/datastore");
+
+            var client = new FirestoreClientBuilder
+            {
+                ChannelCredentials = credential.ToChannelCredentials()
+            }.Build();
+
+            _db = FirestoreDb.Create(PROJECT_ID, client);
+        }
+        else
+        {
+            _db = FirestoreDb.Create(PROJECT_ID);
+        }
+    }
+
+
 
     // ── POI ──────────────────────────────────────────
     public async Task<List<PoiModel>> GetAllPoisAsync()
