@@ -128,7 +128,7 @@
               "RelativeDocumentMoniker": "VinhKhanhTour.Api\\Services\\StorageService.cs",
               "ToolTip": "D:\\Projects\\VinhKhanhTour\\VinhKhanhTour.Api\\Services\\StorageService.cs",
               "RelativeToolTip": "VinhKhanhTour.Api\\Services\\StorageService.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAACcAAAABAAAAAAAAAA==",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAUwCcAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-03-17T11:44:01.067Z",
               "EditorCaption": ""
@@ -143,8 +143,7 @@
               "RelativeToolTip": "VinhKhanhTour.Api\\Services\\FirestoreService.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAdAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-17T11:43:52.582Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-17T11:43:52.582Z"
             },
             {
               "$type": "Document",

@@ -10,7 +10,7 @@ public class StorageService
 
     public StorageService()
     {
-        var base64Key = Environment.GetEnvironmentVariable("FIREBASE_KEY_BASE64");
+        var base64Key = Environment.GetEnvironmentVariable("FIREBASE_KEY_JSON");
 
         if (!string.IsNullOrEmpty(base64Key))
         {

@@ -5,19 +5,15 @@ using VinhKhanhTour.Api.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // ── Firebase Init ──────────────────────────────────
-var base64Key = Environment.GetEnvironmentVariable("FIREBASE_KEY_BASE64");
+var keyJson = Environment.GetEnvironmentVariable("FIREBASE_KEY_JSON");
 
-if (!string.IsNullOrEmpty(base64Key))
+if (!string.IsNullOrEmpty(keyJson))
 {
-    // Production: đọc từ biến môi trường Railway
-    var keyJson = System.Text.Encoding.UTF8.GetString(
-        Convert.FromBase64String(base64Key));
     var credential = GoogleCredential.FromJson(keyJson);
     FirebaseApp.Create(new AppOptions { Credential = credential });
 }
 else
 {
-    // Local: đọc từ file
     var keyPath = Path.Combine(AppContext.BaseDirectory, "firebase-key.json");
     Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", keyPath);
     FirebaseApp.Create(new AppOptions
