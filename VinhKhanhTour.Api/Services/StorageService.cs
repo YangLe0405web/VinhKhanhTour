@@ -1,15 +1,29 @@
-﻿using Google.Cloud.Storage.V1;
+﻿using Google.Apis.Auth.OAuth2;
+using Google.Cloud.Storage.V1;
 
 namespace VinhKhanhTour.Api.Services;
 
 public class StorageService
 {
     private readonly StorageClient _client;
-
-    // ⚠️ Thay bằng bucket của bạn (thường là "projectid.appspot.com")
     const string BUCKET = "vinhkhanhtour-c8e3f.appspot.com";
+
     public StorageService()
-        => _client = StorageClient.Create();
+    {
+        var base64Key = Environment.GetEnvironmentVariable("FIREBASE_KEY_BASE64");
+
+        if (!string.IsNullOrEmpty(base64Key))
+        {
+            var keyJson = System.Text.Encoding.UTF8.GetString(
+                Convert.FromBase64String(base64Key));
+            var credential = GoogleCredential.FromJson(keyJson);
+            _client = StorageClient.Create(credential);
+        }
+        else
+        {
+            _client = StorageClient.Create();
+        }
+    }
 
     public async Task<string> UploadAudioAsync(
         Stream fileStream, string poiId, string lang, string contentType)
