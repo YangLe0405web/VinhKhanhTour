@@ -11,7 +11,8 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 COPY --from=build /out .
 
-ENV ASPNETCORE_URLS=http://+:$PORT
+ENV ASPNETCORE_URLS=http://+:8080
+ENV PORT=8080
 EXPOSE $PORT
 
 ENTRYPOINT ["dotnet", "VinhKhanhTour.Api.dll"]
