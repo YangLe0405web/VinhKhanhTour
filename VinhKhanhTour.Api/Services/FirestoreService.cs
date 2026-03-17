@@ -1,15 +1,42 @@
 ﻿using Google.Cloud.Firestore;
+using Google.Apis.Auth.OAuth2;
+using Google.Cloud.Firestore.V1;
+using Grpc.Auth;
 using VinhKhanhTour.Shared.Models;
+
 namespace VinhKhanhTour.Api.Services;
 
 public class FirestoreService
 {
     private readonly FirestoreDb _db;
-
-    // ⚠️ Thay "vinhkhanhtour-xxxxx" bằng Project ID của bạn
     const string PROJECT_ID = "vinhkhanhtour-c8e3f";
+
     public FirestoreService()
-        => _db = FirestoreDb.Create(PROJECT_ID);
+    {
+        var base64Key = Environment.GetEnvironmentVariable("FIREBASE_KEY_BASE64");
+
+        if (!string.IsNullOrEmpty(base64Key))
+        {
+            // Production: dùng biến môi trường
+            var keyJson = System.Text.Encoding.UTF8.GetString(
+                Convert.FromBase64String(base64Key));
+            var credential = GoogleCredential.FromJson(keyJson)
+                .CreateScoped("https://www.googleapis.com/auth/datastore");
+
+            var client = new FirestoreClientBuilder
+            {
+                ChannelCredentials = credential.ToChannelCredentials()
+            }.Build();
+
+            _db = FirestoreDb.Create(PROJECT_ID, client);
+        }
+        else
+        {
+            // Local: dùng file
+            _db = FirestoreDb.Create(PROJECT_ID);
+        }
+    }
+   
 
     // ── POI ──────────────────────────────────────────
     public async Task<List<PoiModel>> GetAllPoisAsync()
