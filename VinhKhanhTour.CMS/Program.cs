@@ -11,7 +11,7 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 // URL API backend đang chạy
 builder.Services.AddScoped(sp => new HttpClient
 {
-    BaseAddress = new Uri("https://vinhkhanh-api-production.up.railway.app/")
+    BaseAddress = new Uri("https://vinhkhanh-api.onrender.com/")
 });
 
 builder.Services.AddMudServices();

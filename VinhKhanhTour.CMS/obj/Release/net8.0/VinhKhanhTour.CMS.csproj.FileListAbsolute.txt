@@ -1240,11 +1240,6 @@ D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Release\net8.0\compressed\4041qt
 D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Release\net8.0\compressed\usno3xabuz-{0}-tptq2av103-tptq2av103.gz
 D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Release\net8.0\compressed\869o9odpud-{0}-lfu7j35m59-lfu7j35m59.gz
 D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Release\net8.0\compressed\j21o4uoxu5-{0}-oyz0vx2fzb-oyz0vx2fzb.gz
-D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Release\net8.0\compressed\y9nkrrfk5s-{0}-pfkqpslirf-pfkqpslirf.gz
-D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Release\net8.0\compressed\8ps1r8qx05-{0}-k3er40hzby-k3er40hzby.gz
-D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Release\net8.0\compressed\l79v5z028x-{0}-fqh0iu2aol-fqh0iu2aol.gz
-D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Release\net8.0\compressed\vae8dy7az7-{0}-tu3qe20g9o-tu3qe20g9o.gz
-D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Release\net8.0\compressed\2krq0yhw91-{0}-18jxfab4kf-18jxfab4kf.gz
 D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Release\net8.0\staticwebassets.build.json
 D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Release\net8.0\staticwebassets.build.json.cache
 D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Release\net8.0\staticwebassets.development.json
@@ -1255,3 +1250,10 @@ D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Release\net8.0\VinhKhanhTour.CMS
 D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Release\net8.0\refint\VinhKhanhTour.CMS.dll
 D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Release\net8.0\VinhKhanhTour.CMS.pdb
 D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Release\net8.0\ref\VinhKhanhTour.CMS.dll
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\bin\Release\net8.0\firebase.json
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Release\net8.0\VinhKhanhTour.CMS.sourcelink.json
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Release\net8.0\compressed\y9nkrrfk5s-{0}-4n84r2byzb-4n84r2byzb.gz
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Release\net8.0\compressed\8ps1r8qx05-{0}-1a6qd2sylo-1a6qd2sylo.gz
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Release\net8.0\compressed\l79v5z028x-{0}-l03r2xsqho-l03r2xsqho.gz
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Release\net8.0\compressed\vae8dy7az7-{0}-6tfw39j08r-6tfw39j08r.gz
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Release\net8.0\compressed\2krq0yhw91-{0}-5gtost5h63-5gtost5h63.gz
