@@ -9,21 +9,7 @@ public class StorageService
     const string BUCKET = "vinhkhanhtour-c8e3f.appspot.com";
 
     public StorageService()
-    {
-        var base64Key = Environment.GetEnvironmentVariable("FIREBASE_KEY_JSON");
-
-        if (!string.IsNullOrEmpty(base64Key))
-        {
-            var keyJson = System.Text.Encoding.UTF8.GetString(
-                Convert.FromBase64String(base64Key));
-            var credential = GoogleCredential.FromJson(keyJson);
-            _client = StorageClient.Create(credential);
-        }
-        else
-        {
-            _client = StorageClient.Create();
-        }
-    }
+     => _client = StorageClient.Create();
 
     public async Task<string> UploadAudioAsync(
         Stream fileStream, string poiId, string lang, string contentType)
