@@ -10,9 +10,9 @@ RUN dotnet publish VinhKhanhTour.Api/VinhKhanhTour.Api.csproj -c Release -o /out
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 COPY --from=build /out .
+COPY VinhKhanhTour.Api/firebase-key.json .
 
 ENV ASPNETCORE_URLS=http://+:8080
 ENV PORT=8080
-EXPOSE $PORT
 
 ENTRYPOINT ["dotnet", "VinhKhanhTour.Api.dll"]
