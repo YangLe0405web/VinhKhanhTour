@@ -10,7 +10,10 @@ public class AnalyticsController : ControllerBase
 {
     private readonly FirestoreService _db;
 
-    public AnalyticsController(FirestoreService db) => _db = db;
+    public AnalyticsController(FirestoreService db)
+    {
+        _db = db;
+    }
 
     // GET api/analytics
     [HttpGet]
@@ -28,7 +31,8 @@ public class AnalyticsController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, ex.ToString()); // 🔥 hiện lỗi thật
+            Console.WriteLine("🔥 ANALYTICS ERROR: " + ex.ToString());
+            return StatusCode(500, ex.ToString());
         }
     }
 }

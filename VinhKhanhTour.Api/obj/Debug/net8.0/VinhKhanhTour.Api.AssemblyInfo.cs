@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("VinhKhanhTour.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2ede3f3d4a95c7aaa25c56ce2c5166494671f2f3")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+cc42b3b3ccda62c8114187f6ac544f7527657339")]
 [assembly: System.Reflection.AssemblyProductAttribute("VinhKhanhTour.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("VinhKhanhTour.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
