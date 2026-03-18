@@ -21,7 +21,14 @@ public class AnalyticsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Log([FromBody] AnalyticsEvent ev)
     {
-        await _db.LogEventAsync(ev);
-        return Ok();
+        try
+        {
+            await _db.LogEventAsync(ev);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex.ToString()); // 🔥 hiện lỗi thật
+        }
     }
 }

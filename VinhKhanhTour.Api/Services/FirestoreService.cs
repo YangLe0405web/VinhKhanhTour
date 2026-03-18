@@ -62,8 +62,15 @@ public class FirestoreService
     // ── Analytics ─────────────────────────────────────
     public async Task LogEventAsync(AnalyticsEvent ev)
     {
+        if (ev == null)
+            throw new Exception("Event null");
+
+        // 🔥 FIX QUAN TRỌNG
+        ev.Timestamp = Timestamp.GetCurrentTimestamp();
+
         ev.Lat = Math.Round(ev.Lat, 3);
         ev.Lng = Math.Round(ev.Lng, 3);
+
         await _db.Collection("analytics").AddAsync(ev);
     }
 
