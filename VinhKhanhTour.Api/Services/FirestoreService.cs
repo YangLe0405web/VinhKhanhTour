@@ -62,16 +62,26 @@ public class FirestoreService
     // ── Analytics ─────────────────────────────────────
     public async Task LogEventAsync(AnalyticsEvent ev)
     {
-        if (ev == null)
-            throw new Exception("Event null");
+        try
+        {
+            var data = new Dictionary<string, object>
+        {
+            { "EventType", ev.EventType ?? "" },
+            { "PoiId", ev.PoiId ?? "" },
+            { "Language", ev.Language ?? "vi" },
+            { "Duration", ev.Duration },
+            { "Lat", Math.Round(ev.Lat, 3) },
+            { "Lng", Math.Round(ev.Lng, 3) },
+            { "Timestamp", Timestamp.GetCurrentTimestamp() }
+        };
 
-        // 🔥 FIX QUAN TRỌNG
-        ev.Timestamp = Timestamp.GetCurrentTimestamp();
-
-        ev.Lat = Math.Round(ev.Lat, 3);
-        ev.Lng = Math.Round(ev.Lng, 3);
-
-        await _db.Collection("analytics").AddAsync(ev);
+            await _db.Collection("analytics").AddAsync(data);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("🔥 FIRESTORE ERROR: " + ex.ToString());
+            throw;
+        }
     }
 
     // ── App History ───────────────────────────────────
