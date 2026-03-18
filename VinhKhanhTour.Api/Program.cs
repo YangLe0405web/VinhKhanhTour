@@ -17,7 +17,8 @@ builder.Services.AddCors(opt => opt.AddPolicy("CmsPolicy", p =>
     p.WithOrigins(
         "https://localhost:7110",
         "http://localhost:7110",
-        "https://vinhkhanhtour-c8e3f.web.app"   // ← thêm sau khi deploy CMS
+        "https://vinhkhanhtour-c8e3f.web.app",
+        "https://vinhkhanhtour-c8e3f.firebaseapp.com"
     )
     .AllowAnyHeader()
     .AllowAnyMethod()

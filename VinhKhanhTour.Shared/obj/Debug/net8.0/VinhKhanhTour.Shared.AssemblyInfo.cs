@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("VinhKhanhTour.Shared")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0a0f7dd6b21fe9446e5e7883ca48b66b36df25b0")]
 [assembly: System.Reflection.AssemblyProductAttribute("VinhKhanhTour.Shared")]
 [assembly: System.Reflection.AssemblyTitleAttribute("VinhKhanhTour.Shared")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
