@@ -54,10 +54,5 @@ public class PoisController : ControllerBase
     }
 
     // POST api/analytics
-    [HttpPost("~/api/analytics")]
-    public async Task<IActionResult> LogEvent([FromBody] AnalyticsEvent ev)
-    {
-        await _db.LogEventAsync(ev);
-        return Ok();
-    }
+    
 }
