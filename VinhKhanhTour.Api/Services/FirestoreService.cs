@@ -145,13 +145,10 @@ public class FirestoreService
                 Lng = d.ContainsField("Lng") ? d.GetValue<double>("Lng") : 0,
             };
 
-            // 🔥 FIX Timestamp chuẩn tuyệt đối
             if (d.ContainsField("Timestamp"))
             {
                 var ts = d.GetValue<Google.Cloud.Firestore.Timestamp>("Timestamp");
-                // Timestamp property on AnalyticsEvent is a Firestore Timestamp type,
-                // assign it directly instead of converting to DateTime to avoid type mismatch.
-                ev.Timestamp = ts;
+                ev.Timestamp = ts.ToDateTime(); // 🔥 FIX CHÍNH
             }
 
             return ev;

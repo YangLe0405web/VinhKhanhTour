@@ -18,7 +18,20 @@ public class AnalyticsController : ControllerBase
     // GET api/analytics
     [HttpGet]
     public async Task<IActionResult> GetAll()
-        => Ok(await _db.GetAnalyticsAsync());
+    {
+        var data = await _db.GetAnalyticsAsync();
+
+        return Ok(data.Select(e => new
+        {
+            e.EventType,
+            e.PoiId,
+            e.Language,
+            e.Duration,
+            e.Lat,
+            e.Lng,
+            timestamp = e.Timestamp.ToString("o") // 🔥 QUAN TRỌNG
+        }));
+    }
 
     // POST api/analytics
     [HttpPost]

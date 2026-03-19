@@ -13,5 +13,6 @@ public class AnalyticsEvent
     [FirestoreProperty] public int Duration { get; set; } = 0;
     [FirestoreProperty] public double Lat { get; set; }
     [FirestoreProperty] public double Lng { get; set; }
-    public Timestamp Timestamp { get; set; } = Timestamp.GetCurrentTimestamp();
+    [FirestoreProperty]
+    public DateTime Timestamp { get; set; } = DateTime.UtcNow;
 }
