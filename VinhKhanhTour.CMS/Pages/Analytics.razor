@@ -99,7 +99,7 @@ else
                         <MudTh Style="min-width:120px">Vị trí</MudTh>
                     </HeaderContent>
                     <RowTemplate>
-                        <MudTd>@context.Timestamp.ToDateTime().ToLocalTime().ToString("dd/MM HH:mm")</MudTd>
+                        <MudTd>@context.Timestamp.ToLocalTime().ToString("dd/MM HH:mm")</MudTd>
                         <MudTd>
                             <MudChip T="string" Size="Size.Small" Color="Color.Info">
                                 @context.EventType

@@ -15,6 +15,10 @@
       "RelativeMoniker": "D:0:0:{64F2CFA5-4FBD-80F3-8644-9F9C372179DF}|VinhKhanhTour.Api\\VinhKhanhTour.Api.csproj|solutionrelative:vinhkhanhtour.api\\controllers\\analyticscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
+      "AbsoluteMoniker": "D:0:0:{D1C793E2-1A46-1F4F-9308-C33A0F1C9401}|VinhKhanhTour.CMS\\VinhKhanhTour.CMS.csproj|d:\\projects\\vinhkhanhtour\\vinhkhanhtour.cms\\pages\\analytics.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{D1C793E2-1A46-1F4F-9308-C33A0F1C9401}|VinhKhanhTour.CMS\\VinhKhanhTour.CMS.csproj|solutionrelative:vinhkhanhtour.cms\\pages\\analytics.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{0B595DE3-3555-A95B-0C7F-479719B56945}|..\\..\\C#\\VinhKhanhTour\\VinhKhanhTour\\VinhKhanhTour.csproj|d:\\c#\\vinhkhanhtour\\vinhkhanhtour\\services\\audioqueueservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
@@ -35,10 +39,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{64F2CFA5-4FBD-80F3-8644-9F9C372179DF}|VinhKhanhTour.Api\\VinhKhanhTour.Api.csproj|d:\\projects\\vinhkhanhtour\\vinhkhanhtour.api\\controllers\\poiscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{64F2CFA5-4FBD-80F3-8644-9F9C372179DF}|VinhKhanhTour.Api\\VinhKhanhTour.Api.csproj|solutionrelative:vinhkhanhtour.api\\controllers\\poiscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{D1C793E2-1A46-1F4F-9308-C33A0F1C9401}|VinhKhanhTour.CMS\\VinhKhanhTour.CMS.csproj|d:\\projects\\vinhkhanhtour\\vinhkhanhtour.cms\\pages\\analytics.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{D1C793E2-1A46-1F4F-9308-C33A0F1C9401}|VinhKhanhTour.CMS\\VinhKhanhTour.CMS.csproj|solutionrelative:vinhkhanhtour.cms\\pages\\analytics.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{64F2CFA5-4FBD-80F3-8644-9F9C372179DF}|VinhKhanhTour.Api\\VinhKhanhTour.Api.csproj|d:\\projects\\vinhkhanhtour\\vinhkhanhtour.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -77,23 +77,11 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 5,
+          "SelectedChildIndex": 4,
           "Children": [
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 12,
-              "Title": "MapViewModel.cs",
-              "DocumentMoniker": "D:\\C#\\VinhKhanhTour\\VinhKhanhTour\\ViewModels\\MapViewModel.cs",
-              "RelativeDocumentMoniker": "..\\..\\C#\\VinhKhanhTour\\VinhKhanhTour\\ViewModels\\MapViewModel.cs",
-              "ToolTip": "D:\\C#\\VinhKhanhTour\\VinhKhanhTour\\ViewModels\\MapViewModel.cs",
-              "RelativeToolTip": "..\\..\\C#\\VinhKhanhTour\\VinhKhanhTour\\ViewModels\\MapViewModel.cs",
-              "ViewState": "AgIAAGgBAAAAAAAAAAAAAHYBAAAlAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-18T10:25:57.26Z"
             },
             {
               "$type": "Document",
@@ -109,7 +97,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 7,
               "Title": "PoiData.cs",
               "DocumentMoniker": "D:\\C#\\VinhKhanhTour\\VinhKhanhTour\\Data\\PoiData.cs",
               "RelativeDocumentMoniker": "..\\..\\C#\\VinhKhanhTour\\VinhKhanhTour\\Data\\PoiData.cs",
@@ -121,7 +109,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "AudioQueueService.cs",
               "DocumentMoniker": "D:\\C#\\VinhKhanhTour\\VinhKhanhTour\\Services\\AudioQueueService.cs",
               "RelativeDocumentMoniker": "..\\..\\C#\\VinhKhanhTour\\VinhKhanhTour\\Services\\AudioQueueService.cs",
@@ -139,7 +127,7 @@
               "RelativeDocumentMoniker": "VinhKhanhTour.Api\\Services\\FirestoreService.cs",
               "ToolTip": "D:\\Projects\\VinhKhanhTour\\VinhKhanhTour.Api\\Services\\FirestoreService.cs",
               "RelativeToolTip": "VinhKhanhTour.Api\\Services\\FirestoreService.cs",
-              "ViewState": "AgIAAHYAAAAAAAAAAAAwwIIAAAA0AAAAAAAAAA==",
+              "ViewState": "AgIAAHYAAAAAAAAAAAAwwIcAAAApAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-03-17T11:43:52.582Z",
               "EditorCaption": ""
@@ -172,7 +160,32 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 3,
+              "Title": "Analytics.razor",
+              "DocumentMoniker": "D:\\Projects\\VinhKhanhTour\\VinhKhanhTour.CMS\\Pages\\Analytics.razor",
+              "RelativeDocumentMoniker": "VinhKhanhTour.CMS\\Pages\\Analytics.razor",
+              "ToolTip": "D:\\Projects\\VinhKhanhTour\\VinhKhanhTour.CMS\\Pages\\Analytics.razor",
+              "RelativeToolTip": "VinhKhanhTour.CMS\\Pages\\Analytics.razor",
+              "ViewState": "AgIAAFQAAAAAAAAAAAAuwHIAAAAnAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-03-18T13:22:43.814Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "MapViewModel.cs",
+              "DocumentMoniker": "D:\\C#\\VinhKhanhTour\\VinhKhanhTour\\ViewModels\\MapViewModel.cs",
+              "RelativeDocumentMoniker": "..\\..\\C#\\VinhKhanhTour\\VinhKhanhTour\\ViewModels\\MapViewModel.cs",
+              "ToolTip": "D:\\C#\\VinhKhanhTour\\VinhKhanhTour\\ViewModels\\MapViewModel.cs",
+              "RelativeToolTip": "..\\..\\C#\\VinhKhanhTour\\VinhKhanhTour\\ViewModels\\MapViewModel.cs",
+              "ViewState": "AgIAAGgBAAAAAAAAAAAAAHYBAAAlAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-18T10:25:57.26Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
               "Title": "ApiSyncService.cs",
               "DocumentMoniker": "D:\\C#\\VinhKhanhTour\\VinhKhanhTour\\Services\\ApiSyncService.cs",
               "RelativeDocumentMoniker": "..\\..\\C#\\VinhKhanhTour\\VinhKhanhTour\\Services\\ApiSyncService.cs",
@@ -184,7 +197,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 9,
               "Title": "MapPage.xaml.cs",
               "DocumentMoniker": "D:\\C#\\VinhKhanhTour\\VinhKhanhTour\\Views\\MapPage.xaml.cs",
               "RelativeDocumentMoniker": "..\\..\\C#\\VinhKhanhTour\\VinhKhanhTour\\Views\\MapPage.xaml.cs",
@@ -196,7 +209,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
               "Title": "TtsService.cs",
               "DocumentMoniker": "D:\\C#\\VinhKhanhTour\\VinhKhanhTour\\Services\\TtsService.cs",
               "RelativeDocumentMoniker": "..\\..\\C#\\VinhKhanhTour\\VinhKhanhTour\\Services\\TtsService.cs",
@@ -208,7 +221,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 8,
               "Title": "LocalizationService.cs",
               "DocumentMoniker": "D:\\C#\\VinhKhanhTour\\VinhKhanhTour\\Services\\LocalizationService.cs",
               "RelativeDocumentMoniker": "..\\..\\C#\\VinhKhanhTour\\VinhKhanhTour\\Services\\LocalizationService.cs",
@@ -220,7 +233,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 10,
               "Title": "PoisController.cs",
               "DocumentMoniker": "D:\\Projects\\VinhKhanhTour\\VinhKhanhTour.Api\\Controllers\\PoisController.cs",
               "RelativeDocumentMoniker": "VinhKhanhTour.Api\\Controllers\\PoisController.cs",
@@ -229,18 +242,6 @@
               "ViewState": "AgIAABMAAAAAAAAAAAAAABoAAABCAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-03-18T14:09:37.286Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 10,
-              "Title": "Analytics.razor",
-              "DocumentMoniker": "D:\\Projects\\VinhKhanhTour\\VinhKhanhTour.CMS\\Pages\\Analytics.razor",
-              "RelativeDocumentMoniker": "VinhKhanhTour.CMS\\Pages\\Analytics.razor",
-              "ToolTip": "D:\\Projects\\VinhKhanhTour\\VinhKhanhTour.CMS\\Pages\\Analytics.razor",
-              "RelativeToolTip": "VinhKhanhTour.CMS\\Pages\\Analytics.razor",
-              "ViewState": "AgIAAD8AAAAAAAAAAAAuwF8AAAAEAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-03-18T13:22:43.814Z"
             },
             {
               "$type": "Document",

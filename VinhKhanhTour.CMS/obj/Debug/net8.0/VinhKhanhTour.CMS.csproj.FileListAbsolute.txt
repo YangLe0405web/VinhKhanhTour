@@ -1259,8 +1259,8 @@ D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\VinhKhanhTour.CMS.d
 D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\refint\VinhKhanhTour.CMS.dll
 D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\VinhKhanhTour.CMS.pdb
 D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\ref\VinhKhanhTour.CMS.dll
-D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\compressed\y9nkrrfk5s-{0}-gwjf03cxzs-gwjf03cxzs.gz
-D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\compressed\8ps1r8qx05-{0}-u6haxox173-u6haxox173.gz
-D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\compressed\l79v5z028x-{0}-b2s646weqx-b2s646weqx.gz
-D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\compressed\vae8dy7az7-{0}-lhtgko7ctf-lhtgko7ctf.gz
-D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\compressed\2krq0yhw91-{0}-yhk42vyrkh-yhk42vyrkh.gz
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\compressed\y9nkrrfk5s-{0}-x935g6d7tw-x935g6d7tw.gz
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\compressed\8ps1r8qx05-{0}-l1nswhtcjn-l1nswhtcjn.gz
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\compressed\l79v5z028x-{0}-hc5qwuvb8n-hc5qwuvb8n.gz
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\compressed\vae8dy7az7-{0}-sg56a0994r-sg56a0994r.gz
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\compressed\2krq0yhw91-{0}-o1exwrngza-o1exwrngza.gz
