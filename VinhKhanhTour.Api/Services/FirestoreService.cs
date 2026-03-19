@@ -132,9 +132,30 @@ public class FirestoreService
             .OrderByDescending("Timestamp")
             .Limit(500)
             .GetSnapshotAsync();
-        return snap.Documents
-            .Select(d => d.ConvertTo<AnalyticsEvent>())
-            .ToList();
+
+        return snap.Documents.Select(d =>
+        {
+            var ev = new AnalyticsEvent
+            {
+                EventType = d.ContainsField("EventType") ? d.GetValue<string>("EventType") : "",
+                PoiId = d.ContainsField("PoiId") ? d.GetValue<string>("PoiId") : "",
+                Language = d.ContainsField("Language") ? d.GetValue<string>("Language") : "vi",
+                Duration = d.ContainsField("Duration") ? d.GetValue<int>("Duration") : 0,
+                Lat = d.ContainsField("Lat") ? d.GetValue<double>("Lat") : 0,
+                Lng = d.ContainsField("Lng") ? d.GetValue<double>("Lng") : 0,
+            };
+
+            // 🔥 FIX Timestamp chuẩn tuyệt đối
+            if (d.ContainsField("Timestamp"))
+            {
+                var ts = d.GetValue<Google.Cloud.Firestore.Timestamp>("Timestamp");
+                // Timestamp property on AnalyticsEvent is a Firestore Timestamp type,
+                // assign it directly instead of converting to DateTime to avoid type mismatch.
+                ev.Timestamp = ts;
+            }
+
+            return ev;
+        }).ToList();
     }
 
     // ── Location Trace ────────────────────────────────

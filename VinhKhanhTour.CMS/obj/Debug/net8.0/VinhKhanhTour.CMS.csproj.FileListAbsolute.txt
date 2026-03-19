@@ -1248,11 +1248,6 @@ D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\compressed\4041qtqy
 D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\compressed\usno3xabuz-{0}-tptq2av103-tptq2av103.gz
 D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\compressed\869o9odpud-{0}-lfu7j35m59-lfu7j35m59.gz
 D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\compressed\j21o4uoxu5-{0}-oyz0vx2fzb-oyz0vx2fzb.gz
-D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\compressed\y9nkrrfk5s-{0}-b8878mxncz-b8878mxncz.gz
-D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\compressed\8ps1r8qx05-{0}-mtvzyu5hyc-mtvzyu5hyc.gz
-D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\compressed\l79v5z028x-{0}-apq9c2bhy5-apq9c2bhy5.gz
-D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\compressed\vae8dy7az7-{0}-xb68npwspz-xb68npwspz.gz
-D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\compressed\2krq0yhw91-{0}-hfrnpoaibj-hfrnpoaibj.gz
 D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\staticwebassets.build.json
 D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\staticwebassets.build.json.cache
 D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\staticwebassets.development.json
@@ -1264,3 +1259,8 @@ D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\VinhKhanhTour.CMS.d
 D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\refint\VinhKhanhTour.CMS.dll
 D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\VinhKhanhTour.CMS.pdb
 D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\ref\VinhKhanhTour.CMS.dll
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\compressed\y9nkrrfk5s-{0}-gwjf03cxzs-gwjf03cxzs.gz
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\compressed\8ps1r8qx05-{0}-u6haxox173-u6haxox173.gz
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\compressed\l79v5z028x-{0}-b2s646weqx-b2s646weqx.gz
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\compressed\vae8dy7az7-{0}-lhtgko7ctf-lhtgko7ctf.gz
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\compressed\2krq0yhw91-{0}-yhk42vyrkh-yhk42vyrkh.gz
