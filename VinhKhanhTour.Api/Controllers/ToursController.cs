@@ -29,4 +29,12 @@ public class ToursController : ControllerBase
         await _db.DeleteTourAsync(id);
         return Ok();
     }
+
+    // POST api/tours/{id}/scan  ← endpoint mới tăng QrScans
+    [HttpPost("{id}/scan")]
+    public async Task<IActionResult> Scan(string id)
+    {
+        await _db.IncrementQrScansAsync(id);
+        return Ok();
+    }
 }

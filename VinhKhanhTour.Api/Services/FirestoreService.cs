@@ -33,8 +33,6 @@ public class FirestoreService
         }
     }
 
-
-
     // ── POI ──────────────────────────────────────────
     public async Task<List<PoiModel>> GetAllPoisAsync()
     {
@@ -65,15 +63,15 @@ public class FirestoreService
         try
         {
             var data = new Dictionary<string, object>
-        {
-            { "EventType", ev.EventType ?? "" },
-            { "PoiId", ev.PoiId ?? "" },
-            { "Language", ev.Language ?? "vi" },
-            { "Duration", ev.Duration },
-            { "Lat", Math.Round(ev.Lat, 3) },
-            { "Lng", Math.Round(ev.Lng, 3) },
-            { "Timestamp", Timestamp.GetCurrentTimestamp() }
-        };
+            {
+                { "EventType", ev.EventType ?? "" },
+                { "PoiId", ev.PoiId ?? "" },
+                { "Language", ev.Language ?? "vi" },
+                { "Duration", ev.Duration },
+                { "Lat", Math.Round(ev.Lat, 3) },
+                { "Lng", Math.Round(ev.Lng, 3) },
+                { "Timestamp", Timestamp.GetCurrentTimestamp() }
+            };
 
             await _db.Collection("analytics").AddAsync(data);
         }
@@ -125,6 +123,16 @@ public class FirestoreService
     public async Task DeleteTourAsync(string id)
         => await _db.Collection("tours").Document(id).DeleteAsync();
 
+    // ── QR Scan Counter ───────────────────────────────
+    public async Task IncrementQrScansAsync(string tourId)
+    {
+        var docRef = _db.Collection("tours").Document(tourId);
+        await docRef.UpdateAsync(new Dictionary<string, object>
+        {
+            { "QrScans", FieldValue.Increment(1) }
+        });
+    }
+
     // ── Analytics ─────────────────────────────────────
     public async Task<List<AnalyticsEvent>> GetAnalyticsAsync()
     {
@@ -148,7 +156,7 @@ public class FirestoreService
             if (d.ContainsField("Timestamp"))
             {
                 var ts = d.GetValue<Google.Cloud.Firestore.Timestamp>("Timestamp");
-                ev.Timestamp = ts.ToDateTime(); // 🔥 FIX CHÍNH
+                ev.Timestamp = ts.ToDateTime();
             }
 
             return ev;
@@ -158,7 +166,6 @@ public class FirestoreService
     // ── Location Trace ────────────────────────────────
     public async Task LogTraceAsync(LocationTrace trace)
     {
-        // Làm tròn tọa độ để ẩn danh
         trace.Lat = Math.Round(trace.Lat, 3);
         trace.Lng = Math.Round(trace.Lng, 3);
         await _db.Collection("traces").AddAsync(trace);

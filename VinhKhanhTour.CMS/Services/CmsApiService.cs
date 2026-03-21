@@ -48,6 +48,10 @@ public class CmsApiService
     public Task<HttpResponseMessage> DeleteTourAsync(string id)
         => _http.DeleteAsync($"api/tours/{id}");
 
+    // ── QR Scan Counter ───────────────────────────────
+    public Task<HttpResponseMessage> IncrementScanAsync(string tourId)
+        => _http.PostAsync($"api/tours/{tourId}/scan", null);
+
     // ── Analytics ─────────────────────────────────────
     public Task<List<AnalyticsEvent>?> GetAnalyticsAsync()
         => _http.GetFromJsonAsync<List<AnalyticsEvent>>("api/analytics");
