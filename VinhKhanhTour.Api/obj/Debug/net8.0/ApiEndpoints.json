@@ -1,21 +1,5 @@
 [
   {
-    "ContainingType": "VinhKhanhTour.Api.Controllers.PoisController",
-    "Method": "LogEvent",
-    "RelativePath": "api/analytics",
-    "HttpMethod": "POST",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "ev",
-        "Type": "VinhKhanhTour.Shared.Models.AnalyticsEvent",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
     "ContainingType": "VinhKhanhTour.Api.Controllers.AnalyticsController",
     "Method": "GetAll",
     "RelativePath": "api/Analytics",

@@ -1,3 +1,0 @@
-D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\publish\firebase.json
-D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\publish\emcc-props.json
-D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\publish\web.config

@@ -1,0 +1,9 @@
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\bin\Release\net8.0\publish\publish\web.config
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\bin\Release\net8.0\publish\firebase.json
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\bin\Release\net8.0\publish\publish\emcc-props.json
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\bin\Release\net8.0\publish\publish\firebase.json
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\bin\Release\net8.0\publish\publish\VinhKhanhTour.CMS.staticwebassets.endpoints.json
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\bin\Release\net8.0\publish\publish\wwwroot\sample-data\weather.json
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\bin\Release\net8.0\publish\publish\wwwroot\_framework\blazor.boot.json
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\bin\Release\net8.0\publish\emcc-props.json
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\bin\Release\net8.0\publish\web.config

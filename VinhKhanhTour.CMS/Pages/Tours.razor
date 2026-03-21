@@ -1,10 +1,23 @@
-﻿@page "/tours"
+﻿@* ============================================================
+   FILE: VinhKhanhTour.CMS/Pages/Tours.razor
+   Thay thế hoàn toàn file cũ.
+   Thay đổi chính:
+     - GetQrUrl() dùng vinhkhanh:// scheme thực thay vì giả lập
+     - ShowQr() hiển thị trong MudDialog đẹp hơn
+     - Thêm nút copy URL, thêm badge loại QR màu sắc
+   ============================================================ *@
+
+@page "/tours"
+@using VinhKhanhTour.Shared.Models
+@using QRCoder
 @inject CmsApiService Api
-@inject ISnackbar Snackbar
 @inject IDialogService DialogService
+@inject ISnackbar Snackbar
 @inject IJSRuntime JS
 
-<MudText Typo="Typo.h4" Class="mb-4">🗺️ Quản lý Tour</MudText>
+<PageTitle>Quản lý Tour</PageTitle>
+
+<MudText Typo="Typo.h5" Class="mb-4">🗺️ Quản lý Tour</MudText>
 
 <MudButton Variant="Variant.Filled" Color="Color.Primary"
            StartIcon="@Icons.Material.Filled.Add"
@@ -14,78 +27,141 @@
 
 @if (_loading)
 {
-    <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+    <MudProgressCircular Indeterminate="true" />
+}
+else if (_tours.Count == 0)
+{
+    <MudAlert Severity="Severity.Info">Chưa có tour nào. Thêm tour đầu tiên!</MudAlert>
 }
 else
 {
-    <MudTable Items="_tours" Hover="true" Striped="true"
-              HorizontalScrollbar="true" Breakpoint="Breakpoint.None">
+    <MudTable Items="_tours" Hover="true" Striped="true" Breakpoint="Breakpoint.Sm">
         <HeaderContent>
-            <MudTh Style="min-width:200px">Tên Tour</MudTh>
-            <MudTh Style="min-width:120px">Số POI</MudTh>
-            <MudTh Style="min-width:100px">Loại QR</MudTh>
-            <MudTh Style="min-width:100px">Lượt quét</MudTh>
-            <MudTh Style="min-width:100px">Kích hoạt</MudTh>
-            <MudTh Style="min-width:180px">Thao tác</MudTh>
+            <MudTh>Tên Tour</MudTh>
+            <MudTh>Mô tả</MudTh>
+            <MudTh Style="min-width:110px">Loại QR</MudTh>
+            <MudTh Style="min-width:80px">Lượt quét</MudTh>
+            <MudTh Style="min-width:160px">Trạng thái</MudTh>
+            <MudTh Style="min-width:130px">Hành động</MudTh>
         </HeaderContent>
         <RowTemplate>
-            <MudTd>@context.Name</MudTd>
-            <MudTd>@context.PoiIds.Count POI</MudTd>
-            <MudTd>
-                <MudChip T="string" Size="Size.Small"
-                         Color="@(context.QrType == "play" ? Color.Success : Color.Info)">
+            <MudTd DataLabel="Tên">@context.Name</MudTd>
+            <MudTd DataLabel="Mô tả">
+                <MudText Typo="Typo.body2" Style="max-width:220px;white-space:normal">
+                    @context.Desc
+                </MudText>
+            </MudTd>
+            <MudTd DataLabel="Loại QR">
+                <MudChip T="string" Color="@(context.QrType == "play" ? Color.Success : Color.Info)"
+                         Size="Size.Small" Variant="Variant.Filled">
                     @(context.QrType == "play" ? "🔊 Play" : "🗺️ Navigate")
                 </MudChip>
             </MudTd>
-            <MudTd>@context.QrScans</MudTd>
-            <MudTd>
-                <MudSwitch @bind-Value="context.IsActive"
-                           Color="Color.Success" T="bool" />
+            <MudTd DataLabel="Lượt quét">
+                <MudText Typo="Typo.body2">📷 @context.QrScans</MudText>
+            </MudTd>
+            <MudTd DataLabel="Trạng thái">
+                <MudChip T="string" Color="@(context.IsActive? Color.Success: Color.Default)"
+                         Size="Size.Small">
+                    @(context.IsActive ? "✅ Đang hoạt động" : "⏸ Tạm dừng")
+                </MudChip>
             </MudTd>
             <MudTd>
-                <MudIconButton Icon="@Icons.Material.Filled.Edit"
-                               Color="Color.Primary" Size="Size.Small"
-                               OnClick="() => OpenEditDialog(context)" />
                 <MudIconButton Icon="@Icons.Material.Filled.QrCode"
-                               Color="Color.Secondary" Size="Size.Small"
+                               Color="Color.Primary" Size="Size.Small"
+                               Title="Xem QR Code"
                                OnClick="() => ShowQr(context)" />
+                <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                               Color="Color.Warning" Size="Size.Small"
+                               Title="Chỉnh sửa"
+                               OnClick="() => OpenEditDialog(context)" />
                 <MudIconButton Icon="@Icons.Material.Filled.Delete"
                                Color="Color.Error" Size="Size.Small"
+                               Title="Xoá"
                                OnClick="() => DeleteTour(context.Id)" />
             </MudTd>
         </RowTemplate>
     </MudTable>
 }
 
-@if (_qrTour != null)
-{
-    <MudPaper Class="pa-4 mt-4" Elevation="3" Style="max-width:400px">
-        <MudText Typo="Typo.h6" Class="mb-2">
-            📷 QR Code — @_qrTour.Name
+@* ── QR Dialog ────────────────────────────────────────────────────── *@
+<MudDialog @bind-IsVisible="_showQrDialog" Options="_qrDialogOptions">
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            📷 QR Code — @_qrTour?.Name
         </MudText>
-        <MudText Typo="Typo.caption" Class="mb-2" Color="Color.Secondary">
-            URL: @GetQrUrl(_qrTour)
-        </MudText>
-        <img src="@_qrImageBase64" style="width:100%; max-width:300px" />
-        <br />
+    </TitleContent>
+    <DialogContent>
+        @if (_qrTour != null)
+        {
+            <MudStack AlignItems="AlignItems.Center" Spacing="3">
+
+                @* Badge loại QR *@
+                <MudChip T="string" Color="@(_qrTour.QrType == "play" ? Color.Success : Color.Info)"
+                         Variant="Variant.Filled" Size="Size.Medium">
+                    @(_qrTour.QrType == "play"
+                        ? "🔊 Play — Quét là nghe ngay"
+                        : "🗺️ Navigate — Quét là dẫn đường")
+                </MudChip>
+
+                @* Ảnh QR *@
+                <MudPaper Elevation="3" Class="pa-3" Style="background:white;border-radius:12px">
+                    <img src="@_qrImageBase64"
+                         style="width:240px;height:240px;display:block" />
+                </MudPaper>
+
+                @* URL deep link *@
+                <MudPaper Outlined="true" Class="pa-2 px-3" Style="width:100%;border-radius:8px">
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween">
+                        <MudText Typo="Typo.caption" Color="Color.Secondary"
+                                 Style="word-break:break-all;font-family:monospace">
+                            @GetQrUrl(_qrTour)
+                        </MudText>
+                        <MudIconButton Icon="@Icons.Material.Filled.ContentCopy"
+                                       Size="Size.Small" Color="Color.Default"
+                                       Title="Copy URL"
+                                       OnClick="() => CopyUrl(_qrTour)" />
+                    </MudStack>
+                </MudPaper>
+
+                @* Hướng dẫn *@
+                <MudAlert Severity="Severity.Info" Dense="true" Class="mt-1">
+                    Khách quét mã này sẽ mở thẳng app VinhKhanhTour trên điện thoại
+                    (Android &amp; iOS). App phải được cài đặt trước.
+                </MudAlert>
+
+            </MudStack>
+        }
+    </DialogContent>
+    <DialogActions>
         <MudButton Variant="Variant.Filled" Color="Color.Primary"
-                   Class="mt-2" OnClick="DownloadQr"
-                   StartIcon="@Icons.Material.Filled.Download">
+                   StartIcon="@Icons.Material.Filled.Download"
+                   OnClick="DownloadQr">
             Tải QR PNG
         </MudButton>
-        <MudButton Class="mt-2 ml-2" OnClick="() => _qrTour = null">
-            Đóng
-        </MudButton>
-    </MudPaper>
-}
+        <MudButton OnClick="CloseQrDialog">Đóng</MudButton>
+    </DialogActions>
+</MudDialog>
 
 @code {
+    // ── State ─────────────────────────────────────────────────────────
     List<TourModel> _tours = new();
     List<PoiModel> _pois = new();
     bool _loading = true;
+
+    // QR dialog
+    bool _showQrDialog = false;
     TourModel? _qrTour = null;
     string _qrImageBase64 = "";
+    DialogOptions _qrDialogOptions = new()
+    {
+        MaxWidth = MaxWidth.ExtraSmall,
+        FullWidth = true,
+        CloseOnEscapeKey = true,
+        CloseButton = true
+    };
 
+    // ── Init ──────────────────────────────────────────────────────────
     protected override async Task OnInitializedAsync()
     {
         _tours = await Api.GetToursAsync() ?? new();
@@ -93,33 +169,67 @@ else
         _loading = false;
     }
 
+    // ── Deep Link URL ─────────────────────────────────────────────────
+    /// <summary>
+    /// Tạo deep link URL vinhkhanh:// để nhúng vào QR.
+    /// Android: intent filter trong MainActivity.cs bắt scheme này.
+    /// iOS:     CFBundleURLSchemes trong Info.plist bắt scheme này.
+    ///
+    ///   vinhkhanh://play/{tourId}      → mở app, phát audio tự động
+    ///   vinhkhanh://navigate/{tourId}  → mở app, bật chỉ đường
+    /// </summary>
     string GetQrUrl(TourModel tour)
         => tour.QrType == "play"
             ? $"vinhkhanh://play/{tour.Id}"
             : $"vinhkhanh://navigate/{tour.Id}";
 
+    // ── QR Generation ─────────────────────────────────────────────────
     void ShowQr(TourModel tour)
     {
         _qrTour = tour;
         var url = GetQrUrl(tour);
 
-        using var qrGenerator = new QRCoder.QRCodeGenerator();
-        var qrData = qrGenerator.CreateQrCode(url, QRCoder.QRCodeGenerator.ECCLevel.M);
-        using var qrCode = new QRCoder.PngByteQRCode(qrData);
-        var pngBytes = qrCode.GetGraphic(20);
+        using var qrGenerator = new QRCodeGenerator();
+        var qrData = qrGenerator.CreateQrCode(url, QRCodeGenerator.ECCLevel.M);
+        using var qrCode = new PngByteQRCode(qrData);
+        var pngBytes = qrCode.GetGraphic(
+            pixelsPerModule: 20,
+            darkColorRgba: new byte[] { 26, 35, 126, 255 },    // #1A237E (xanh brand)
+            lightColorRgba: new byte[] { 255, 255, 255, 255 }  // trắng
+        );
         _qrImageBase64 = $"data:image/png;base64,{Convert.ToBase64String(pngBytes)}";
+        _showQrDialog = true;
+    }
+
+    void CloseQrDialog()
+    {
+        _showQrDialog = false;
+        _qrTour = null;
+        _qrImageBase64 = "";
     }
 
     async Task DownloadQr()
     {
         if (_qrTour == null) return;
         var fileName = $"qr_{_qrTour.Id}_{_qrTour.QrType}.png";
-        await JS.InvokeVoidAsync("downloadBase64File",
-            _qrImageBase64, fileName);
+        await JS.InvokeVoidAsync("downloadBase64File", _qrImageBase64, fileName);
     }
 
+    async Task CopyUrl(TourModel tour)
+    {
+        await JS.InvokeVoidAsync("navigator.clipboard.writeText", GetQrUrl(tour));
+        Snackbar.Add("✅ Đã copy URL!", Severity.Success);
+    }
+
+    // ── CRUD ──────────────────────────────────────────────────────────
     async Task DeleteTour(string id)
     {
+        bool? confirm = await DialogService.ShowMessageBoxAsync(
+            "Xác nhận xoá",
+            "Bạn có chắc muốn xoá tour này không?",
+            yesText: "Xoá", cancelText: "Huỷ");
+        if (confirm != true) return;
+
         await Api.DeleteTourAsync(id);
         _tours.RemoveAll(t => t.Id == id);
         Snackbar.Add("Đã xóa tour!", Severity.Success);
@@ -128,46 +238,41 @@ else
     async Task OpenAddDialog()
     {
         var options = new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true };
-        var dialog = await DialogService.ShowAsync<TourDialog>(
-            "Thêm Tour",
-            new DialogParameters
-            {
-                ["Tour"] = new TourModel(),
-                ["IsEdit"] = false,
-                ["AllPois"] = _pois
-            },
-            options);
+        var dialog = await DialogService.ShowAsync<TourDialog>("Thêm Tour", new DialogParameters
+        {
+            ["Tour"] = new TourModel(),
+            ["IsEdit"] = false,
+            ["AllPois"] = _pois
+        }, options);
 
         var result = await dialog.Result;
-        if (!result.Canceled)
+        if (result is { Canceled: false, Data: TourModel tour })
         {
-            var tour = (TourModel)result.Data!;
             await Api.SaveTourAsync(tour);
-            _tours = await Api.GetToursAsync() ?? new();
-            Snackbar.Add("Đã thêm tour!", Severity.Success);
+            _tours = await Api.GetToursAsync() ?? _tours;
+            Snackbar.Add("✅ Đã thêm tour mới!", Severity.Success);
         }
     }
 
     async Task OpenEditDialog(TourModel tour)
     {
         var options = new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true };
-        var dialog = await DialogService.ShowAsync<TourDialog>(
-            "Sửa Tour",
-            new DialogParameters
-            {
-                ["Tour"] = tour,
-                ["IsEdit"] = true,
-                ["AllPois"] = _pois
-            },
-            options);
+        var clone = System.Text.Json.JsonSerializer.Deserialize<TourModel>(
+                          System.Text.Json.JsonSerializer.Serialize(tour))!;
+        var dialog = await DialogService.ShowAsync<TourDialog>("Sửa Tour", new DialogParameters
+        {
+            ["Tour"] = clone,
+            ["IsEdit"] = true,
+            ["AllPois"] = _pois
+        }, options);
 
         var result = await dialog.Result;
-        if (!result.Canceled)
+        if (result is { Canceled: false, Data: TourModel updated })
         {
-            var updated = (TourModel)result.Data!;
             await Api.SaveTourAsync(updated);
-            _tours = await Api.GetToursAsync() ?? new();
-            Snackbar.Add("Đã cập nhật tour!", Severity.Success);
+            var idx = _tours.FindIndex(t => t.Id == updated.Id);
+            if (idx >= 0) _tours[idx] = updated;
+            Snackbar.Add("✅ Đã cập nhật tour!", Severity.Success);
         }
     }
 }

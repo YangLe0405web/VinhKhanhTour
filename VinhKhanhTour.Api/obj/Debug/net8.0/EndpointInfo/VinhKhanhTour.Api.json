@@ -211,37 +211,6 @@
         }
       }
     },
-    "/api/analytics": {
-      "post": {
-        "tags": [
-          "Pois"
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AnalyticsEvent"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AnalyticsEvent"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/AnalyticsEvent"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
     "/api/Tours": {
       "get": {
         "tags": [
