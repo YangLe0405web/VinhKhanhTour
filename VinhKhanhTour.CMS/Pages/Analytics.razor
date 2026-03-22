@@ -69,11 +69,39 @@ else
             </MudPaper>
         </MudItem>
 
-        <!-- Bảng chi tiết gộp analytics + history -->
+        <!-- Filter + Bảng chi tiết gộp analytics + history -->
         <MudItem xs="12">
             <MudPaper Class="pa-4" Elevation="2">
                 <MudText Typo="Typo.h6" Class="mb-3">📋 Chi tiết sự kiện</MudText>
-                <MudTable Items="_unified" Hover="true" Striped="true" Dense="true"
+                <MudGrid Class="mb-3">
+                    <MudItem xs="12" sm="4">
+                        <MudSelect @bind-Value="_filterType" Label="Lọc theo loại"
+                                   Clearable="true" Variant="Variant.Outlined" Dense="true">
+                            <MudSelectItem Value="@("")">(Tất cả)</MudSelectItem>
+                            <MudSelectItem Value="@("poi_play")">🔊 Nghe POI</MudSelectItem>
+                            <MudSelectItem Value="@("scan_qr")">📷 Quét QR</MudSelectItem>
+                            <MudSelectItem Value="@("route_start")">🗺️ Chỉ đường</MudSelectItem>
+                            <MudSelectItem Value="@("open_app")">📱 Mở app</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="12" sm="4">
+                        <MudSelect @bind-Value="_filterLang" Label="Lọc theo ngôn ngữ"
+                                   Clearable="true" Variant="Variant.Outlined" Dense="true">
+                            <MudSelectItem Value="@("")">(Tất cả)</MudSelectItem>
+                            <MudSelectItem Value="@("vi")">🇻🇳 Tiếng Việt</MudSelectItem>
+                            <MudSelectItem Value="@("en")">🇬🇧 English</MudSelectItem>
+                            <MudSelectItem Value="@("zh")">🇨🇳 中文</MudSelectItem>
+                            <MudSelectItem Value="@("ja")">🇯🇵 日本語</MudSelectItem>
+                            <MudSelectItem Value="@("ko")">🇰🇷 한국어</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="12" sm="4" Class="d-flex align-center">
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">
+                            Hiển thị @FilteredUnified.Count() / @_unified.Count bản ghi
+                        </MudText>
+                    </MudItem>
+                </MudGrid>
+                <MudTable Items="FilteredUnified" Hover="true" Striped="true" Dense="true"
                           HorizontalScrollbar="true" Breakpoint="Breakpoint.None">
                     <HeaderContent>
                         <MudTh Style="min-width:140px">Thời gian</MudTh>
@@ -166,6 +194,14 @@ else
         public double Lat { get; set; }
         public double Lng { get; set; }
     }
+
+    string _filterType = "";
+    string _filterLang = "";
+
+    IEnumerable<UnifiedEvent> FilteredUnified => _unified
+        .Where(e => string.IsNullOrEmpty(_filterType) || e.EventType == _filterType)
+        .Where(e => string.IsNullOrEmpty(_filterLang) ||
+            e.Language.ToLower().StartsWith(_filterLang));
 
     bool _mapsInitialized = false;
     List<LocationTrace> _traces = new();
