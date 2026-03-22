@@ -12,7 +12,6 @@
 else
 {
     <MudGrid>
-        <!-- Thống kê tổng quan -->
         <MudItem xs="12" sm="6" md="3">
             <MudPaper Class="pa-4" Elevation="2">
                 <MudText Typo="Typo.h3" Color="Color.Primary">@_total</MudText>
@@ -38,100 +37,113 @@ else
             </MudPaper>
         </MudItem>
 
-        <!-- Top POI -->
         <MudItem xs="12" md="6">
             <MudPaper Class="pa-4" Elevation="2">
                 <MudText Typo="Typo.h6" Class="mb-3">🏆 Top POI được nghe nhiều nhất</MudText>
                 <MudTable Items="_topPois" Hover="true" Dense="true">
                     <HeaderContent>
-                        <MudTh>#</MudTh>
-                        <MudTh>POI</MudTh>
-                        <MudTh>Lượt nghe</MudTh>
+                        <MudTh>#</MudTh><MudTh>POI</MudTh><MudTh>Lượt</MudTh>
                     </HeaderContent>
                     <RowTemplate>
                         <MudTd>@(_topPois.IndexOf(context) + 1)</MudTd>
                         <MudTd>@context.Key</MudTd>
-                        <MudTd>
-                            <MudChip T="string" Size="Size.Small" Color="Color.Primary">
-                                @context.Value
-                            </MudChip>
-                        </MudTd>
+                        <MudTd><MudChip T="string" Size="Size.Small" Color="Color.Primary">@context.Value</MudChip></MudTd>
                     </RowTemplate>
                 </MudTable>
             </MudPaper>
         </MudItem>
 
-        <!-- Ngôn ngữ -->
         <MudItem xs="12" md="6">
             <MudPaper Class="pa-4" Elevation="2">
                 <MudText Typo="Typo.h6" Class="mb-3">🌐 Phân bố ngôn ngữ</MudText>
                 <MudTable Items="_langStats" Hover="true" Dense="true">
                     <HeaderContent>
-                        <MudTh>Ngôn ngữ</MudTh>
-                        <MudTh>Lượt nghe</MudTh>
-                        <MudTh>Tỉ lệ</MudTh>
+                        <MudTh>Ngôn ngữ</MudTh><MudTh>Lượt</MudTh><MudTh>Tỉ lệ</MudTh>
                     </HeaderContent>
                     <RowTemplate>
                         <MudTd>@GetLangFlag(context.Key)</MudTd>
                         <MudTd>@context.Value</MudTd>
-                        <MudTd>
-                            <MudProgressLinear Value="@GetPercent(context.Value)"
-                                               Color="Color.Primary" Rounded="true" />
-                        </MudTd>
+                        <MudTd><MudProgressLinear Value="@GetPercent(context.Value)" Color="Color.Primary" Rounded="true" /></MudTd>
                     </RowTemplate>
                 </MudTable>
             </MudPaper>
         </MudItem>
 
-        <!-- Bảng chi tiết -->
+        <!-- Bảng chi tiết gộp analytics + history -->
         <MudItem xs="12">
             <MudPaper Class="pa-4" Elevation="2">
                 <MudText Typo="Typo.h6" Class="mb-3">📋 Chi tiết sự kiện</MudText>
-                <MudTable Items="_events" Hover="true" Striped="true"
-                          Dense="true" HorizontalScrollbar="true"
-                          Breakpoint="Breakpoint.None">
+                <MudTable Items="_unified" Hover="true" Striped="true" Dense="true"
+                          HorizontalScrollbar="true" Breakpoint="Breakpoint.None">
                     <HeaderContent>
                         <MudTh Style="min-width:140px">Thời gian</MudTh>
-                        <MudTh Style="min-width:120px">Loại</MudTh>
+                        <MudTh Style="min-width:130px">Loại</MudTh>
                         <MudTh Style="min-width:180px">POI</MudTh>
                         <MudTh Style="min-width:80px">Ngôn ngữ</MudTh>
                         <MudTh Style="min-width:80px">Thời lượng</MudTh>
+                        <MudTh Style="min-width:140px">Thiết bị</MudTh>
                         <MudTh Style="min-width:120px">Vị trí</MudTh>
                     </HeaderContent>
                     <RowTemplate>
                         <MudTd>@context.Timestamp.ToLocalTime().ToString("dd/MM HH:mm")</MudTd>
                         <MudTd>
-                            <MudChip T="string" Size="Size.Small" Color="Color.Info">
-                                @context.EventType
+                            <MudChip T="string" Size="Size.Small" Color="@GetEventColor(context.EventType)">
+                                @GetEventLabel(context.EventType)
                             </MudChip>
                         </MudTd>
-                        <MudTd>@context.PoiId</MudTd>
+                        <MudTd>@(!string.IsNullOrEmpty(context.PoiName) ? context.PoiName : context.PoiId)</MudTd>
                         <MudTd>@GetLangFlag(context.Language)</MudTd>
-                        <MudTd>@context.Duration s</MudTd>
-                        <MudTd>@context.Lat.ToString("F3"), @context.Lng.ToString("F3")</MudTd>
+                        <MudTd>
+                            @if (context.Duration > 0)
+                            {
+                                <MudChip T="string" Size="Size.Small" Color="Color.Success">@context.Duration s</MudChip>
+                            }
+                            else
+                            {
+
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">—</MudText>
+                            }
+                        </MudTd>
+                        <MudTd>
+                            @if (!string.IsNullOrEmpty(context.Device))
+                            {
+                                <MudText Typo="Typo.caption">@context.Device</MudText>
+                            }
+                            else
+                            {
+
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">—</MudText>
+                            }
+                        </MudTd>
+                        <MudTd>
+                            @if (context.Lat != 0)
+                            {
+                                @($"{context.Lat:F3}, {context.Lng:F3}")
+                            }
+                            else
+                            {
+
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">—</MudText>
+                            }
+                        </MudTd>
                     </RowTemplate>
                     <NoRecordsContent>
-                        <MudText Class="pa-4">Chưa có dữ liệu analytics</MudText>
+                        <MudText Class="pa-4">Chưa có dữ liệu</MudText>
                     </NoRecordsContent>
                 </MudTable>
             </MudPaper>
         </MudItem>
-        <!-- Heatmap -->
+
         <MudItem xs="12">
             <MudPaper Class="pa-4" Elevation="2">
-                <MudText Typo="Typo.h6" Class="mb-3">
-                    🔥 Heatmap vị trí người dùng
-                </MudText>
+                <MudText Typo="Typo.h6" Class="mb-3">🔥 Heatmap vị trí người dùng</MudText>
                 <div id="heatmap" style="height:400px; width:100%; border-radius:8px;"></div>
             </MudPaper>
         </MudItem>
 
-        <!-- Tuyến di chuyển -->
         <MudItem xs="12">
             <MudPaper Class="pa-4" Elevation="2">
-                <MudText Typo="Typo.h6" Class="mb-3">
-                    🗺️ Tuyến di chuyển người dùng
-                </MudText>
+                <MudText Typo="Typo.h6" Class="mb-3">🗺️ Tuyến di chuyển người dùng</MudText>
                 <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mb-2">
                     Tọa độ được làm tròn 3 chữ số (~111m) để bảo vệ quyền riêng tư
                 </MudText>
@@ -142,92 +154,139 @@ else
 }
 
 @code {
+    class UnifiedEvent
+    {
+        public DateTime Timestamp { get; set; }
+        public string EventType { get; set; } = "";
+        public string PoiId { get; set; } = "";
+        public string PoiName { get; set; } = "";
+        public string Language { get; set; } = "";
+        public int Duration { get; set; }
+        public string Device { get; set; } = "";
+        public double Lat { get; set; }
+        public double Lng { get; set; }
+    }
+
     bool _mapsInitialized = false;
     List<LocationTrace> _traces = new();
     List<AnalyticsEvent> _events = new();
+    List<AppHistory> _history = new();
+    List<UnifiedEvent> _unified = new();
     bool _loading = true;
 
-    int _total;
-    int _totalQr;
-    int _avgDuration;
-    int _uniquePois;
-
+    int _total, _totalQr, _avgDuration, _uniquePois;
     List<KeyValuePair<string, int>> _topPois = new();
     List<KeyValuePair<string, int>> _langStats = new();
 
     protected override async Task OnInitializedAsync()
     {
-        _events = await Api.GetAnalyticsAsync() ?? new();
-        _traces = await Api.GetTracesAsync() ?? new();
+        var t1 = Api.GetAnalyticsAsync();
+        var t2 = Api.GetTracesAsync();
+        var t3 = Api.GetHistoryAsync();
+        await Task.WhenAll(t1, t2, t3);
+        _events = t1.Result ?? new();
+        _traces = t2.Result ?? new();
+        _history = t3.Result ?? new();
+        BuildUnified();
         ComputeStats();
         _loading = false;
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    void BuildUnified()
     {
-        if (_loading) return;
-        if (_mapsInitialized) return;
-        _mapsInitialized = true;
+        var list = new List<UnifiedEvent>();
 
-        await Task.Delay(500);
+        // Từ analytics (MAUI GPS)
+        foreach (var e in _events)
+            list.Add(new UnifiedEvent
+            {
+                Timestamp = e.Timestamp,
+                EventType = e.EventType,
+                PoiId = e.PoiId,
+                Language = e.Language,
+                Duration = e.Duration,
+                Lat = e.Lat,
+                Lng = e.Lng,
+            });
 
-        try
-        {
-            await JS.InvokeVoidAsync("initHeatmap",
-                _traces.Select(t => new { lat = t.Lat, lng = t.Lng }).ToList());
+        // Từ history (QR web + MAUI manual)
+        foreach (var h in _history)
+            list.Add(new UnifiedEvent
+            {
+                Timestamp = h.Timestamp,
+                EventType = h.Action,
+                PoiId = h.PoiId,
+                PoiName = h.PoiName,
+                Language = h.Language,
+                Device = h.Device,
+            });
 
-            await JS.InvokeVoidAsync("initTraceMap",
-                _traces
-                    .GroupBy(t => t.SessionId)
-                    .Select(g => g.OrderBy(t => t.Timestamp)
-                        .Select(t => new { lat = t.Lat, lng = t.Lng })
-                        .ToList())
-                    .ToList());
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Map init error: {ex.Message}");
-        }
+        _unified = list.OrderByDescending(e => e.Timestamp).ToList();
     }
 
     void ComputeStats()
     {
         _total = _events.Count(e => e.EventType == "poi_play");
-        _totalQr = _events.Count(e => e.EventType == "qr_scan");
+        _totalQr = _history.Count(h => h.Action == "scan_qr");
         _avgDuration = _events.Any(e => e.Duration > 0)
-            ? (int)_events.Where(e => e.Duration > 0).Average(e => e.Duration)
-            : 0;
-
-        _uniquePois = _events
-            .Where(e => !string.IsNullOrEmpty(e.PoiId))
-            .Select(e => e.PoiId)
-            .Distinct().Count();
-
-        _topPois = _events
-            .Where(e => !string.IsNullOrEmpty(e.PoiId))
-            .GroupBy(e => e.PoiId)
+            ? (int)_events.Where(e => e.Duration > 0).Average(e => e.Duration) : 0;
+        _uniquePois = _unified.Where(e => !string.IsNullOrEmpty(e.PoiId))
+            .Select(e => e.PoiId).Distinct().Count();
+        _topPois = _unified.Where(e => !string.IsNullOrEmpty(e.PoiId))
+            .GroupBy(e => string.IsNullOrEmpty(e.PoiName) ? e.PoiId : e.PoiName)
+            .OrderByDescending(g => g.Count()).Take(5)
+            .Select(g => new KeyValuePair<string, int>(g.Key, g.Count())).ToList();
+        _langStats = _unified.GroupBy(e => e.Language)
             .OrderByDescending(g => g.Count())
-            .Take(5)
-            .Select(g => new KeyValuePair<string, int>(g.Key, g.Count()))
-            .ToList();
-
-        _langStats = _events
-            .GroupBy(e => e.Language)
-            .OrderByDescending(g => g.Count())
-            .Select(g => new KeyValuePair<string, int>(g.Key, g.Count()))
-            .ToList();
+            .Select(g => new KeyValuePair<string, int>(g.Key, g.Count())).ToList();
     }
 
-    double GetPercent(int val)
-        => _events.Count == 0 ? 0 : (double)val / _events.Count * 100;
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_loading || _mapsInitialized) return;
+        _mapsInitialized = true;
+        await Task.Delay(500);
+        try
+        {
+            await JS.InvokeVoidAsync("initHeatmap",
+                _traces.Select(t => new { lat = t.Lat, lng = t.Lng }).ToList());
+            await JS.InvokeVoidAsync("initTraceMap",
+                _traces.GroupBy(t => t.SessionId)
+                    .Select(g => g.OrderBy(t => t.Timestamp)
+                        .Select(t => new { lat = t.Lat, lng = t.Lng }).ToList()).ToList());
+        }
+        catch (Exception ex) { Console.WriteLine($"Map error: {ex.Message}"); }
+    }
+
+    double GetPercent(int val) => _unified.Count == 0 ? 0 : (double)val / _unified.Count * 100;
+
+    Color GetEventColor(string t) => t switch
+    {
+        "poi_play" => Color.Success,
+        "scan_qr" => Color.Warning,
+        "route_start" => Color.Primary,
+        "language_change" => Color.Secondary,
+        "open_app" => Color.Info,
+        _ => Color.Default
+    };
+
+    string GetEventLabel(string t) => t switch
+    {
+        "poi_play" => "🔊 Nghe POI",
+        "scan_qr" => "📷 Quét QR",
+        "route_start" => "🗺️ Chỉ đường",
+        "language_change" => "🌐 Đổi ngôn ngữ",
+        "open_app" => "📱 Mở app",
+        _ => t
+    };
 
     string GetLangFlag(string lang) => lang switch
     {
-        "vi" => "🇻🇳 VI",
-        "en" => "🇬🇧 EN",
-        "zh" => "🇨🇳 ZH",
-        "ja" => "🇯🇵 JA",
-        "ko" => "🇰🇷 KO",
+        "vi" or "vietnamese" => "🇻🇳 VI",
+        "en" or "english" => "🇬🇧 EN",
+        "zh" or "chinese" => "🇨🇳 ZH",
+        "ja" or "japanese" => "🇯🇵 JA",
+        "ko" or "korean" => "🇰🇷 KO",
         _ => lang
     };
 }

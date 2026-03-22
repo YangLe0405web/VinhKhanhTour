@@ -5,7 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Thuyết Minh — Vĩnh Khánh</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
         body {
             font-family: 'Segoe UI', sans-serif;
@@ -57,22 +61,25 @@
             font-weight: 600;
             padding: 4px 14px;
             border-radius: 20px;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
 
-        .poi-desc {
-            color: #555;
-            font-size: 15px;
-            line-height: 1.7;
-            margin-bottom: 28px;
+        .lang-detected {
+            background: #E8F5E9;
+            color: #2E7D32;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 20px;
+            margin-bottom: 16px;
+            display: inline-block;
         }
 
-        /* Lang selector */
         .lang-selector {
             display: flex;
             gap: 8px;
             justify-content: center;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
             flex-wrap: wrap;
         }
 
@@ -80,23 +87,22 @@
             background: #F3E5F5;
             border: 2px solid transparent;
             border-radius: 20px;
-            padding: 6px 16px;
-            font-size: 14px;
+            padding: 6px 14px;
+            font-size: 13px;
             cursor: pointer;
             transition: all 0.2s;
         }
 
-        .lang-btn.active {
-            background: #6A1B9A;
-            color: white;
-            border-color: #6A1B9A;
-        }
+            .lang-btn.active {
+                background: #6A1B9A;
+                color: white;
+                border-color: #6A1B9A;
+            }
 
-        .lang-btn:hover:not(.active) {
-            border-color: #6A1B9A;
-        }
+            .lang-btn:hover:not(.active) {
+                border-color: #6A1B9A;
+            }
 
-        /* Play button */
         .play-btn {
             width: 80px;
             height: 80px;
@@ -114,29 +120,42 @@
             margin: 0 auto 16px;
         }
 
-        .play-btn:hover { transform: scale(1.08); }
-        .play-btn:active { transform: scale(0.96); }
-        .play-btn.speaking {
-            background: linear-gradient(135deg, #e53935, #b71c1c);
-            box-shadow: 0 8px 24px rgba(229,57,53,0.4);
-            animation: pulse 1.2s infinite;
-        }
+            .play-btn:hover {
+                transform: scale(1.08);
+            }
+
+            .play-btn:active {
+                transform: scale(0.96);
+            }
+
+            .play-btn.speaking {
+                background: linear-gradient(135deg, #e53935, #b71c1c);
+                box-shadow: 0 8px 24px rgba(229,57,53,0.4);
+                animation: pulse 1.2s infinite;
+            }
 
         @keyframes pulse {
-            0%, 100% { box-shadow: 0 8px 24px rgba(229,57,53,0.4); }
-            50% { box-shadow: 0 8px 36px rgba(229,57,53,0.7); }
+            0%,100% {
+                box-shadow: 0 8px 24px rgba(229,57,53,0.4);
+            }
+
+            50% {
+                box-shadow: 0 8px 36px rgba(229,57,53,0.7);
+            }
         }
 
         .status {
             color: #888;
             font-size: 13px;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
             min-height: 20px;
         }
 
-        .status.speaking { color: #6A1B9A; font-weight: 600; }
+            .status.speaking {
+                color: #6A1B9A;
+                font-weight: 600;
+            }
 
-        /* Script text */
         .script-box {
             background: #F8F5FF;
             border-left: 4px solid #6A1B9A;
@@ -151,7 +170,7 @@
         }
 
         .footer {
-            margin-top: 28px;
+            margin-top: 24px;
             color: #bbb;
             font-size: 11px;
         }
@@ -170,202 +189,195 @@
     </style>
 </head>
 <body>
-<div class="card">
-    <div class="logo">🍜</div>
-    <div class="brand">Phố Vĩnh Khánh</div>
-
-    <div id="loading" class="loading">⏳ Đang tải thông tin...</div>
-    <div id="error"   class="error"   style="display:none"></div>
-
-    <div id="content" style="display:none">
-        <div class="poi-name"    id="poi-name"></div>
-        <div class="poi-category" id="poi-cat"></div>
-        <div class="poi-desc"    id="poi-desc"></div>
-
-        <!-- Chọn ngôn ngữ -->
-        <div class="lang-selector" id="lang-selector"></div>
-
-        <!-- Nút phát -->
-        <button class="play-btn" id="play-btn" onclick="toggleSpeak()">▶</button>
-        <div class="status" id="status">Bấm để nghe thuyết minh</div>
-
-        <!-- Nội dung thuyết minh -->
-        <div class="script-box" id="script-box"></div>
+    <div class="card">
+        <div class="logo">🍜</div>
+        <div class="brand">Phố Vĩnh Khánh</div>
+        <div id="loading" class="loading">⏳ Đang tải thông tin...</div>
+        <div id="error" class="error" style="display:none"></div>
+        <div id="content" style="display:none">
+            <div class="poi-name" id="poi-name"></div>
+            <div class="poi-category" id="poi-cat"></div>
+            <div class="lang-detected" id="lang-detected"></div>
+            <div class="lang-selector" id="lang-selector"></div>
+            <button class="play-btn" id="play-btn" onclick="toggleSpeak()">▶</button>
+            <div class="status" id="status">Bấm để nghe thuyết minh</div>
+            <div class="script-box" id="script-box"></div>
+        </div>
+        <div class="footer">🔊 Powered by VinhKhanhTour</div>
     </div>
 
-    <div class="footer">🔊 Powered by VinhKhanhTour</div>
-</div>
+    <script>
+        const API = 'https://vinhkhanh-api.onrender.com';
+        const pathParts = window.location.pathname.split('/');
+        const poiId = pathParts[pathParts.length - 1];
 
-<script>
-// ── Lấy poiId từ URL ────────────────────────────────────────────────
-// URL dạng: https://vinhkhanhtour.web.app/poi/vk_hai_san
-const pathParts = window.location.pathname.split('/');
-const poiId = pathParts[pathParts.length - 1];
+        const LANGS = {
+            vi: { label: '🇻🇳 Việt', tts: 'vi-VN' },
+            en: { label: '🇬🇧 English', tts: 'en-US' },
+            zh: { label: '🇨🇳 中文', tts: 'zh-CN' },
+            ja: { label: '🇯🇵 日本', tts: 'ja-JP' },
+            ko: { label: '🇰🇷 한국어', tts: 'ko-KR' },
+        };
 
-const API = 'https://vinhkhanh-api.onrender.com';
-
-// ── State ────────────────────────────────────────────────────────────
-let poiData   = null;
-let currentLang = 'vi';
-let isSpeaking  = false;
-
-// ── Load POI từ API ──────────────────────────────────────────────────
-async function loadPoi() {
-    try {
-        const res = await fetch(`${API}/api/pois`);
-        if (!res.ok) throw new Error('API lỗi');
-
-        const pois = await res.json();
-        poiData = pois.find(p => p.id === poiId);
-
-        if (!poiData) {
-            showError('Không tìm thấy điểm tham quan này.');
-            return;
+        function detectLang() {
+            const browserLang = (navigator.language || 'vi').toLowerCase().split('-')[0];
+            return LANGS[browserLang] ? browserLang : 'vi';
         }
 
-        renderPoi();
+        function getDeviceName() {
+            const ua = navigator.userAgent;
+            if (/iPhone|iPad|iPod/.test(ua)) return 'iOS Web';
+            if (/Android/.test(ua)) return 'Android Web';
+            return 'Web';
+        }
 
-        // Tăng lượt quét
-        fetch(`${API}/api/pois/${poiId}/scan`, { method: 'POST' }).catch(() => {});
+        let poiData = null;
+        let currentLang = detectLang();
+        let isSpeaking = false;
 
-        // Tự động phát sau 1 giây
-        setTimeout(() => speak(), 1000);
+        async function loadPoi() {
+            try {
+                const res = await fetch(`${API}/api/pois`);
+                if (!res.ok) throw new Error();
+                const pois = await res.json();
+                poiData = pois.find(p => p.id === poiId);
 
-    } catch (e) {
-        showError('Không thể tải dữ liệu. Vui lòng kiểm tra kết nối mạng.');
-    }
-}
+                if (!poiData) { showError('Không tìm thấy điểm tham quan này.'); return; }
 
-// ── Render POI ───────────────────────────────────────────────────────
-function renderPoi() {
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('content').style.display = 'block';
+                if (!poiData.content?.[currentLang]) {
+                    currentLang = poiData.content?.['vi'] ? 'vi'
+                        : Object.keys(poiData.content || {})[0] || 'vi';
+                }
 
-    const catEmoji = { food: '🍜', drink: '🥤', landmark: '🏛' };
-    const catLabel = { food: 'Ẩm thực', drink: 'Đồ uống', landmark: 'Địa điểm' };
+                renderPoi();
 
-    document.getElementById('poi-name').textContent = poiData.name;
-    document.getElementById('poi-cat').textContent =
-        (catEmoji[poiData.category] || '📍') + ' ' + (catLabel[poiData.category] || poiData.category);
+                // Tăng lượt quét counter
+                fetch(`${API}/api/pois/${poiId}/scan`, { method: 'POST' }).catch(() => { });
 
-    // Danh sách ngôn ngữ có sẵn
-    const langs = {
-        vi: '🇻🇳 Tiếng Việt',
-        en: '🇬🇧 English',
-        zh: '🇨🇳 中文',
-        ja: '🇯🇵 日本語',
-        ko: '🇰🇷 한국어'
-    };
+                // ── Ghi lịch sử quét QR vào api/history ──────────────────────
+                fetch(`${API}/api/history`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'scan_qr',
+                        poiId: poiData.id,
+                        poiName: poiData.name,
+                        language: currentLang,
+                        device: getDeviceName(),
+                        timestamp: new Date().toISOString()
+                    })
+                }).catch(() => { });
 
-    const selector = document.getElementById('lang-selector');
-    selector.innerHTML = '';
+                // Tự động phát sau 1s
+                setTimeout(speak, 1000);
 
-    const available = Object.keys(langs).filter(l => poiData.content && poiData.content[l]);
-    if (available.length === 0) available.push('vi'); // fallback
+            } catch {
+                showError('Không thể tải dữ liệu. Vui lòng kiểm tra kết nối mạng.');
+            }
+        }
 
-    available.forEach(lang => {
-        const btn = document.createElement('button');
-        btn.className = 'lang-btn' + (lang === currentLang ? ' active' : '');
-        btn.textContent = langs[lang] || lang;
-        btn.onclick = () => selectLang(lang);
-        selector.appendChild(btn);
-    });
+        function renderPoi() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('content').style.display = 'block';
 
-    updateScript();
-}
+            const catEmoji = { food: '🍜', drink: '🥤', landmark: '🏛' };
+            const catLabel = { food: 'Ẩm thực', drink: 'Đồ uống', landmark: 'Địa điểm' };
 
-function updateScript() {
-    const text = getScript();
-    document.getElementById('poi-desc').textContent =
-        text ? text.substring(0, 100) + '...' : '';
-    document.getElementById('script-box').textContent = text || '(Chưa có nội dung)';
-}
+            document.getElementById('poi-name').textContent = poiData.name;
+            document.getElementById('poi-cat').textContent =
+                (catEmoji[poiData.category] || '📍') + ' ' +
+                (catLabel[poiData.category] || poiData.category);
 
-function getScript() {
-    if (!poiData?.content) return '';
-    return poiData.content[currentLang]
-        || poiData.content['vi']
-        || '';
-}
+            const detected = document.getElementById('lang-detected');
+            detected.textContent = `🌐 Tự động: ${LANGS[currentLang]?.label || currentLang}`;
 
-function selectLang(lang) {
-    if (isSpeaking) stopSpeak();
-    currentLang = lang;
+            const selector = document.getElementById('lang-selector');
+            selector.innerHTML = '';
+            const available = Object.keys(LANGS).filter(l => poiData.content?.[l]);
+            available.forEach(lang => {
+                const btn = document.createElement('button');
+                btn.className = 'lang-btn' + (lang === currentLang ? ' active' : '');
+                btn.textContent = LANGS[lang].label;
+                btn.onclick = () => selectLang(lang);
+                selector.appendChild(btn);
+            });
 
-    // Update active button
-    document.querySelectorAll('.lang-btn').forEach(b => {
-        b.classList.toggle('active', b.textContent.startsWith(
-            { vi:'🇻🇳', en:'🇬🇧', zh:'🇨🇳', ja:'🇯🇵', ko:'🇰🇷' }[lang]
-        ));
-    });
+            updateScript();
+        }
 
-    updateScript();
-}
+        function updateScript() {
+            const text = getScript();
+            document.getElementById('script-box').textContent = text || '(Chưa có nội dung thuyết minh)';
+            document.getElementById('lang-detected').textContent = `🌐 ${LANGS[currentLang]?.label || currentLang}`;
+        }
 
-// ── Web Speech API TTS ────────────────────────────────────────────────
-const langMap = { vi: 'vi-VN', en: 'en-US', zh: 'zh-CN', ja: 'ja-JP', ko: 'ko-KR' };
+        function getScript() {
+            return poiData?.content?.[currentLang] || poiData?.content?.['vi'] || '';
+        }
 
-function speak() {
-    if (!('speechSynthesis' in window)) {
-        setStatus('⚠️ Trình duyệt không hỗ trợ đọc giọng nói');
-        return;
-    }
+        function selectLang(lang) {
+            if (isSpeaking) stopSpeak();
+            currentLang = lang;
+            document.querySelectorAll('.lang-btn').forEach(b => {
+                b.classList.toggle('active', b.textContent === LANGS[lang]?.label);
+            });
+            updateScript();
+            setStatus('Bấm ▶ để nghe thuyết minh bằng ' + (LANGS[lang]?.label || lang));
+        }
 
-    const text = getScript();
-    if (!text) { setStatus('⚠️ Chưa có nội dung thuyết minh'); return; }
+        function speak() {
+            if (!('speechSynthesis' in window)) { setStatus('⚠️ Trình duyệt không hỗ trợ giọng nói'); return; }
+            const text = getScript();
+            if (!text) { setStatus('⚠️ Chưa có nội dung thuyết minh'); return; }
 
-    window.speechSynthesis.cancel();
+            window.speechSynthesis.cancel();
+            const utter = new SpeechSynthesisUtterance(text);
+            utter.lang = LANGS[currentLang]?.tts || 'vi-VN';
+            utter.rate = 0.95;
+            utter.pitch = 1.0;
 
-    const utter = new SpeechSynthesisUtterance(text);
-    utter.lang = langMap[currentLang] || 'vi-VN';
-    utter.rate = 0.95;
-    utter.pitch = 1.0;
+            utter.onstart = () => {
+                isSpeaking = true;
+                document.getElementById('play-btn').textContent = '⏹';
+                document.getElementById('play-btn').classList.add('speaking');
+                setStatus('🔊 Đang đọc thuyết minh...', true);
+            };
+            utter.onend = utter.onerror = () => {
+                isSpeaking = false;
+                document.getElementById('play-btn').textContent = '▶';
+                document.getElementById('play-btn').classList.remove('speaking');
+                setStatus('✅ Hoàn thành — Bấm ▶ để nghe lại');
+            };
+            window.speechSynthesis.speak(utter);
+        }
 
-    utter.onstart = () => {
-        isSpeaking = true;
-        document.getElementById('play-btn').textContent = '⏹';
-        document.getElementById('play-btn').classList.add('speaking');
-        setStatus('🔊 Đang đọc thuyết minh...', true);
-    };
+        function stopSpeak() {
+            window.speechSynthesis.cancel();
+            isSpeaking = false;
+            document.getElementById('play-btn').textContent = '▶';
+            document.getElementById('play-btn').classList.remove('speaking');
+            setStatus('Bấm để nghe thuyết minh');
+        }
 
-    utter.onend = utter.onerror = () => {
-        isSpeaking = false;
-        document.getElementById('play-btn').textContent = '▶';
-        document.getElementById('play-btn').classList.remove('speaking');
-        setStatus('✅ Hoàn thành — Bấm ▶ để nghe lại');
-    };
+        function toggleSpeak() {
+            if (isSpeaking) stopSpeak();
+            else speak();
+        }
 
-    window.speechSynthesis.speak(utter);
-}
+        function setStatus(msg, speaking = false) {
+            const el = document.getElementById('status');
+            el.textContent = msg;
+            el.className = 'status' + (speaking ? ' speaking' : '');
+        }
 
-function stopSpeak() {
-    window.speechSynthesis.cancel();
-    isSpeaking = false;
-    document.getElementById('play-btn').textContent = '▶';
-    document.getElementById('play-btn').classList.remove('speaking');
-    setStatus('Bấm để nghe thuyết minh');
-}
+        function showError(msg) {
+            document.getElementById('loading').style.display = 'none';
+            const el = document.getElementById('error');
+            el.style.display = 'block';
+            el.textContent = '⚠️ ' + msg;
+        }
 
-function toggleSpeak() {
-    if (isSpeaking) stopSpeak();
-    else speak();
-}
-
-function setStatus(msg, speaking = false) {
-    const el = document.getElementById('status');
-    el.textContent = msg;
-    el.className = 'status' + (speaking ? ' speaking' : '');
-}
-
-function showError(msg) {
-    document.getElementById('loading').style.display = 'none';
-    const el = document.getElementById('error');
-    el.style.display = 'block';
-    el.textContent = '⚠️ ' + msg;
-}
-
-// ── Start ─────────────────────────────────────────────────────────────
-loadPoi();
-</script>
+        loadPoi();
+    </script>
 </body>
 </html>
