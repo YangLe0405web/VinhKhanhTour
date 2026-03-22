@@ -1,4 +1,5 @@
 ﻿@inject ISnackbar Snackbar
+@inject HttpClient Http
 
 <MudDialog>
     <TitleContent>
@@ -39,12 +40,42 @@
             </MudItem>
 
             <MudItem xs="12">
-                <MudText Typo="Typo.subtitle1" Class="mt-2 mb-2">
+                <MudText Typo="Typo.subtitle1" Class="mt-2 mb-1">
                     📝 Nội dung thuyết minh
+                </MudText>
+                <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mb-2">
+                    Nhập tiếng Việt → bấm dịch tự động → Gemini điền các ngôn ngữ khác
                 </MudText>
             </MudItem>
 
-            @foreach (var lang in _langs)
+            <MudItem xs="12">
+                <MudTextField Value="@GetContent("vi")"
+                              ValueChanged="@((string v) => SetContent("vi", v))"
+                              Label="🇻🇳 Tiếng Việt (bắt buộc)"
+                              Variant="Variant.Outlined"
+                              Lines="4" />
+            </MudItem>
+
+            <MudItem xs="12">
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Secondary"
+                           StartIcon="@Icons.Material.Filled.AutoAwesome"
+                           OnClick="TranslateAll"
+                           Disabled="_translating"
+                           FullWidth="true">
+                    @if (_translating)
+                    {
+                        <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                        <span>Gemini đang dịch...</span>
+                    }
+                    else
+                    {
+                        <span>✨ Dịch tự động sang EN / ZH / JA / KO</span>
+                    }
+                </MudButton>
+            </MudItem>
+
+            @foreach (var lang in _otherLangs)
             {
                 <MudItem xs="12">
                     <MudTextField Value="@GetContent(lang.Key)"
@@ -76,9 +107,10 @@
     [Parameter] public PoiModel Poi { get; set; } = new();
     [Parameter] public bool IsEdit { get; set; } = false;
 
-    readonly Dictionary<string, string> _langs = new()
+    bool _translating = false;
+
+    readonly Dictionary<string, string> _otherLangs = new()
     {
-        { "vi", "🇻🇳 Tiếng Việt" },
         { "en", "🇬🇧 English" },
         { "zh", "🇨🇳 中文" },
         { "ja", "🇯🇵 日本語" },
@@ -94,6 +126,63 @@
             Poi.Content.Remove(lang);
         else
             Poi.Content[lang] = value;
+    }
+
+    // ── Gọi API Render để dịch (Render gọi Gemini server-side) ───────
+    async Task TranslateAll()
+    {
+        var viText = GetContent("vi");
+        if (string.IsNullOrWhiteSpace(viText))
+        {
+            Snackbar.Add("⚠️ Vui lòng nhập nội dung tiếng Việt trước!", Severity.Warning);
+            return;
+        }
+
+        _translating = true;
+
+        try
+        {
+            // Http đã có BaseAddress là vinhkhanh-api.onrender.com
+            var response = await Http.PostAsJsonAsync(
+                "api/translate",
+                new { text = viText }
+            );
+
+            if (!response.IsSuccessStatusCode)
+            {
+                Snackbar.Add("❌ Lỗi dịch: " + response.StatusCode, Severity.Error);
+                return;
+            }
+
+            var root = await response.Content.ReadFromJsonAsync<System.Text.Json.JsonElement>();
+            int count = 0;
+
+            foreach (var lang in new[] { "en", "zh", "ja", "ko" })
+            {
+                if (root.TryGetProperty(lang, out var val))
+                {
+                    var text = val.GetString() ?? "";
+                    if (!string.IsNullOrWhiteSpace(text))
+                    {
+                        SetContent(lang, text);
+                        count++;
+                    }
+                }
+            }
+
+            Snackbar.Add(count > 0
+                ? "✅ Đã dịch sang " + count + " ngôn ngữ!"
+                : "❌ Không parse được kết quả",
+                count > 0 ? Severity.Success : Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("❌ Lỗi: " + ex.Message, Severity.Error);
+        }
+        finally
+        {
+            _translating = false;
+        }
     }
 
     void Submit() => MudDialog?.Close(DialogResult.Ok(Poi));

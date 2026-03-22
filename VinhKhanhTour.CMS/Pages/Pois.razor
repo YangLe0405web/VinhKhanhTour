@@ -1,7 +1,10 @@
 ﻿@page "/pois"
+@using VinhKhanhTour.Shared.Models
+@using QRCoder
 @inject CmsApiService Api
 @inject ISnackbar Snackbar
 @inject IDialogService DialogService
+@inject IJSRuntime JS
 
 <MudText Typo="Typo.h4" Class="mb-4">📍 Quản lý POI</MudText>
 
@@ -13,7 +16,7 @@
 
 @if (_loading)
 {
-    <MudProgressLinear Indeterminate="true" Color="Color.Primary"/>
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
 }
 else
 {
@@ -25,7 +28,7 @@ else
             <MudTh Style="min-width:180px">Tọa độ</MudTh>
             <MudTh Style="min-width:120px">Ngôn ngữ</MudTh>
             <MudTh Style="min-width:100px">Kích hoạt</MudTh>
-            <MudTh Style="min-width:120px">Thao tác</MudTh>
+            <MudTh Style="min-width:150px">Thao tác</MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="Tên POI">@context.Name</MudTd>
@@ -43,6 +46,11 @@ else
                            Color="Color.Success" T="bool" />
             </MudTd>
             <MudTd DataLabel="Thao tác">
+                @* Nút QR — mỗi POI có QR riêng *@
+                <MudIconButton Icon="@Icons.Material.Filled.QrCode"
+                               Color="Color.Secondary" Size="Size.Small"
+                               Title="Xem QR thuyết minh"
+                               OnClick="() => ShowQr(context)" />
                 <MudIconButton Icon="@Icons.Material.Filled.Edit"
                                Color="Color.Primary" Size="Size.Small"
                                OnClick="() => OpenEditDialog(context)" />
@@ -54,9 +62,72 @@ else
     </MudTable>
 }
 
+@* ── QR Dialog cho POI ───────────────────────────────────────────── *@
+<MudDialog @bind-Visible="_showQrDialog" Options="_qrDialogOptions">
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            📷 QR Thuyết Minh — @_qrPoi?.Name
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        @if (_qrPoi != null)
+        {
+            <MudStack AlignItems="AlignItems.Center" Spacing="3">
+
+                <MudPaper Elevation="3" Class="pa-3"
+                          Style="background:white;border-radius:12px">
+                    <img src="@_qrImageBase64"
+                         style="width:240px;height:240px;display:block" />
+                </MudPaper>
+
+                <MudPaper Outlined="true" Class="pa-2 px-3"
+                          Style="width:100%;border-radius:8px">
+                    <MudStack Row="true" AlignItems="AlignItems.Center"
+                              Justify="Justify.SpaceBetween">
+                        <MudText Typo="Typo.caption" Color="Color.Secondary"
+                                 Style="word-break:break-all;font-family:monospace">
+                            @GetQrUrl(_qrPoi)
+                        </MudText>
+                        <MudIconButton Icon="@Icons.Material.Filled.ContentCopy"
+                                       Size="Size.Small"
+                                       OnClick="() => CopyUrl(_qrPoi)" />
+                    </MudStack>
+                </MudPaper>
+
+                <MudAlert Severity="Severity.Info" Dense="true" Class="mt-1">
+                    Dán QR này tại quầy <b>@_qrPoi.Name</b>.<br />
+                    Khách quét → app tự đọc thuyết minh ngay,
+                    <b>không cần GPS</b>, không cần mạng (TTS offline).
+                </MudAlert>
+
+            </MudStack>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Filled" Color="Color.Secondary"
+                   StartIcon="@Icons.Material.Filled.Download"
+                   OnClick="DownloadQr">
+            Tải QR PNG
+        </MudButton>
+        <MudButton OnClick="CloseQrDialog">Đóng</MudButton>
+    </DialogActions>
+</MudDialog>
+
 @code {
     List<PoiModel> _pois = new();
     bool _loading = true;
+
+    // QR dialog
+    bool _showQrDialog = false;
+    PoiModel? _qrPoi = null;
+    string _qrImageBase64 = "";
+    DialogOptions _qrDialogOptions = new()
+    {
+        MaxWidth = MaxWidth.ExtraSmall,
+        FullWidth = true,
+        CloseOnEscapeKey = true,
+        CloseButton = true
+    };
 
     protected override async Task OnInitializedAsync()
     {
@@ -64,9 +135,49 @@ else
         _loading = false;
     }
 
+    // https://vinhkhanhtour-c8e3f.web.app/poi/{poiId} → app nhận → TTS đọc ngay, không GPS
+    string GetQrUrl(PoiModel poi) => $"https://vinhkhanhtour-c8e3f.web.app/poi/{poi.Id}";
+
+    void ShowQr(PoiModel poi)
+    {
+        _qrPoi = poi;
+        var url = GetQrUrl(poi);
+
+        using var qrGenerator = new QRCodeGenerator();
+        var qrData = qrGenerator.CreateQrCode(url, QRCodeGenerator.ECCLevel.M);
+        using var qrCode = new PngByteQRCode(qrData);
+        var pngBytes = qrCode.GetGraphic(
+            pixelsPerModule: 20,
+            darkColorRgba: new byte[] { 106, 27, 154, 255 },  // tím #6A1B9A
+            lightColorRgba: new byte[] { 255, 255, 255, 255 }
+        );
+        _qrImageBase64 = $"data:image/png;base64,{Convert.ToBase64String(pngBytes)}";
+        _showQrDialog = true;
+    }
+
+    void CloseQrDialog()
+    {
+        _showQrDialog = false;
+        _qrPoi = null;
+        _qrImageBase64 = "";
+    }
+
+    async Task DownloadQr()
+    {
+        if (_qrPoi == null) return;
+        var fileName = $"qr_poi_{_qrPoi.Id}.png";
+        await JS.InvokeVoidAsync("downloadBase64File", _qrImageBase64, fileName);
+    }
+
+    async Task CopyUrl(PoiModel poi)
+    {
+        await JS.InvokeVoidAsync("navigator.clipboard.writeText", GetQrUrl(poi));
+        Snackbar.Add("✅ Đã copy URL!", Severity.Success);
+    }
+
     string GetFlags(PoiModel p)
     {
-        var flags = new[] { ("vi","🇻🇳"),("en","🇬🇧"),("zh","🇨🇳"),("ja","🇯🇵"),("ko","🇰🇷") };
+        var flags = new[] { ("vi", "🇻🇳"), ("en", "🇬🇧"), ("zh", "🇨🇳"), ("ja", "🇯🇵"), ("ko", "🇰🇷") };
         return string.Join(" ", flags
             .Where(f => p.Content.ContainsKey(f.Item1))
             .Select(f => f.Item2));

@@ -29,6 +29,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<FirestoreService>();
 builder.Services.AddSingleton<StorageService>();
+builder.Services.AddHttpClient();
+
 
 var app = builder.Build();
 app.UseCors("CmsPolicy");

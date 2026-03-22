@@ -4,4 +4,5 @@ wwwroot\css\bootstrap\bootstrap.min.css.map
 wwwroot\favicon.png
 wwwroot\icon-192.png
 wwwroot\index.html
+wwwroot\poi.html
 wwwroot\sample-data\weather.json
