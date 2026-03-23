@@ -66,8 +66,7 @@ public class TranslateController : ControllerBase
         try
         {
             var http = _httpFactory.CreateClient();
-            var url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={geminiKey}";
-
+            var url = $"https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key={geminiKey}";
             var json = JsonSerializer.Serialize(requestBody);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
             var response = await http.PostAsync(url, content);
