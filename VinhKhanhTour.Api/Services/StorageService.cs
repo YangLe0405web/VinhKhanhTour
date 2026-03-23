@@ -1,4 +1,6 @@
 ﻿using System.Net.Http.Headers;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace VinhKhanhTour.Api.Services;
 
@@ -6,37 +8,49 @@ public class StorageService
 {
     private const string CLOUD_NAME = "denzxxuw4";
     private const string API_KEY = "162781952147593";
-    private const string API_SECRET = "3IbFP7kQAIOBBEqzdgDy_7VoJZk";
-
+    private readonly IConfiguration _config;
     private readonly HttpClient _http = new();
 
-    public async Task<string> UploadAudioAsync(
-        Stream fileStream, string poiId, string lang, string contentType)
+    public StorageService(IConfiguration config)
     {
-        // Tạo public_id để dễ quản lý: audio/poi_01/vi
-        var publicId = $"audio/{poiId}/{lang}";
+        _config = config;
+    }
 
-        // Tạo signature cho Cloudinary API
+    private async Task<string> GetApiSecret()
+    {
+        // Ưu tiên đọc từ file bí mật (cloudinary-secret.txt)
+        var renderSecret = "/etc/secrets/cloudinary-secret.txt";
+        var localSecret = Path.Combine(AppContext.BaseDirectory, "cloudinary-secret.txt");
+
+        if (File.Exists(renderSecret)) return (await File.ReadAllTextAsync(renderSecret)).Trim();
+        if (File.Exists(localSecret)) return (await File.ReadAllTextAsync(localSecret)).Trim();
+
+        // Backup nếu chưa tạo file (Giang nên tạo file để an toàn hơn)
+        return _config["Cloudinary:ApiSecret"] ?? "3IbFP7kQAIOBBEqzdgDy_7VoJZk";
+    }
+
+    public async Task<string> UploadAudioAsync(Stream fileStream, string poiId, string lang, string contentType)
+    {
+        var apiSecret = await GetApiSecret();
+        var publicId = $"audio/{poiId}/{lang}";
         var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
-        var sigString = $"public_id={publicId}&timestamp={timestamp}{API_SECRET}";
+
+        // BẮT BUỘC: Signature không thay đổi nhưng Cloudinary sẽ nhận diện đúng khi gọi URL /video/
+        var sigString = $"public_id={publicId}&timestamp={timestamp}{apiSecret}";
         var signature = ComputeSha1(sigString);
 
-        // Upload lên Cloudinary
-        var url = $"https://api.cloudinary.com/v1_1/{CLOUD_NAME}/raw/upload";
+        // ĐỔI TỪ /raw/ SANG /video/ ĐỂ FIX LỖI CORS
+        var url = $"https://api.cloudinary.com/v1_1/{CLOUD_NAME}/video/upload";
 
         using var form = new MultipartFormDataContent();
-
-        // File content
         var fileContent = new StreamContent(fileStream);
         fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse(contentType);
-        form.Add(fileContent, "file", $"{lang}.mp3");
 
+        form.Add(fileContent, "file", $"{lang}.mp3");
         form.Add(new StringContent(publicId), "public_id");
         form.Add(new StringContent(timestamp), "timestamp");
         form.Add(new StringContent(API_KEY), "api_key");
         form.Add(new StringContent(signature), "signature");
-        form.Add(new StringContent("true"), "overwrite");
-        form.Add(new StringContent("vinhkhanh_audio"), "upload_preset");
 
         var resp = await _http.PostAsync(url, form);
         var body = await resp.Content.ReadAsStringAsync();
@@ -44,23 +58,20 @@ public class StorageService
         if (!resp.IsSuccessStatusCode)
             throw new Exception($"Cloudinary upload failed: {body}");
 
-        // Parse secure_url từ response JSON
         using var doc = System.Text.Json.JsonDocument.Parse(body);
-        var secureUrl = doc.RootElement
-            .GetProperty("secure_url")
-            .GetString();
-
-        return secureUrl ?? throw new Exception("No URL in Cloudinary response");
+        return doc.RootElement.GetProperty("secure_url").GetString() ?? "";
     }
 
     public async Task DeleteAudioAsync(string poiId, string lang)
     {
+        var apiSecret = await GetApiSecret();
         var publicId = $"audio/{poiId}/{lang}";
         var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
-        var sigString = $"public_id={publicId}&timestamp={timestamp}{API_SECRET}";
+        var sigString = $"public_id={publicId}&timestamp={timestamp}{apiSecret}";
         var signature = ComputeSha1(sigString);
 
-        var url = $"https://api.cloudinary.com/v1_1/{CLOUD_NAME}/raw/destroy";
+        // CŨNG PHẢI ĐỔI /raw/ SANG /video/ Ở ĐÂY
+        var url = $"https://api.cloudinary.com/v1_1/{CLOUD_NAME}/video/destroy";
 
         using var form = new FormUrlEncodedContent(new Dictionary<string, string>
         {
@@ -73,11 +84,9 @@ public class StorageService
         await _http.PostAsync(url, form);
     }
 
-    // ── SHA1 helper ───────────────────────────────────────────────────
     private static string ComputeSha1(string input)
     {
-        var bytes = System.Text.Encoding.UTF8.GetBytes(input);
-        var hash = System.Security.Cryptography.SHA1.HashData(bytes);
-        return Convert.ToHexString(hash).ToLower();
+        var hash = SHA1.HashData(Encoding.UTF8.GetBytes(input));
+        return BitConverter.ToString(hash).Replace("-", "").ToLower();
     }
 }
