@@ -14,7 +14,6 @@ FirebaseApp.Create(new AppOptions
     Credential = GoogleCredential.GetApplicationDefault()
 });
 
-// ── CORS ───────────────────────────────────────────
 builder.Services.AddCors(opt => opt.AddPolicy("CmsPolicy", p =>
     p.WithOrigins(
         "https://localhost:7110",
@@ -24,7 +23,6 @@ builder.Services.AddCors(opt => opt.AddPolicy("CmsPolicy", p =>
     )
     .AllowAnyHeader()
     .AllowAnyMethod()
-    .WithExposedHeaders("Content-Disposition")
 ));
 
 builder.Services.AddControllers();
@@ -32,30 +30,13 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<FirestoreService>();
 builder.Services.AddSingleton<StorageService>();
+
+// ── HttpClient cho Gemini API ──────────────────────
 builder.Services.AddHttpClient();
 
 var app = builder.Build();
-
-// ✅ CORS phải đặt TRƯỚC MapControllers
 app.UseCors("CmsPolicy");
-
-// ✅ Xử lý preflight OPTIONS — cần cho upload file multipart
-app.Use(async (context, next) =>
-{
-    if (context.Request.Method == "OPTIONS")
-    {
-        context.Response.StatusCode = 200;
-        await context.Response.CompleteAsync();
-        return;
-    }
-    await next();
-});
-
 app.UseSwagger();
 app.UseSwaggerUI();
-
-// ✅ Health check — chống Render sleep
-app.MapGet("/health", () => "ok");
-
 app.MapControllers();
 app.Run();
