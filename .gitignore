@@ -1,1 +1,31 @@
+# ─── BẢO MẬT & SECRET FILES ──────────────────────────
+# Chặn file chứa API Key Gemini (Cực kỳ quan trọng)
+gemini-key.txt
+VinhKhanhTour.Api/gemini-key.txt
+
+# Chặn file chứa Key Firebase
 VinhKhanhTour.Api/firebase-key.json
+firebase-key.json
+
+# Chặn cấu hình local (thường chứa connection string hoặc key chạy máy cá nhân)
+appsettings.Development.json
+*/appsettings.Development.json
+
+
+# ─── .NET STANDARD IGNORES ───────────────────────────
+# Chặn các thư mục tự sinh khi Build (Làm nặng Repo)
+[Bb]in/
+[Oo]bj/
+
+# Chặn các file cấu hình riêng của Visual Studio
+.vs/
+.idea/
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+
+
+# ─── CÁC FILE TẠP KHÁC ───────────────────────────────
+.DS_Store
+Thumbs.db
