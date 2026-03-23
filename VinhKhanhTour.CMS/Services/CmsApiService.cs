@@ -1,4 +1,5 @@
 ﻿using System.Net.Http.Json;
+using System.Text.Json.Serialization;
 using VinhKhanhTour.Shared.Models;
 
 namespace VinhKhanhTour.CMS.Services;
@@ -9,6 +10,7 @@ public class CmsApiService
 
     public CmsApiService(HttpClient http) => _http = http;
 
+    // ── POI ───────────────────────────────────────────
     public Task<List<PoiModel>?> GetPoisAsync()
         => _http.GetFromJsonAsync<List<PoiModel>>("api/pois");
 
@@ -18,12 +20,14 @@ public class CmsApiService
     public Task<HttpResponseMessage> DeletePoiAsync(string id)
         => _http.DeleteAsync($"api/pois/{id}");
 
+    // ── Audio ─────────────────────────────────────────
     public async Task<string?> UploadAudioAsync(
-    string poiId, string lang, Stream stream, string fileName)
+        string poiId, string lang, Stream stream, string fileName)
     {
         var form = new MultipartFormDataContent();
         var content = new StreamContent(stream);
-        content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("audio/mpeg");
+        content.Headers.ContentType =
+            new System.Net.Http.Headers.MediaTypeHeaderValue("audio/mpeg");
         form.Add(content, "file", fileName);
 
         var resp = await _http.PostAsync($"api/pois/{poiId}/audio/{lang}", form);
@@ -48,7 +52,6 @@ public class CmsApiService
     public Task<HttpResponseMessage> DeleteTourAsync(string id)
         => _http.DeleteAsync($"api/tours/{id}");
 
-    // ── QR Scan Counter ───────────────────────────────
     public Task<HttpResponseMessage> IncrementScanAsync(string tourId)
         => _http.PostAsync($"api/tours/{tourId}/scan", null);
 
@@ -59,4 +62,25 @@ public class CmsApiService
     // ── Location Trace ────────────────────────────────
     public Task<List<LocationTrace>?> GetTracesAsync()
         => _http.GetFromJsonAsync<List<LocationTrace>>("api/trace");
+
+    // ── Translate (Gemini AI) ─────────────────────────
+    // Chỉ gọi khi user bấm nút, KHÔNG tự động
+    public async Task<TranslateResult?> TranslateAsync(string viText)
+    {
+        var resp = await _http.PostAsJsonAsync("api/translate",
+            new { text = viText });
+
+        if (!resp.IsSuccessStatusCode) return null;
+
+        return await resp.Content.ReadFromJsonAsync<TranslateResult>();
+    }
+}
+
+// ── Model kết quả dịch từ Gemini ─────────────────────────────────────
+public class TranslateResult
+{
+    [JsonPropertyName("en")] public string En { get; set; } = "";
+    [JsonPropertyName("zh")] public string Zh { get; set; } = "";
+    [JsonPropertyName("ja")] public string Ja { get; set; } = "";
+    [JsonPropertyName("ko")] public string Ko { get; set; } = "";
 }

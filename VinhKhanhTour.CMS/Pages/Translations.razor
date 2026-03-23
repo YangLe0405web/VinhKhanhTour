@@ -18,14 +18,14 @@ else
             <MudTh Style="min-width:80px">🇨🇳 ZH</MudTh>
             <MudTh Style="min-width:80px">🇯🇵 JA</MudTh>
             <MudTh Style="min-width:80px">🇰🇷 KO</MudTh>
-            <MudTh Style="min-width:100px">Thao tác</MudTh>
+            <MudTh Style="min-width:160px">Thao tác</MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd>@context.Name</MudTd>
             @foreach (var lang in _langs)
             {
                 <MudTd>
-                    @if (context.Content.ContainsKey(lang))
+                    @if (context.Content.ContainsKey(lang) && !string.IsNullOrEmpty(context.Content[lang]))
                     {
                         <MudIcon Icon="@Icons.Material.Filled.CheckCircle"
                                  Color="Color.Success" Size="Size.Small" />
@@ -54,6 +54,34 @@ else
         <MudText Typo="Typo.h6" Class="mb-3">
             ✏️ Sửa nội dung: @_editing.Name
         </MudText>
+
+        {{!-- Nút Auto dịch Gemini — chỉ gọi khi bấm, không tự động --}}
+        <MudPaper Class="pa-3 mb-4" Elevation="1"
+                  Style="background:#F3E5F5; border-left:4px solid #7B1FA2">
+            <MudText Typo="Typo.subtitle2" Class="mb-2">
+                🤖 Tự động dịch bằng Gemini AI
+            </MudText>
+            <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mb-2">
+                Nhập nội dung tiếng Việt trước, rồi bấm dịch. Kết quả sẽ điền vào EN/ZH/JA/KO.
+            </MudText>
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Secondary"
+                       Size="Size.Small"
+                       Disabled="_translating"
+                       StartIcon="@Icons.Material.Filled.Translate"
+                       OnClick="AutoTranslate">
+                @if (_translating)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                    <span>Đang dịch...</span>
+                }
+                else
+                {
+                    <span>🤖 Dịch tự động (EN / ZH / JA / KO)</span>
+                }
+            </MudButton>
+        </MudPaper>
+
         <MudGrid>
             @foreach (var lang in _langMap)
             {
@@ -66,6 +94,7 @@ else
                 </MudItem>
             }
         </MudGrid>
+
         <MudButton Color="Color.Primary" Variant="Variant.Filled"
                    Class="mt-3" OnClick="SaveEditing">
             💾 Lưu
@@ -80,6 +109,7 @@ else
     List<PoiModel> _pois = new();
     PoiModel? _editing = null;
     bool _loading = true;
+    bool _translating = false;
 
     readonly string[] _langs = { "vi", "en", "zh", "ja", "ko" };
 
@@ -115,7 +145,48 @@ else
     {
         if (_editing == null) return;
         await Api.SavePoiAsync(_editing);
-        Snackbar.Add("Đã lưu bản dịch!", Severity.Success);
+        Snackbar.Add("✅ Đã lưu bản dịch!", Severity.Success);
         _editing = null;
+    }
+
+    // ── Auto dịch Gemini — chỉ gọi khi bấm nút ──────────────────────
+    async Task AutoTranslate()
+    {
+        if (_editing == null) return;
+
+        // Lấy nội dung tiếng Việt
+        var viText = GetContent(_editing, "vi");
+        if (string.IsNullOrWhiteSpace(viText))
+        {
+            Snackbar.Add("⚠️ Nhập nội dung tiếng Việt trước!", Severity.Warning);
+            return;
+        }
+
+        _translating = true;
+        try
+        {
+            var result = await Api.TranslateAsync(viText);
+            if (result == null)
+            {
+                Snackbar.Add("❌ Dịch thất bại, thử lại sau!", Severity.Error);
+                return;
+            }
+
+            // Điền kết quả vào các ô ngôn ngữ
+            if (!string.IsNullOrEmpty(result.En)) SetContent(_editing, "en", result.En);
+            if (!string.IsNullOrEmpty(result.Zh)) SetContent(_editing, "zh", result.Zh);
+            if (!string.IsNullOrEmpty(result.Ja)) SetContent(_editing, "ja", result.Ja);
+            if (!string.IsNullOrEmpty(result.Ko)) SetContent(_editing, "ko", result.Ko);
+
+            Snackbar.Add("✅ Dịch xong! Kiểm tra lại rồi bấm Lưu.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"❌ Lỗi: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _translating = false;
+        }
     }
 }
