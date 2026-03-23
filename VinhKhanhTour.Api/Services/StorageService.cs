@@ -31,26 +31,21 @@ public class StorageService
 
     public async Task<string> UploadAudioAsync(Stream fileStream, string poiId, string lang, string contentType)
     {
-        var apiSecret = await GetApiSecret();
         var publicId = $"audio/{poiId}/{lang}";
-        var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
 
-        // BẮT BUỘC: Signature không thay đổi nhưng Cloudinary sẽ nhận diện đúng khi gọi URL /video/
-        var sigString = $"public_id={publicId}&timestamp={timestamp}{apiSecret}";
-        var signature = ComputeSha1(sigString);
-
-        // ĐỔI TỪ /raw/ SANG /video/ ĐỂ FIX LỖI CORS
+        // ĐỊA CHỈ UPLOAD (Dùng /video/ cho audio để tránh lỗi CORS)
         var url = $"https://api.cloudinary.com/v1_1/{CLOUD_NAME}/video/upload";
 
         using var form = new MultipartFormDataContent();
-        var fileContent = new StreamContent(fileStream);
-        fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse(contentType);
 
+        // File content
+        var fileContent = new StreamContent(fileStream);
+        fileContent.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse(contentType);
         form.Add(fileContent, "file", $"{lang}.mp3");
+
+        // CÁC THAM SỐ CHO UNSIGNED UPLOAD
         form.Add(new StringContent(publicId), "public_id");
-        form.Add(new StringContent(timestamp), "timestamp");
-        form.Add(new StringContent(API_KEY), "api_key");
-        form.Add(new StringContent(signature), "signature");
+        form.Add(new StringContent("vinhkhanh_audio"), "upload_preset"); // Tên bạn vừa đặt ở Bước 1
 
         var resp = await _http.PostAsync(url, form);
         var body = await resp.Content.ReadAsStringAsync();
