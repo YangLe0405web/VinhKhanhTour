@@ -38,6 +38,19 @@ var app = builder.Build();
 
 // ✅ CORS phải đặt TRƯỚC MapControllers
 app.UseCors("CmsPolicy");
+
+// ✅ Xử lý preflight OPTIONS — cần cho upload file multipart
+app.Use(async (context, next) =>
+{
+    if (context.Request.Method == "OPTIONS")
+    {
+        context.Response.StatusCode = 200;
+        await context.Response.CompleteAsync();
+        return;
+    }
+    await next();
+});
+
 app.UseSwagger();
 app.UseSwaggerUI();
 
