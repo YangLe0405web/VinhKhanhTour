@@ -39,23 +39,16 @@ builder.Services.AddHttpClient();
 
 var app = builder.Build();
 
-// ── 3. THỨ TỰ MIDDLEWARE (Cực kỳ quan trọng để không bị Failed to fetch) ──
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
+app.UseSwagger();
+app.UseSwaggerUI();
 app.UseHttpsRedirection();
 
-// UseRouting PHẢI đứng trước UseCors
+// 1. Thêm Routing trước
 app.UseRouting();
 
-// UseCors PHẢI đứng trước MapControllers
+// 2. Thêm Cors sau Routing nhưng trước MapControllers
 app.UseCors("CmsPolicy");
 
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();

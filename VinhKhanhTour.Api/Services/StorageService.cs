@@ -32,20 +32,17 @@ public class StorageService
     public async Task<string> UploadAudioAsync(Stream fileStream, string poiId, string lang, string contentType)
     {
         var publicId = $"audio/{poiId}/{lang}";
-
-        // ĐỊA CHỈ UPLOAD (Dùng /video/ cho audio để tránh lỗi CORS)
+        // BẮT BUỘC: Đổi raw thành video để sửa lỗi CORS trên trình duyệt
         var url = $"https://api.cloudinary.com/v1_1/{CLOUD_NAME}/video/upload";
 
         using var form = new MultipartFormDataContent();
-
-        // File content
         var fileContent = new StreamContent(fileStream);
-        fileContent.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse(contentType);
-        form.Add(fileContent, "file", $"{lang}.mp3");
+        fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(contentType);
 
-        // CÁC THAM SỐ CHO UNSIGNED UPLOAD
+        form.Add(fileContent, "file", $"{lang}.mp3");
         form.Add(new StringContent(publicId), "public_id");
-        form.Add(new StringContent("vinhkhanh_audio"), "upload_preset"); // Tên bạn vừa đặt ở Bước 1
+        // Dùng cái preset bạn vừa chụp ảnh gửi mình
+        form.Add(new StringContent("vinhkhanh_audio"), "upload_preset");
 
         var resp = await _http.PostAsync(url, form);
         var body = await resp.Content.ReadAsStringAsync();
