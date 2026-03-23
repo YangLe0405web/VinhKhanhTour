@@ -10,7 +10,6 @@
         "dependencies": {
           "FirebaseAdmin": "3.4.0",
           "Google.Cloud.Firestore": "4.2.0",
-          "Google.Cloud.Storage.V1": "4.14.0",
           "Swashbuckle.AspNetCore": "6.6.2",
           "VinhKhanhTour.Shared": "1.0.0"
         },
@@ -20,7 +19,7 @@
       },
       "FirebaseAdmin/3.4.0": {
         "dependencies": {
-          "Google.Api.Gax.Rest": "4.12.1",
+          "Google.Api.Gax.Rest": "4.8.0",
           "Google.Apis.Auth": "1.73.0"
         },
         "runtime": {
@@ -71,7 +70,7 @@
           }
         }
       },
-      "Google.Api.Gax.Rest/4.12.1": {
+      "Google.Api.Gax.Rest/4.8.0": {
         "dependencies": {
           "Google.Api.Gax": "4.13.1",
           "Google.Apis.Auth": "1.73.0",
@@ -79,8 +78,8 @@
         },
         "runtime": {
           "lib/netstandard2.0/Google.Api.Gax.Rest.dll": {
-            "assemblyVersion": "4.12.1.0",
-            "fileVersion": "4.12.1.0"
+            "assemblyVersion": "4.8.0.0",
+            "fileVersion": "4.8.0.0"
           }
         }
       },
@@ -119,18 +118,6 @@
           }
         }
       },
-      "Google.Apis.Storage.v1/1.71.0.3920": {
-        "dependencies": {
-          "Google.Apis": "1.73.0",
-          "Google.Apis.Auth": "1.73.0"
-        },
-        "runtime": {
-          "lib/net6.0/Google.Apis.Storage.v1.dll": {
-            "assemblyVersion": "1.71.0.3920",
-            "fileVersion": "1.71.0.3920"
-          }
-        }
-      },
       "Google.Cloud.Firestore/4.2.0": {
         "dependencies": {
           "Google.Cloud.Firestore.V1": "4.2.0",
@@ -165,18 +152,6 @@
           "lib/netstandard2.0/Google.Cloud.Location.dll": {
             "assemblyVersion": "2.4.0.0",
             "fileVersion": "2.4.0.0"
-          }
-        }
-      },
-      "Google.Cloud.Storage.V1/4.14.0": {
-        "dependencies": {
-          "Google.Api.Gax.Rest": "4.12.1",
-          "Google.Apis.Storage.v1": "1.71.0.3920"
-        },
-        "runtime": {
-          "lib/netstandard2.0/Google.Cloud.Storage.V1.dll": {
-            "assemblyVersion": "4.14.0.0",
-            "fileVersion": "4.14.0.0"
           }
         }
       },
@@ -597,12 +572,12 @@
       "path": "google.api.gax.grpc/4.13.1",
       "hashPath": "google.api.gax.grpc.4.13.1.nupkg.sha512"
     },
-    "Google.Api.Gax.Rest/4.12.1": {
+    "Google.Api.Gax.Rest/4.8.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-djYb7sDJvUiOG66fpDIOsprrZz4RPbiAtMiKtRguQhrzlHasd+3k/u6BQFFY3S0KCdxJzvv8M8hi81Ocdi6Ijw==",
-      "path": "google.api.gax.rest/4.12.1",
-      "hashPath": "google.api.gax.rest.4.12.1.nupkg.sha512"
+      "sha512": "sha512-zaA5LZ2VvGj/wwIzRB68swr7khi2kWNgqWvsB0fYtScIAl3kGkGtqiBcx63H1YLeKr5xau1866bFjTeReH6FSQ==",
+      "path": "google.api.gax.rest/4.8.0",
+      "hashPath": "google.api.gax.rest.4.8.0.nupkg.sha512"
     },
     "Google.Apis/1.73.0": {
       "type": "package",
@@ -625,13 +600,6 @@
       "path": "google.apis.core/1.73.0",
       "hashPath": "google.apis.core.1.73.0.nupkg.sha512"
     },
-    "Google.Apis.Storage.v1/1.71.0.3920": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-jW4i96fvFjtkPOdOo3bfC2Wity0krx3RTCExTksIx9lS/k7HmbF/zfxE1z3VouhrQvwwdEOkrR4TxdxzomJKxQ==",
-      "path": "google.apis.storage.v1/1.71.0.3920",
-      "hashPath": "google.apis.storage.v1.1.71.0.3920.nupkg.sha512"
-    },
     "Google.Cloud.Firestore/4.2.0": {
       "type": "package",
       "serviceable": true,
@@ -652,13 +620,6 @@
       "sha512": "sha512-ZFChsp6OYVPBAzpoEWFMf/W9lfOgPj5BY+75/VjGV6EoirhA3YNlSKta3fX2MPaWH6RqJ9ZtNJT4vmdxhxbkbQ==",
       "path": "google.cloud.location/2.4.0",
       "hashPath": "google.cloud.location.2.4.0.nupkg.sha512"
-    },
-    "Google.Cloud.Storage.V1/4.14.0": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-CLoAz9BDzqGEXWKWPuUxlk8/wcabsONxCa3MEQzxhbEGoKT1TOT6KnWNl1IhrBGqNw7IWtR/Xg06XHS8JYF1qQ==",
-      "path": "google.cloud.storage.v1/4.14.0",
-      "hashPath": "google.cloud.storage.v1.4.14.0.nupkg.sha512"
     },
     "Google.LongRunning/3.5.0": {
       "type": "package",
