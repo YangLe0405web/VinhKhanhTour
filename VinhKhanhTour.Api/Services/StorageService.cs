@@ -36,7 +36,7 @@ public class StorageService
         form.Add(new StringContent(API_KEY), "api_key");
         form.Add(new StringContent(signature), "signature");
         form.Add(new StringContent("true"), "overwrite");
-        form.Add(new StringContent("audio"), "resource_type");
+        form.Add(new StringContent("vinhkhanh_audio"), "upload_preset");
 
         var resp = await _http.PostAsync(url, form);
         var body = await resp.Content.ReadAsStringAsync();
