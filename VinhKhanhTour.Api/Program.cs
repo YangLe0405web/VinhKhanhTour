@@ -13,6 +13,8 @@ FirebaseApp.Create(new AppOptions
 {
     Credential = GoogleCredential.GetApplicationDefault()
 });
+
+// ── CORS ───────────────────────────────────────────
 builder.Services.AddCors(opt => opt.AddPolicy("CmsPolicy", p =>
     p.WithOrigins(
         "https://localhost:7110",
@@ -22,6 +24,7 @@ builder.Services.AddCors(opt => opt.AddPolicy("CmsPolicy", p =>
     )
     .AllowAnyHeader()
     .AllowAnyMethod()
+    .WithExposedHeaders("Content-Disposition")
 ));
 
 builder.Services.AddControllers();
@@ -31,10 +34,15 @@ builder.Services.AddSingleton<FirestoreService>();
 builder.Services.AddSingleton<StorageService>();
 builder.Services.AddHttpClient();
 
-
 var app = builder.Build();
+
+// ✅ CORS phải đặt TRƯỚC MapControllers
 app.UseCors("CmsPolicy");
 app.UseSwagger();
 app.UseSwaggerUI();
+
+// ✅ Health check — chống Render sleep
+app.MapGet("/health", () => "ok");
+
 app.MapControllers();
 app.Run();
