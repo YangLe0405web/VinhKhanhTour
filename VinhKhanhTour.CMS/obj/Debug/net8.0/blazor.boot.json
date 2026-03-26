@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "VinhKhanhTour.CMS",
   "resources": {
-    "hash": "sha256-655LqUoQ2R9B0YA3oaK9fGqG8Cx/CEEtdXJfMyY0fwc=",
+    "hash": "sha256-/m4staaBcGCupxX7TUeU1xZdj2OwKsl68Yh5mmFr3Os=",
     "jsModuleNative": {
       "dotnet.native.js": "sha256-A16ka545FHaB+QXjyJ4exXh7XpBAAIFnX8YkC4xAng8="
     },
@@ -72,9 +72,9 @@
       "OpenTelemetry.wasm": "sha256-Kx8EVBYAtaTcq5ofb2++NfTeJi+Qdfj5Ufyh+455G4o=",
       "OpenTelemetry.Api.wasm": "sha256-ZaShzG9SKfF4kWih7Rv9rriLEX4Ldrb9w5XCpWZHk7s=",
       "OpenTelemetry.Api.ProviderBuilderExtensions.wasm": "sha256-cT6udyd0ysoVFdHYLzF9z3KhFxJnHub6lbRIyR2pa4k=",
-      "Paramore.Brighter.wasm": "sha256-yELbevx4M+no0XEXw0kiN60itPdKW9THEUB65AmzPDE=",
-      "Paramore.Brighter.Firestore.wasm": "sha256-jYul1Hj8S0WpGWZMurVjRICh9zHOV/WYFzIf6OcBkKk=",
-      "Paramore.Brighter.Inbox.Firestore.wasm": "sha256-Ry1lMBnLUoF0JykAxZ51ihuqeZVQmu/sOHQ0Y9t7vpI=",
+      "Paramore.Brighter.wasm": "sha256-TOgCwRHcTr5/YDMr8SfO2b4DvcSi7Qmb1x5MqqnOns4=",
+      "Paramore.Brighter.Firestore.wasm": "sha256-xuSpbjMRMVJAACIP4dUR2s/+GIubbvvVKTWn5Lnvmrs=",
+      "Paramore.Brighter.Inbox.Firestore.wasm": "sha256-YPgMmtnOopz+/71t4WQeZChJPR5yP9M8hMD8OxTVuy4=",
       "Polly.wasm": "sha256-fjy1ix52+QqFaLZHRRfrWeTC3HzOC2RidJ1mm0syTbI=",
       "Polly.Core.wasm": "sha256-R5YhZimRrAqKwjbeYtgDGmlupzzPS3UOAEhPMoUuAm4=",
       "QRCoder.wasm": "sha256-4TK6yB5uwDqrse6OA6+FmX1spHTQV/3Ltbl/ysN02/Y=",
@@ -251,12 +251,12 @@
       "mscorlib.wasm": "sha256-ovgR6YJeXMcsAhvGJVdyjhD5pU34EEAc0BGQYTUAyNk=",
       "netstandard.wasm": "sha256-90+pPOP/3NxK0buBFJlcvDw0r6Nk/i3+oM9dt2x+LPM=",
       "System.Private.CoreLib.wasm": "sha256-IXKG8p3ppN4zPjJOxht5wSXCcbFNPH6InVm7fsThBPI=",
-      "VinhKhanhTour.Shared.wasm": "sha256-p0hY8G4ZdGFNSIT649ZKG3rn6pkKlFTRcw06h0AJFP0=",
-      "VinhKhanhTour.CMS.wasm": "sha256-La6WxAByLTxczMZ60rYNpTvOz2/OqCOfmHKWG3tK/sg="
+      "VinhKhanhTour.Shared.wasm": "sha256-CEmiUtCa5yK56z5kopzjjgnB4umF/xe9DURSIfY0VBc=",
+      "VinhKhanhTour.CMS.wasm": "sha256-sdJ12e4RwxbxQcELMhoP+prLw7uzJeMLwfsltPL4U7I="
     },
     "pdb": {
-      "VinhKhanhTour.Shared.pdb": "sha256-s0MLN7I0aTWdt8LVRzEEESQc+u/LZ+4ogRwoLpWv3qg=",
-      "VinhKhanhTour.CMS.pdb": "sha256-4+zX/mQJpn4P2SOxsC7ZY7yNG1YTp+xc/a8wsjIv0b8="
+      "VinhKhanhTour.Shared.pdb": "sha256-Mq9tZ3Rc+F3sqCI72dRmtofjfmumX9L2whrkC1YyEaU=",
+      "VinhKhanhTour.CMS.pdb": "sha256-oGPqM5SbNvex6Lk4rUWeNN7KGhUmF910TuCuLyi8BbU="
     }
   },
   "cacheBootResources": true,
