@@ -7,7 +7,6 @@ public class StorageService
 {
     private const string CLOUD_NAME = "denzxxuw4";
     private const string API_KEY = "162781952147593";
-    private const string UPLOAD_PRESET = "vinhkhanh_audio";
     private const string API_SECRET = "3IbFP7kQAIOBBEqzdgDy_7VoJZk";
 
     private readonly HttpClient _http = new();
@@ -20,9 +19,16 @@ public class StorageService
         try
         {
             var publicId = $"audio/{poiId}/{lang}";
+            var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
+
+            // Signed upload: ký SHA1(public_id=...&timestamp=...{SECRET})
+            // Các param phải sắp xếp alphabet trước khi ký
+            var sigString = $"public_id={publicId}&timestamp={timestamp}{API_SECRET}";
+            var signature = ComputeSha1(sigString);
+
             var url = $"https://api.cloudinary.com/v1_1/{CLOUD_NAME}/video/upload";
 
-            // Bước 1: Copy toàn bộ stream ra byte[] trước
+            // Đọc toàn bộ stream ra byte[] trước để tránh dispose stream sớm
             byte[] fileBytes;
             using (var ms = new MemoryStream())
             {
@@ -32,7 +38,6 @@ public class StorageService
 
             Console.WriteLine($"[Cloudinary] File size: {fileBytes.Length} bytes");
 
-            // Bước 2: Tạo form SAU KHI đã có byte[] (tránh dispose stream sớm)
             using var form = new MultipartFormDataContent();
 
             var fileContent = new ByteArrayContent(fileBytes);
@@ -42,9 +47,12 @@ public class StorageService
 
             form.Add(fileContent, "file", $"{lang}.mp3");
             form.Add(new StringContent(publicId), "public_id");
-            form.Add(new StringContent(UPLOAD_PRESET), "upload_preset");
+            form.Add(new StringContent(timestamp), "timestamp");
+            form.Add(new StringContent(API_KEY), "api_key");
+            form.Add(new StringContent(signature), "signature");
+            // KHÔNG dùng upload_preset khi signed upload
 
-            Console.WriteLine($"[Cloudinary] Sending to {url} with preset={UPLOAD_PRESET} public_id={publicId}");
+            Console.WriteLine($"[Cloudinary] Sending signed upload → public_id={publicId}");
 
             var resp = await _http.PostAsync(url, form);
             var body = await resp.Content.ReadAsStringAsync();
