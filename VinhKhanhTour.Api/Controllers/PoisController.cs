@@ -36,34 +36,37 @@ public class PoisController : ControllerBase
     [RequestSizeLimit(20 * 1024 * 1024)]
     public async Task<IActionResult> UploadAudio(string id, string lang, IFormFile file)
     {
-        Console.WriteLine($"[Upload] START poi={id} lang={lang} file={file?.FileName} size={file?.Length}");
-
-        if (file == null || file.Length == 0) return BadRequest("File is required");
+        if (file == null || file.Length == 0) return BadRequest("File is empty");
 
         try
         {
-            // 1. Kiểm tra POI tồn tại trước khi upload (Tránh phí công upload nếu ID sai)
-            var pois = await _db.GetAllPoisAsync();
-            var poi = pois.FirstOrDefault(p => p.Id == id);
-            if (poi == null) return NotFound($"Không tìm thấy POI với ID: {id}");
-
-            // 2. Thực hiện upload
-            string url;
-            using (var stream = file.OpenReadStream())
+            // Đọc toàn bộ file vào mảng byte ngay tại đây
+            byte[] fileBytes;
+            using (var ms = new MemoryStream())
             {
-                url = await _storage.UploadAudioAsync(stream, id, lang, file.ContentType);
+                await file.CopyToAsync(ms);
+                fileBytes = ms.ToArray();
             }
 
-            // 3. Cập nhật Firestore
-            poi.AudioUrls[lang] = url;
-            poi.UpdatedAt = DateTime.UtcNow; // Nên update cả thời gian cập nhật
-            await _db.SavePoiAsync(poi);
+            Console.WriteLine($"[Controller] Read {fileBytes.Length} bytes from IFormFile");
+
+            // Gửi mảng byte sang Service
+            string url = await _storage.UploadAudioAsync(fileBytes, id, lang, file.ContentType);
+
+            // Lưu vào Firestore (Giữ nguyên logic cũ của bạn)
+            var pois = await _db.GetAllPoisAsync();
+            var poi = pois.FirstOrDefault(p => p.Id == id);
+            if (poi != null)
+            {
+                poi.AudioUrls[lang] = url;
+                await _db.SavePoiAsync(poi);
+            }
 
             return Ok(new { url });
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[Upload ERROR]: {ex.Message}");
+            Console.WriteLine($"[Fatal Error]: {ex.Message}");
             return StatusCode(500, ex.Message);
         }
     }
