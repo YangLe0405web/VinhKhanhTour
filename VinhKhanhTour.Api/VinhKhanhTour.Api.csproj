@@ -8,6 +8,7 @@
   </PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="CloudinaryDotNet" Version="1.28.0" />
 		<PackageReference Include="FirebaseAdmin" Version="3.4.0" />
 		<PackageReference Include="Google.Cloud.Firestore" Version="4.2.0" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />

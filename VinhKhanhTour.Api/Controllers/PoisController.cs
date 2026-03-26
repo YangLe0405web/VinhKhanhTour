@@ -39,28 +39,20 @@ public class PoisController : ControllerBase
 
         try
         {
-            // Đọc file thành byte array để không bị lỗi stream 0 bytes
-            byte[] fileBytes;
-            using (var ms = new MemoryStream())
-            {
-                await file.CopyToAsync(ms);
-                fileBytes = ms.ToArray();
-            }
+            using var stream = file.OpenReadStream();
+            // Gọi service bằng stream luôn, không cần byte array nữa
+            string url = await _storage.UploadAudioAsync(stream, id, lang);
 
-            // Gọi service
-            string url = await _storage.UploadAudioAsync(fileBytes, id, lang, file.ContentType);
-
-            // Lưu vào Firestore
+            // Đoạn lưu Firestore giữ nguyên của Giang nhé
             var pois = await _db.GetAllPoisAsync();
             var poi = pois.FirstOrDefault(p => p.Id == id);
             if (poi != null)
             {
                 poi.AudioUrls[lang] = url;
                 await _db.SavePoiAsync(poi);
-                return Ok(new { url });
             }
 
-            return NotFound("Không tìm thấy POI");
+            return Ok(new { url });
         }
         catch (Exception ex)
         {

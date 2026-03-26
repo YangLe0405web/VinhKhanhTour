@@ -55,6 +55,10 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "CloudinaryDotNet": {
+              "target": "Package",
+              "version": "[1.28.0, )"
+            },
             "FirebaseAdmin": {
               "target": "Package",
               "version": "[3.4.0, )"
