@@ -22,46 +22,52 @@ public class StorageService
     /// <summary>
     /// Tải file audio lên Cloudinary bằng phương thức Unsigned (Không cần Signature).
     /// </summary>
-    public async Task<string> UploadAudioAsync(
-        Stream fileStream, string poiId, string lang, string contentType)
+    public async Task<string> UploadAudioAsync(Stream fileStream, string poiId, string lang, string contentType)
     {
-        // Public ID để quản lý file theo cấu trúc thư mục
-        var publicId = $"audio/{poiId}/{lang}";
+        // Đảm bảo con trỏ stream ở vị trí bắt đầu
+        if (fileStream.CanSeek) fileStream.Position = 0;
 
         using var content = new MultipartFormDataContent();
 
-        // 1. Thêm các tham số cho Unsigned Upload
-        // Quan trọng: Phải có upload_preset và tên preset đó phải ở chế độ 'Unsigned'
-        content.Add(new StringContent(UPLOAD_PRESET), "upload_preset");
-        content.Add(new StringContent(publicId), "public_id");
+        // 1. Thêm tham số text (Bỏ qua Content-Type để tránh lỗi signature/preset)
+        var presetContent = new StringContent("vinhkhanh_preset");
+        presetContent.Headers.ContentType = null;
+        content.Add(presetContent, "upload_preset");
 
-        // 2. Xử lý file stream
+        var publicIdContent = new StringContent($"audio/{poiId}/{lang}");
+        publicIdContent.Headers.ContentType = null;
+        content.Add(publicIdContent, "public_id");
+
+        // 2. Chuyển stream sang mảng byte để đảm bảo không bị mất dữ liệu
         using var ms = new MemoryStream();
         await fileStream.CopyToAsync(ms);
-        var fileBytes = ms.ToArray();
+        var bytes = ms.ToArray();
 
-        var fileContent = new ByteArrayContent(fileBytes);
-        fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse(contentType);
+        // LOG QUAN TRỌNG: Kiểm tra xem bytes.Length có bằng size ở Controller không
+        Console.WriteLine($"[StorageService] Prepared {bytes.Length} bytes for Cloudinary");
 
-        // Cloudinary nhận file qua key "file"
+        if (bytes.Length == 0) throw new Exception("File stream bị trống!");
+
+        var fileContent = new ByteArrayContent(bytes);
+        // Cloudinary cần Content-Type chính xác hoặc mặc định audio/mpeg
+        fileContent.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse(contentType ?? "audio/mpeg");
+
+        // Bắt buộc tên field là "file"
         content.Add(fileContent, "file", $"{lang}.mp3");
 
-        // 3. Gửi request lên endpoint video/upload
-        var url = $"https://api.cloudinary.com/v1_1/{CLOUD_NAME}/video/upload";
+        // 3. Gửi tới endpoint video
+        var url = $"https://api.cloudinary.com/v1_1/denzxxuw4/video/upload";
         var resp = await _http.PostAsync(url, content);
         var body = await resp.Content.ReadAsStringAsync();
 
         if (!resp.IsSuccessStatusCode)
         {
-            throw new Exception($"Cloudinary Unsigned Upload failed: {body}");
+            Console.WriteLine($"[Cloudinary ERROR Detail]: {body}");
+            throw new Exception(body);
         }
 
-        // 4. Trả về URL an toàn
         using var doc = JsonDocument.Parse(body);
-        var secureUrl = doc.RootElement.GetProperty("secure_url").GetString() ?? "";
-
-        Console.WriteLine($"[Cloudinary] Upload thành công: {secureUrl}");
-        return secureUrl;
+        return doc.RootElement.GetProperty("secure_url").GetString() ?? "";
     }
 
     /// <summary>
