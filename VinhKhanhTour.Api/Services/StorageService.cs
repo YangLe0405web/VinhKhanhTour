@@ -24,29 +24,26 @@ public class StorageService
     /// </summary>
     public async Task<string> UploadAudioAsync(byte[] fileBytes, string poiId, string lang, string contentType)
     {
-        if (fileBytes == null || fileBytes.Length == 0) throw new Exception("Dữ liệu file bị trống!");
-
         using var content = new MultipartFormDataContent();
 
-        // 1. Chỉ gửi 2 tham số này cho chế độ Unsigned
+        // CHỈ GỬI ĐÚNG 2 THỨ NÀY CHO CHẾ ĐỘ UNSIGNED
         content.Add(new StringContent("vinhkhanh_preset"), "upload_preset");
         content.Add(new StringContent($"audio/{poiId}/{lang}"), "public_id");
 
-        // 2. Đóng gói file từ mảng byte (fix lỗi 0 bytes)
         var fileContent = new ByteArrayContent(fileBytes);
         fileContent.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse(contentType ?? "audio/mpeg");
+
+        // Tên field phải là "file"
         content.Add(fileContent, "file", $"{lang}.mp3");
 
-        // 3. Endpoint video/upload cho file .mp3
         var url = $"https://api.cloudinary.com/v1_1/denzxxuw4/video/upload";
-
         var resp = await _http.PostAsync(url, content);
         var body = await resp.Content.ReadAsStringAsync();
 
         if (!resp.IsSuccessStatusCode)
         {
             Console.WriteLine($"[Cloudinary ERROR]: {body}");
-            throw new Exception($"Cloudinary báo lỗi: {body}");
+            throw new Exception(body);
         }
 
         using var doc = JsonDocument.Parse(body);
