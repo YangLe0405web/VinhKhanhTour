@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("VinhKhanhTour.CMS")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c42645483d288b6e9e4f76906bb071e3a57ef6e5")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+bccea217c95221d2b30dc6861c36086c455a96ab")]
 [assembly: System.Reflection.AssemblyProductAttribute("VinhKhanhTour.CMS")]
 [assembly: System.Reflection.AssemblyTitleAttribute("VinhKhanhTour.CMS")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
