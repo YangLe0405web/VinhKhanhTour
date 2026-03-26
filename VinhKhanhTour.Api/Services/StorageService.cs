@@ -1,42 +1,26 @@
-﻿using CloudinaryDotNet;
-using CloudinaryDotNet.Actions;
+﻿using Google.Apis.Auth.OAuth2;
+using Google.Cloud.Storage.V1;
+
+namespace VinhKhanhTour.Api.Services;
 
 public class StorageService
 {
-    private readonly Cloudinary _cloudinary;
+    private readonly StorageClient _client;
+    const string BUCKET = "vinhkhanhtour-c8e3f.appspot.com";
 
     public StorageService()
+     => _client = StorageClient.Create();
+
+    public async Task<string> UploadAudioAsync(
+        Stream fileStream, string poiId, string lang, string contentType)
     {
-        // Thay 2 cái mã này bằng mã trên Dashboard Cloudinary của Giang nhé
-        var account = new Account(
-            "denzxxuw4",
-            "162781952147593",
-            "3IbFP7kQAIOBBEqzdgDy_7VoJZk"
-        );
-        _cloudinary = new Cloudinary(account);
-        _cloudinary.Api.Secure = true;
+        var objectName = $"audio/{poiId}/{lang}.mp3";
+        await _client.UploadObjectAsync(
+            BUCKET, objectName, contentType, fileStream);
+        return $"https://storage.googleapis.com/{BUCKET}/{objectName}";
     }
 
-    public async Task<string> UploadAudioAsync(Stream fileStream, string poiId, string lang)
-    {
-        if (fileStream.CanSeek) fileStream.Position = 0;
-
-        var uploadParams = new VideoUploadParams()
-        {
-            File = new FileDescription($"{poiId}_{lang}.mp3", fileStream),
-            PublicId = $"audio/{poiId}/{lang}",
-            Overwrite = true,
-            // Với SDK này, Giang thậm chí không cần dùng Upload Preset 
-            // vì nó dùng API Key để xác thực rồi, cực kỳ an toàn.
-        };
-
-        var uploadResult = await _cloudinary.UploadAsync(uploadParams);
-
-        if (uploadResult.Error != null)
-        {
-            throw new Exception($"Lỗi Cloudinary: {uploadResult.Error.Message}");
-        }
-
-        return uploadResult.SecureUrl.ToString();
-    }
+    public async Task DeleteAudioAsync(string poiId, string lang)
+        => await _client.DeleteObjectAsync(
+               BUCKET, $"audio/{poiId}/{lang}.mp3");
 }

@@ -67,6 +67,10 @@
               "target": "Package",
               "version": "[4.2.0, )"
             },
+            "Google.Cloud.Storage.V1": {
+              "target": "Package",
+              "version": "[4.14.0, )"
+            },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
               "version": "[6.6.2, )"
@@ -145,6 +149,10 @@
             "Google.Cloud.Firestore": {
               "target": "Package",
               "version": "[4.2.0, )"
+            },
+            "Google.Cloud.Storage.V1": {
+              "target": "Package",
+              "version": "[4.14.0, )"
             },
             "Paramore.Brighter.Inbox.Firestore": {
               "target": "Package",
