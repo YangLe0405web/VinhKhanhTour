@@ -17,17 +17,14 @@ public class PoisController : ControllerBase
         _storage = storage;
     }
 
-    // GET api/pois
     [HttpGet]
     public async Task<IActionResult> GetAll()
         => Ok(await _db.GetAllPoisAsync());
 
-    // POST api/pois
     [HttpPost]
     public async Task<IActionResult> Save([FromBody] PoiModel poi)
         => Ok(new { id = await _db.SavePoiAsync(poi) });
 
-    // DELETE api/pois/{id}
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(string id)
     {
@@ -37,22 +34,46 @@ public class PoisController : ControllerBase
 
     // POST api/pois/{id}/audio/{lang}
     [HttpPost("{id}/audio/{lang}")]
+    [RequestSizeLimit(20 * 1024 * 1024)] // 20MB limit
     public async Task<IActionResult> UploadAudio(
         string id, string lang, IFormFile file)
     {
-        using var stream = file.OpenReadStream();
-        var url = await _storage.UploadAudioAsync(
-            stream, id, lang, file.ContentType);
+        Console.WriteLine($"[Upload] START poi={id} lang={lang} file={file?.FileName} size={file?.Length}");
 
-        var pois = await _db.GetAllPoisAsync();
-        var poi = pois.FirstOrDefault(p => p.Id == id);
-        if (poi == null) return NotFound();
+        if (file == null || file.Length == 0)
+        {
+            Console.WriteLine("[Upload] File is null or empty!");
+            return BadRequest("File is required");
+        }
 
-        poi.AudioUrls[lang] = url;
-        await _db.SavePoiAsync(poi);
-        return Ok(new { url });
+        try
+        {
+            string url;
+            using (var stream = file.OpenReadStream())
+            {
+                url = await _storage.UploadAudioAsync(stream, id, lang, file.ContentType);
+            }
+
+            Console.WriteLine($"[Upload] Cloudinary OK: {url}");
+
+            var pois = await _db.GetAllPoisAsync();
+            var poi = pois.FirstOrDefault(p => p.Id == id);
+            if (poi == null)
+            {
+                Console.WriteLine($"[Upload] POI not found: {id}");
+                return NotFound();
+            }
+
+            poi.AudioUrls[lang] = url;
+            await _db.SavePoiAsync(poi);
+
+            Console.WriteLine($"[Upload] Saved to Firestore OK");
+            return Ok(new { url });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Upload] EXCEPTION: {ex}");
+            return StatusCode(500, ex.Message);
+        }
     }
-
-    // POST api/analytics
-    
 }
