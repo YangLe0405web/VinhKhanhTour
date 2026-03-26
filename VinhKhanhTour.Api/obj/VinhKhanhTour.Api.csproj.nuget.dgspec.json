@@ -148,7 +148,7 @@
             },
             "Paramore.Brighter.Inbox.Firestore": {
               "target": "Package",
-              "version": "[10.3.0, )"
+              "version": "[10.3.1, )"
             }
           },
           "imports": [

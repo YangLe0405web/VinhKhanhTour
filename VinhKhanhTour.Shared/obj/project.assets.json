@@ -285,7 +285,7 @@
           "buildTransitive/net6.0/_._": {}
         }
       },
-      "Microsoft.Bcl.TimeProvider/10.0.3": {
+      "Microsoft.Bcl.TimeProvider/10.0.5": {
         "type": "package",
         "compile": {
           "lib/net8.0/Microsoft.Bcl.TimeProvider.dll": {
@@ -359,10 +359,10 @@
           "buildTransitive/netstandard2.0/Microsoft.Extensions.Configuration.Binder.targets": {}
         }
       },
-      "Microsoft.Extensions.DependencyInjection/10.0.3": {
+      "Microsoft.Extensions.DependencyInjection/10.0.5": {
         "type": "package",
         "dependencies": {
-          "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.3"
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.5"
         },
         "compile": {
           "lib/net8.0/Microsoft.Extensions.DependencyInjection.dll": {
@@ -378,7 +378,7 @@
           "buildTransitive/net8.0/_._": {}
         }
       },
-      "Microsoft.Extensions.DependencyInjection.Abstractions/10.0.3": {
+      "Microsoft.Extensions.DependencyInjection.Abstractions/10.0.5": {
         "type": "package",
         "compile": {
           "lib/net8.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {
@@ -415,12 +415,12 @@
           "buildTransitive/net6.0/_._": {}
         }
       },
-      "Microsoft.Extensions.Logging/10.0.3": {
+      "Microsoft.Extensions.Logging/10.0.5": {
         "type": "package",
         "dependencies": {
-          "Microsoft.Extensions.DependencyInjection": "10.0.3",
-          "Microsoft.Extensions.Logging.Abstractions": "10.0.3",
-          "Microsoft.Extensions.Options": "10.0.3"
+          "Microsoft.Extensions.DependencyInjection": "10.0.5",
+          "Microsoft.Extensions.Logging.Abstractions": "10.0.5",
+          "Microsoft.Extensions.Options": "10.0.5"
         },
         "compile": {
           "lib/net8.0/Microsoft.Extensions.Logging.dll": {
@@ -436,11 +436,11 @@
           "buildTransitive/net8.0/_._": {}
         }
       },
-      "Microsoft.Extensions.Logging.Abstractions/10.0.3": {
+      "Microsoft.Extensions.Logging.Abstractions/10.0.5": {
         "type": "package",
         "dependencies": {
-          "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.3",
-          "System.Diagnostics.DiagnosticSource": "10.0.3"
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.5",
+          "System.Diagnostics.DiagnosticSource": "10.0.5"
         },
         "compile": {
           "lib/net8.0/Microsoft.Extensions.Logging.Abstractions.dll": {
@@ -482,11 +482,11 @@
           "buildTransitive/net6.0/_._": {}
         }
       },
-      "Microsoft.Extensions.Options/10.0.3": {
+      "Microsoft.Extensions.Options/10.0.5": {
         "type": "package",
         "dependencies": {
-          "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.3",
-          "Microsoft.Extensions.Primitives": "10.0.3"
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.5",
+          "Microsoft.Extensions.Primitives": "10.0.5"
         },
         "compile": {
           "lib/net8.0/Microsoft.Extensions.Options.dll": {
@@ -525,7 +525,7 @@
           "buildTransitive/net6.0/_._": {}
         }
       },
-      "Microsoft.Extensions.Primitives/10.0.3": {
+      "Microsoft.Extensions.Primitives/10.0.5": {
         "type": "package",
         "compile": {
           "lib/net8.0/Microsoft.Extensions.Primitives.dll": {
@@ -649,16 +649,16 @@
           }
         }
       },
-      "Paramore.Brighter/10.3.0": {
+      "Paramore.Brighter/10.3.1": {
         "type": "package",
         "dependencies": {
           "Microsoft.Bcl.HashCode": "6.0.0",
-          "Microsoft.Bcl.TimeProvider": "10.0.3",
-          "Microsoft.Extensions.Logging": "10.0.3",
+          "Microsoft.Bcl.TimeProvider": "10.0.5",
+          "Microsoft.Extensions.Logging": "10.0.5",
           "NJsonSchema": "11.5.2",
           "Newtonsoft.Json": "13.0.4",
           "OpenTelemetry": "1.15.0",
-          "Polly": "8.6.5"
+          "Polly": "8.6.6"
         },
         "compile": {
           "lib/net8.0/Paramore.Brighter.dll": {}
@@ -667,11 +667,11 @@
           "lib/net8.0/Paramore.Brighter.dll": {}
         }
       },
-      "Paramore.Brighter.Firestore/10.3.0": {
+      "Paramore.Brighter.Firestore/10.3.1": {
         "type": "package",
         "dependencies": {
-          "Google.Cloud.Firestore.V1": "4.1.0",
-          "Paramore.Brighter": "10.3.0"
+          "Google.Cloud.Firestore.V1": "4.2.0",
+          "Paramore.Brighter": "10.3.1"
         },
         "compile": {
           "lib/net8.0/Paramore.Brighter.Firestore.dll": {}
@@ -680,11 +680,11 @@
           "lib/net8.0/Paramore.Brighter.Firestore.dll": {}
         }
       },
-      "Paramore.Brighter.Inbox.Firestore/10.3.0": {
+      "Paramore.Brighter.Inbox.Firestore/10.3.1": {
         "type": "package",
         "dependencies": {
-          "Paramore.Brighter": "10.3.0",
-          "Paramore.Brighter.Firestore": "10.3.0"
+          "Paramore.Brighter": "10.3.1",
+          "Paramore.Brighter.Firestore": "10.3.1"
         },
         "compile": {
           "lib/net8.0/Paramore.Brighter.Inbox.Firestore.dll": {}
@@ -693,10 +693,10 @@
           "lib/net8.0/Paramore.Brighter.Inbox.Firestore.dll": {}
         }
       },
-      "Polly/8.6.5": {
+      "Polly/8.6.6": {
         "type": "package",
         "dependencies": {
-          "Polly.Core": "8.6.5"
+          "Polly.Core": "8.6.6"
         },
         "compile": {
           "lib/net6.0/Polly.dll": {
@@ -709,7 +709,7 @@
           }
         }
       },
-      "Polly.Core/8.6.5": {
+      "Polly.Core/8.6.6": {
         "type": "package",
         "compile": {
           "lib/net8.0/Polly.Core.dll": {
@@ -754,7 +754,7 @@
           "buildTransitive/net6.0/_._": {}
         }
       },
-      "System.Diagnostics.DiagnosticSource/10.0.3": {
+      "System.Diagnostics.DiagnosticSource/10.0.5": {
         "type": "package",
         "compile": {
           "lib/net8.0/System.Diagnostics.DiagnosticSource.dll": {
@@ -1240,10 +1240,10 @@
         "microsoft.bcl.hashcode.nuspec"
       ]
     },
-    "Microsoft.Bcl.TimeProvider/10.0.3": {
-      "sha512": "fXtRMgTSfZgrD+v40amau8kbHl6CKT0ZnO1DL0oOePfaSRvhijIVmdQdpjjctE1Ywto5Pa9/BBIHDRJpnDzhLA==",
+    "Microsoft.Bcl.TimeProvider/10.0.5": {
+      "sha512": "LtRd4Zq2yXONwWDDigM3zkLmhyt07QwZZNzSZn3HkQ61oHkgraz+eq1+IljcXKEwdgldXP8LxDph0fMZ1ZP3sg==",
       "type": "package",
-      "path": "microsoft.bcl.timeprovider/10.0.3",
+      "path": "microsoft.bcl.timeprovider/10.0.5",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -1260,7 +1260,7 @@
         "lib/net8.0/Microsoft.Bcl.TimeProvider.xml",
         "lib/netstandard2.0/Microsoft.Bcl.TimeProvider.dll",
         "lib/netstandard2.0/Microsoft.Bcl.TimeProvider.xml",
-        "microsoft.bcl.timeprovider.10.0.3.nupkg.sha512",
+        "microsoft.bcl.timeprovider.10.0.5.nupkg.sha512",
         "microsoft.bcl.timeprovider.nuspec",
         "useSharedDesignerContext.txt"
       ]
@@ -1366,10 +1366,10 @@
         "useSharedDesignerContext.txt"
       ]
     },
-    "Microsoft.Extensions.DependencyInjection/10.0.3": {
-      "sha512": "2DLOmC0EkB2smVK8lPP1PIKEgL1arE3CMp9XSIQB/Y7ev5nnnyuM/PizKJ6QfLD08QCYoopSC9SFdbYglDomYg==",
+    "Microsoft.Extensions.DependencyInjection/10.0.5": {
+      "sha512": "v1SVsowG6YE1YnHVGmLWz57YTRCQRx9pH5ebIESXfm5isI9gA3QaMyg/oMTzPpXYZwSAVDzYItGJKfmV+pqXkQ==",
       "type": "package",
-      "path": "microsoft.extensions.dependencyinjection/10.0.3",
+      "path": "microsoft.extensions.dependencyinjection/10.0.5",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -1392,15 +1392,15 @@
         "lib/netstandard2.0/Microsoft.Extensions.DependencyInjection.xml",
         "lib/netstandard2.1/Microsoft.Extensions.DependencyInjection.dll",
         "lib/netstandard2.1/Microsoft.Extensions.DependencyInjection.xml",
-        "microsoft.extensions.dependencyinjection.10.0.3.nupkg.sha512",
+        "microsoft.extensions.dependencyinjection.10.0.5.nupkg.sha512",
         "microsoft.extensions.dependencyinjection.nuspec",
         "useSharedDesignerContext.txt"
       ]
     },
-    "Microsoft.Extensions.DependencyInjection.Abstractions/10.0.3": {
-      "sha512": "bwGMrRcAMWx2s/RDgja97p27rxSz2pEQW0+rX5cWAUWVETVJ/eyxGfjAl8vuG5a+lckWmPIE+vcuaZNVB5YDdw==",
+    "Microsoft.Extensions.DependencyInjection.Abstractions/10.0.5": {
+      "sha512": "iVMtq9eRvzyhx8949EGT0OCYJfXi737SbRVzWXE5GrOgGj5AaZ9eUuxA/BSUfmOMALKn/g8KfFaNQw0eiB3lyA==",
       "type": "package",
-      "path": "microsoft.extensions.dependencyinjection.abstractions/10.0.3",
+      "path": "microsoft.extensions.dependencyinjection.abstractions/10.0.5",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -1423,7 +1423,7 @@
         "lib/netstandard2.0/Microsoft.Extensions.DependencyInjection.Abstractions.xml",
         "lib/netstandard2.1/Microsoft.Extensions.DependencyInjection.Abstractions.dll",
         "lib/netstandard2.1/Microsoft.Extensions.DependencyInjection.Abstractions.xml",
-        "microsoft.extensions.dependencyinjection.abstractions.10.0.3.nupkg.sha512",
+        "microsoft.extensions.dependencyinjection.abstractions.10.0.5.nupkg.sha512",
         "microsoft.extensions.dependencyinjection.abstractions.nuspec",
         "useSharedDesignerContext.txt"
       ]
@@ -1457,10 +1457,10 @@
         "useSharedDesignerContext.txt"
       ]
     },
-    "Microsoft.Extensions.Logging/10.0.3": {
-      "sha512": "8D9Er1cGXNjNDIB+VLBNHn386L5ls2FoiG9a6o12gyn+GG3w6jdfUhzT8dtBnKcevE7/fsVA8MS3FBgFfClFtQ==",
+    "Microsoft.Extensions.Logging/10.0.5": {
+      "sha512": "+XTMKQyDWg4ODoNHU/BN3BaI1jhGO7VCS+BnzT/4IauiG6y2iPAte7MyD7rHKS+hNP0TkFkjrae8DFjDUxtcxg==",
       "type": "package",
-      "path": "microsoft.extensions.logging/10.0.3",
+      "path": "microsoft.extensions.logging/10.0.5",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -1483,15 +1483,15 @@
         "lib/netstandard2.0/Microsoft.Extensions.Logging.xml",
         "lib/netstandard2.1/Microsoft.Extensions.Logging.dll",
         "lib/netstandard2.1/Microsoft.Extensions.Logging.xml",
-        "microsoft.extensions.logging.10.0.3.nupkg.sha512",
+        "microsoft.extensions.logging.10.0.5.nupkg.sha512",
         "microsoft.extensions.logging.nuspec",
         "useSharedDesignerContext.txt"
       ]
     },
-    "Microsoft.Extensions.Logging.Abstractions/10.0.3": {
-      "sha512": "lxl0WLk7ROgBFAsjcOYjQ8/DVK+VMszxGBzUhgtQmAsTNldLL5pk9NG/cWTsXHq0lUhUEAtZkEE7jOGOA8bGKQ==",
+    "Microsoft.Extensions.Logging.Abstractions/10.0.5": {
+      "sha512": "9HOdqlDtPptVcmKAjsQ/Nr5Rxfq6FMYLdhvZh1lVmeKR738qeYecQD7+ldooXf+u2KzzR1kafSphWngIM3C6ug==",
       "type": "package",
-      "path": "microsoft.extensions.logging.abstractions/10.0.3",
+      "path": "microsoft.extensions.logging.abstractions/10.0.5",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -1555,7 +1555,7 @@
         "lib/net9.0/Microsoft.Extensions.Logging.Abstractions.xml",
         "lib/netstandard2.0/Microsoft.Extensions.Logging.Abstractions.dll",
         "lib/netstandard2.0/Microsoft.Extensions.Logging.Abstractions.xml",
-        "microsoft.extensions.logging.abstractions.10.0.3.nupkg.sha512",
+        "microsoft.extensions.logging.abstractions.10.0.5.nupkg.sha512",
         "microsoft.extensions.logging.abstractions.nuspec",
         "useSharedDesignerContext.txt"
       ]
@@ -1589,10 +1589,10 @@
         "useSharedDesignerContext.txt"
       ]
     },
-    "Microsoft.Extensions.Options/10.0.3": {
-      "sha512": "hU6WzGTPvPoLA2ng1ILvWQb3g0qORdlHNsxI8IcPLumJb3suimYUl+bbDzdo1V4KFsvVhnMWzysHpKbZaoDQPQ==",
+    "Microsoft.Extensions.Options/10.0.5": {
+      "sha512": "MDaQMdUplw0AIRhWWmbLA7yQEXaLIHb+9CTroTiNS8OlI0LMXS4LCxtopqauiqGCWlRgJ+xyraVD8t6veRAFbw==",
       "type": "package",
-      "path": "microsoft.extensions.options/10.0.3",
+      "path": "microsoft.extensions.options/10.0.5",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -1630,7 +1630,7 @@
         "lib/netstandard2.0/Microsoft.Extensions.Options.xml",
         "lib/netstandard2.1/Microsoft.Extensions.Options.dll",
         "lib/netstandard2.1/Microsoft.Extensions.Options.xml",
-        "microsoft.extensions.options.10.0.3.nupkg.sha512",
+        "microsoft.extensions.options.10.0.5.nupkg.sha512",
         "microsoft.extensions.options.nuspec",
         "useSharedDesignerContext.txt"
       ]
@@ -1665,10 +1665,10 @@
         "useSharedDesignerContext.txt"
       ]
     },
-    "Microsoft.Extensions.Primitives/10.0.3": {
-      "sha512": "GEcpTwo7sUoLGGNTqV1FZEuL+tTD9m81NX/mh099dqGNna07/UGZShKQNZRw4hv6nlliSUwYQgSYc7OR99Jufg==",
+    "Microsoft.Extensions.Primitives/10.0.5": {
+      "sha512": "/HUHJ0tw/LQvD0DZrz50eQy/3z7PfX7WWEaXnjKTV9/TNdcgFlNTZGo49QhS7PTmhDqMyHRMqAXSBxLh0vso4g==",
       "type": "package",
-      "path": "microsoft.extensions.primitives/10.0.3",
+      "path": "microsoft.extensions.primitives/10.0.5",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -1689,7 +1689,7 @@
         "lib/net9.0/Microsoft.Extensions.Primitives.xml",
         "lib/netstandard2.0/Microsoft.Extensions.Primitives.dll",
         "lib/netstandard2.0/Microsoft.Extensions.Primitives.xml",
-        "microsoft.extensions.primitives.10.0.3.nupkg.sha512",
+        "microsoft.extensions.primitives.10.0.5.nupkg.sha512",
         "microsoft.extensions.primitives.nuspec",
         "useSharedDesignerContext.txt"
       ]
@@ -1869,10 +1869,10 @@
         "opentelemetry.api.providerbuilderextensions.nuspec"
       ]
     },
-    "Paramore.Brighter/10.3.0": {
-      "sha512": "zO+NQv7gQlGgtsKueCUTivoPH2/SHuKZr/+JncQSRnnIKPYPr6JgxOHOubQoJ7b2dv+MEsD77vU+6du6gLqkyQ==",
+    "Paramore.Brighter/10.3.1": {
+      "sha512": "tcmie/zQG0AtmT49KKzkZR2vyFlU1P+zpIXEhQn6MvJOkL5Q1Br0zcxlIiKyyyXjO8i63WPz5G/jlGVYwRwp9Q==",
       "type": "package",
-      "path": "paramore.brighter/10.3.0",
+      "path": "paramore.brighter/10.3.1",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -1881,14 +1881,14 @@
         "lib/net9.0/Paramore.Brighter.dll",
         "lib/netstandard2.0/Paramore.Brighter.dll",
         "packageicon.png",
-        "paramore.brighter.10.3.0.nupkg.sha512",
+        "paramore.brighter.10.3.1.nupkg.sha512",
         "paramore.brighter.nuspec"
       ]
     },
-    "Paramore.Brighter.Firestore/10.3.0": {
-      "sha512": "+XU24sSnV7AfxZ8snVAeAdNYOiJCyD2lz9Dy5nhQG+xE+QVrOh/GqD2fHcD0h5HbuILd4bV1/oU/5GgnmAxVYg==",
+    "Paramore.Brighter.Firestore/10.3.1": {
+      "sha512": "l7EdFHF2yKGf7vb8jApmAWGuCOsGoU/M/rBPrfsGnrM39wvk/j+ihWOhh06GoSUVqkiU1plSsufhh5ywVzqDgQ==",
       "type": "package",
-      "path": "paramore.brighter.firestore/10.3.0",
+      "path": "paramore.brighter.firestore/10.3.1",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -1897,14 +1897,14 @@
         "lib/net9.0/Paramore.Brighter.Firestore.dll",
         "lib/netstandard2.0/Paramore.Brighter.Firestore.dll",
         "packageicon.png",
-        "paramore.brighter.firestore.10.3.0.nupkg.sha512",
+        "paramore.brighter.firestore.10.3.1.nupkg.sha512",
         "paramore.brighter.firestore.nuspec"
       ]
     },
-    "Paramore.Brighter.Inbox.Firestore/10.3.0": {
-      "sha512": "WUwFmM2rpLuIHs3mwpiCAMxTlExLfsS5v8h40TQDm9pok5NIeFAE2mOklJwXz7oPI7zCmUSs1iy95wkB30QLng==",
+    "Paramore.Brighter.Inbox.Firestore/10.3.1": {
+      "sha512": "Gq2kiEHxu5q5Lw7dBekF2MIIsGWa7CLA0ZlUXh8DAf2xZRDjDTDeX1zEALft8C9pmeo4OnuHq1iql1NChz8pjQ==",
       "type": "package",
-      "path": "paramore.brighter.inbox.firestore/10.3.0",
+      "path": "paramore.brighter.inbox.firestore/10.3.1",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -1913,14 +1913,14 @@
         "lib/net9.0/Paramore.Brighter.Inbox.Firestore.dll",
         "lib/netstandard2.0/Paramore.Brighter.Inbox.Firestore.dll",
         "packageicon.png",
-        "paramore.brighter.inbox.firestore.10.3.0.nupkg.sha512",
+        "paramore.brighter.inbox.firestore.10.3.1.nupkg.sha512",
         "paramore.brighter.inbox.firestore.nuspec"
       ]
     },
-    "Polly/8.6.5": {
-      "sha512": "VqtW2ZE/ALvQMAH1cQY3qZ2cF2OXa3oe/HKMdOv6Q02HCoEW0rsFNfcBONXlHBe1TnjWW1vdRxBEkPeq0/2FHA==",
+    "Polly/8.6.6": {
+      "sha512": "czKHYJ6uGowPijuZt4kgF4njfGvWxVZ8mKBcrZ9iEtwDe9HKdF0ug6p6TwUG8EHuuufgbDU//rSBFebt5/0Fyw==",
       "type": "package",
-      "path": "polly/8.6.5",
+      "path": "polly/8.6.6",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -1939,14 +1939,14 @@
         "lib/netstandard2.0/Polly.xml",
         "package-icon.png",
         "package-readme.md",
-        "polly.8.6.5.nupkg.sha512",
+        "polly.8.6.6.nupkg.sha512",
         "polly.nuspec"
       ]
     },
-    "Polly.Core/8.6.5": {
-      "sha512": "t+sUVrIwvo7UmsgHGgOG9F0GDZSRIm47u2ylH17Gvcv1q5hNEwgD5GoBlFyc0kh/pebmPyrAgvGsR/65ZBaXlg==",
+    "Polly.Core/8.6.6": {
+      "sha512": "lCBL9mmhF9TZxHG3beVRkyjlLohkIC464xIAq7J7Y59C+z42hmsdUaeCKl2SIAYertOUU5TeBXyQDLDQGIKePQ==",
       "type": "package",
-      "path": "polly.core/8.6.5",
+      "path": "polly.core/8.6.6",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -1968,7 +1968,7 @@
         "lib/netstandard2.0/Polly.Core.xml",
         "package-icon.png",
         "package-readme.md",
-        "polly.core.8.6.5.nupkg.sha512",
+        "polly.core.8.6.6.nupkg.sha512",
         "polly.core.nuspec"
       ]
     },
@@ -2029,10 +2029,10 @@
         "useSharedDesignerContext.txt"
       ]
     },
-    "System.Diagnostics.DiagnosticSource/10.0.3": {
-      "sha512": "IuZXyF3K5X+mCsBKIQ87Cn/V4Nyb39vyCbzfH/AkoneSWNV/ExGQ/I0m4CEaVAeFh9fW6kp2NVObkmevd1Ys7A==",
+    "System.Diagnostics.DiagnosticSource/10.0.5": {
+      "sha512": "CCbzHQ26L3jskdwHh+4bxxW84lUMIrAAmeSlpO69AlrQV0DKbj1/I+feLaLSuZeqXPr9UlSy0OcgZoXOk2a6/g==",
       "type": "package",
-      "path": "system.diagnostics.diagnosticsource/10.0.3",
+      "path": "system.diagnostics.diagnosticsource/10.0.5",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -2052,7 +2052,7 @@
         "lib/net9.0/System.Diagnostics.DiagnosticSource.xml",
         "lib/netstandard2.0/System.Diagnostics.DiagnosticSource.dll",
         "lib/netstandard2.0/System.Diagnostics.DiagnosticSource.xml",
-        "system.diagnostics.diagnosticsource.10.0.3.nupkg.sha512",
+        "system.diagnostics.diagnosticsource.10.0.5.nupkg.sha512",
         "system.diagnostics.diagnosticsource.nuspec",
         "useSharedDesignerContext.txt"
       ]
@@ -2118,7 +2118,7 @@
   "projectFileDependencyGroups": {
     "net8.0": [
       "Google.Cloud.Firestore >= 4.2.0",
-      "Paramore.Brighter.Inbox.Firestore >= 10.3.0"
+      "Paramore.Brighter.Inbox.Firestore >= 10.3.1"
     ]
   },
   "packageFolders": {
@@ -2178,7 +2178,7 @@
           },
           "Paramore.Brighter.Inbox.Firestore": {
             "target": "Package",
-            "version": "[10.3.0, )"
+            "version": "[10.3.1, )"
           }
         },
         "imports": [
