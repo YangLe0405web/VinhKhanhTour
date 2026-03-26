@@ -1,5 +1,7 @@
-﻿using System.Security.Cryptography;
+﻿using System.Net.Http.Headers;
+using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 
 namespace VinhKhanhTour.Api.Services;
 
@@ -16,63 +18,62 @@ public class StorageService
     public async Task<string> UploadAudioAsync(
         Stream fileStream, string poiId, string lang, string contentType)
     {
-        try
+        var publicId = $"audio/{poiId}/{lang}";
+        var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
+
+        // Ký: các param theo alphabet, KHÔNG có api_key / file / resource_type
+        var sigString = $"public_id={publicId}&timestamp={timestamp}{API_SECRET}";
+        var signature = ComputeSha1(sigString);
+
+        Console.WriteLine($"[Cloudinary] sig_input : {sigString}");
+        Console.WriteLine($"[Cloudinary] signature : {signature}");
+
+        // Đọc file vào byte[]
+        byte[] fileBytes;
+        using (var ms = new MemoryStream())
         {
-            var publicId = $"audio/{poiId}/{lang}";
-            var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
-
-            // Signed upload: ký SHA1(public_id=...&timestamp=...{SECRET})
-            // Các param phải sắp xếp alphabet trước khi ký
-            var sigString = $"public_id={publicId}&timestamp={timestamp}{API_SECRET}";
-            var signature = ComputeSha1(sigString);
-
-            var url = $"https://api.cloudinary.com/v1_1/{CLOUD_NAME}/video/upload";
-
-            // Đọc toàn bộ stream ra byte[] trước để tránh dispose stream sớm
-            byte[] fileBytes;
-            using (var ms = new MemoryStream())
-            {
-                await fileStream.CopyToAsync(ms);
-                fileBytes = ms.ToArray();
-            }
-
-            Console.WriteLine($"[Cloudinary] File size: {fileBytes.Length} bytes");
-
-            using var form = new MultipartFormDataContent();
-
-            var fileContent = new ByteArrayContent(fileBytes);
-            fileContent.Headers.ContentType =
-                new System.Net.Http.Headers.MediaTypeHeaderValue(
-                    string.IsNullOrEmpty(contentType) ? "audio/mpeg" : contentType);
-
-            form.Add(fileContent, "file", $"{lang}.mp3");
-            form.Add(new StringContent(publicId), "public_id");
-            form.Add(new StringContent(timestamp), "timestamp");
-            form.Add(new StringContent(API_KEY), "api_key");
-            form.Add(new StringContent(signature), "signature");
-            // KHÔNG dùng upload_preset khi signed upload
-
-            Console.WriteLine($"[Cloudinary] Sending signed upload → public_id={publicId}");
-
-            var resp = await _http.PostAsync(url, form);
-            var body = await resp.Content.ReadAsStringAsync();
-
-            Console.WriteLine($"[Cloudinary] Status={resp.StatusCode}");
-            Console.WriteLine($"[Cloudinary] Body={body[..Math.Min(body.Length, 500)]}");
-
-            if (!resp.IsSuccessStatusCode)
-                throw new Exception($"Cloudinary upload failed ({resp.StatusCode}): {body}");
-
-            using var doc = System.Text.Json.JsonDocument.Parse(body);
-            var secureUrl = doc.RootElement.GetProperty("secure_url").GetString() ?? "";
-            Console.WriteLine($"[Cloudinary] Upload OK: {secureUrl}");
-            return secureUrl;
+            await fileStream.CopyToAsync(ms);
+            fileBytes = ms.ToArray();
         }
-        catch (Exception ex)
+        Console.WriteLine($"[Cloudinary] file size : {fileBytes.Length} bytes");
+
+        // ── KEY FIX: text fields phải NULL ContentType header ──
+        // Nếu để mặc định (text/plain; charset=utf-8) Cloudinary bỏ qua api_key
+        // và treat request là unsigned → lỗi "Upload preset must be specified"
+        StringContent Field(string value)
         {
-            Console.WriteLine($"[Cloudinary] EXCEPTION: {ex.Message}");
-            throw;
+            var sc = new StringContent(value);
+            sc.Headers.ContentType = null;   // <── bắt buộc
+            return sc;
         }
+
+        var fileContent = new ByteArrayContent(fileBytes);
+        fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse(
+            string.IsNullOrEmpty(contentType) ? "audio/mpeg" : contentType);
+
+        using var form = new MultipartFormDataContent();
+        form.Add(fileContent, "file", $"{lang}.mp3");
+        form.Add(Field(publicId), "public_id");
+        form.Add(Field(timestamp), "timestamp");
+        form.Add(Field(API_KEY), "api_key");
+        form.Add(Field(signature), "signature");
+
+        var url = $"https://api.cloudinary.com/v1_1/{CLOUD_NAME}/video/upload";
+        Console.WriteLine($"[Cloudinary] POST {url}  public_id={publicId}");
+
+        var resp = await _http.PostAsync(url, form);
+        var body = await resp.Content.ReadAsStringAsync();
+
+        Console.WriteLine($"[Cloudinary] status : {resp.StatusCode}");
+        Console.WriteLine($"[Cloudinary] body   : {body[..Math.Min(body.Length, 500)]}");
+
+        if (!resp.IsSuccessStatusCode)
+            throw new Exception($"Cloudinary upload failed ({resp.StatusCode}): {body}");
+
+        using var doc = JsonDocument.Parse(body);
+        var secureUrl = doc.RootElement.GetProperty("secure_url").GetString() ?? "";
+        Console.WriteLine($"[Cloudinary] OK → {secureUrl}");
+        return secureUrl;
     }
 
     public async Task DeleteAudioAsync(string poiId, string lang)
@@ -98,7 +99,7 @@ public class StorageService
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[Cloudinary Delete] EXCEPTION: {ex.Message}");
+            Console.WriteLine($"[Cloudinary Delete] ERROR: {ex.Message}");
         }
     }
 
