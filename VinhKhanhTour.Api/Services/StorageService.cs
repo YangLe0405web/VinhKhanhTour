@@ -7,50 +7,35 @@ namespace VinhKhanhTour.Api.Services;
 
 public class StorageService
 {
-    // Thông tin cấu hình Cloudinary
-    // Thay vì dùng private const string...
-    private readonly string CLOUD_NAME = Environment.GetEnvironmentVariable("CLOUDINARY_CLOUD_NAME") ?? "denzxxuw4";
-    private readonly string API_KEY = Environment.GetEnvironmentVariable("CLOUDINARY_API_KEY") ?? "162781952147593";
-    private readonly string API_SECRET = Environment.GetEnvironmentVariable("CLOUDINARY_API_SECRET") ?? "3IbFP7kQAIOBBEqzdgDy_7VoJZk";
+    // Cấu hình Cloudinary
+    private const string CLOUD_NAME = "denzxxuw4";
+    private const string API_KEY = "162781952147593";
+    private const string API_SECRET = "3IbFP7kQAIOBBEqzdgDy_7VoJZk";
+
+    // Tên Upload Preset bạn đã tạo trên Dashboard Cloudinary (chế độ Unsigned)
+    private const string UPLOAD_PRESET = "vinhkhanh_preset";
 
     private readonly HttpClient _http = new();
 
     public StorageService() { }
 
     /// <summary>
-    /// Tải file audio lên Cloudinary với Public ID cố định theo POI và ngôn ngữ.
+    /// Tải file audio lên Cloudinary bằng phương thức Unsigned (Không cần Signature).
     /// </summary>
     public async Task<string> UploadAudioAsync(
         Stream fileStream, string poiId, string lang, string contentType)
     {
-        // 1. Chuẩn bị các tham số
+        // Public ID để quản lý file theo cấu trúc thư mục
         var publicId = $"audio/{poiId}/{lang}";
-        var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
-
-        // 2. Tạo Signature (Sắp xếp theo Alphabet: public_id -> timestamp)
-        // Lưu ý: Không bao gồm file, api_key hay resource_type trong chuỗi ký
-        var sigString = $"public_id={publicId}&timestamp={timestamp}{API_SECRET.Trim()}";
-        var signature = ComputeSha1(sigString);
-
-        Console.WriteLine($"[Cloudinary] sig_input : {sigString}");
-        Console.WriteLine($"[Cloudinary] signature : {signature}");
 
         using var content = new MultipartFormDataContent();
 
-        // Hàm helper để thêm các trường text mà không có Content-Type header (tránh lỗi signature)
-        void AddStringField(string value, string name)
-        {
-            var fieldContent = new StringContent(value);
-            fieldContent.Headers.ContentType = null;
-            content.Add(fieldContent, name);
-        }
+        // 1. Thêm các tham số cho Unsigned Upload
+        // Quan trọng: Phải có upload_preset và tên preset đó phải ở chế độ 'Unsigned'
+        content.Add(new StringContent(UPLOAD_PRESET), "upload_preset");
+        content.Add(new StringContent(publicId), "public_id");
 
-        AddStringField(publicId, "public_id");
-        AddStringField(timestamp, "timestamp");
-        AddStringField(API_KEY, "api_key");
-        AddStringField(signature, "signature");
-
-        // 3. Xử lý file stream
+        // 2. Xử lý file stream
         using var ms = new MemoryStream();
         await fileStream.CopyToAsync(ms);
         var fileBytes = ms.ToArray();
@@ -61,26 +46,26 @@ public class StorageService
         // Cloudinary nhận file qua key "file"
         content.Add(fileContent, "file", $"{lang}.mp3");
 
-        // 4. Gửi request lên endpoint video (dùng cho cả audio)
+        // 3. Gửi request lên endpoint video/upload
         var url = $"https://api.cloudinary.com/v1_1/{CLOUD_NAME}/video/upload";
         var resp = await _http.PostAsync(url, content);
         var body = await resp.Content.ReadAsStringAsync();
 
         if (!resp.IsSuccessStatusCode)
         {
-            throw new Exception($"Cloudinary upload failed ({resp.StatusCode}): {body}");
+            throw new Exception($"Cloudinary Unsigned Upload failed: {body}");
         }
 
-        // 5. Lấy URL trả về
+        // 4. Trả về URL an toàn
         using var doc = JsonDocument.Parse(body);
         var secureUrl = doc.RootElement.GetProperty("secure_url").GetString() ?? "";
 
-        Console.WriteLine($"[Cloudinary] OK → {secureUrl}");
+        Console.WriteLine($"[Cloudinary] Upload thành công: {secureUrl}");
         return secureUrl;
     }
 
     /// <summary>
-    /// Xóa file audio trên Cloudinary.
+    /// Xóa file trên Cloudinary (Hành động xóa bắt buộc phải dùng Signature).
     /// </summary>
     public async Task DeleteAudioAsync(string poiId, string lang)
     {
@@ -89,12 +74,12 @@ public class StorageService
             var publicId = $"audio/{poiId}/{lang}";
             var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
 
+            // Tạo chữ ký cho hành động xóa
             var sigString = $"public_id={publicId}&timestamp={timestamp}{API_SECRET.Trim()}";
             var signature = ComputeSha1(sigString);
 
             var url = $"https://api.cloudinary.com/v1_1/{CLOUD_NAME}/video/destroy";
 
-            // Với method destroy, Cloudinary chấp nhận FormUrlEncodedContent
             using var form = new FormUrlEncodedContent(new Dictionary<string, string>
             {
                 ["public_id"] = publicId,
@@ -114,9 +99,6 @@ public class StorageService
         }
     }
 
-    /// <summary>
-    /// Mã hóa SHA1 và trả về chuỗi hex viết thường (lowercase).
-    /// </summary>
     private static string ComputeSha1(string input)
     {
         var hash = SHA1.HashData(Encoding.UTF8.GetBytes(input));
