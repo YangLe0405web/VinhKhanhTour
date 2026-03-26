@@ -33,14 +33,13 @@ public class PoisController : ControllerBase
     }
 
     [HttpPost("{id}/audio/{lang}")]
-    [RequestSizeLimit(20 * 1024 * 1024)]
     public async Task<IActionResult> UploadAudio(string id, string lang, IFormFile file)
     {
-        if (file == null || file.Length == 0) return BadRequest("File is empty");
+        if (file == null || file.Length == 0) return BadRequest("File trống");
 
         try
         {
-            // Đọc toàn bộ file vào mảng byte ngay tại đây
+            // Đọc file thành byte array để không bị lỗi stream 0 bytes
             byte[] fileBytes;
             using (var ms = new MemoryStream())
             {
@@ -48,25 +47,23 @@ public class PoisController : ControllerBase
                 fileBytes = ms.ToArray();
             }
 
-            Console.WriteLine($"[Controller] Read {fileBytes.Length} bytes from IFormFile");
-
-            // Gửi mảng byte sang Service
+            // Gọi service
             string url = await _storage.UploadAudioAsync(fileBytes, id, lang, file.ContentType);
 
-            // Lưu vào Firestore (Giữ nguyên logic cũ của bạn)
+            // Lưu vào Firestore
             var pois = await _db.GetAllPoisAsync();
             var poi = pois.FirstOrDefault(p => p.Id == id);
             if (poi != null)
             {
                 poi.AudioUrls[lang] = url;
                 await _db.SavePoiAsync(poi);
+                return Ok(new { url });
             }
 
-            return Ok(new { url });
+            return NotFound("Không tìm thấy POI");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[Fatal Error]: {ex.Message}");
             return StatusCode(500, ex.Message);
         }
     }
