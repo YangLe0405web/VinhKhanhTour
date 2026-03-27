@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "VinhKhanhTour.CMS",
   "resources": {
-    "hash": "sha256-Egfniy0ibZ+xtNekt6vvWNd/kN3saAmYZkHBoAAsi0Q=",
+    "hash": "sha256-8aIOkTuJjY1IWlfCrfSzOZVo7YIoPbaCkuh9ueQQu/U=",
     "jsModuleNative": {
       "dotnet.native.js": "sha256-A16ka545FHaB+QXjyJ4exXh7XpBAAIFnX8YkC4xAng8="
     },
@@ -21,12 +21,15 @@
       "Google.Api.CommonProtos.wasm": "sha256-gbo5/6YTf/+hI7gS9ub+AiIODeY9TPbS8m8xvfVjs9E=",
       "Google.Api.Gax.wasm": "sha256-fWOfcBeahWFHd0QeQISmAkOSaeDZ/bOVwRXRTxyMypk=",
       "Google.Api.Gax.Grpc.wasm": "sha256-rTnz/vAKkE9vRfvT2lZfDf6iICxaq/e2G5leqMTe4bk=",
+      "Google.Api.Gax.Rest.wasm": "sha256-jkrvt/4AnVb/jE4TLiZapioV11kJvTklFVwxpLbOXPM=",
       "Google.Apis.wasm": "sha256-ZYHttUGfFJaaALbzUMvDhRHfEAL8EzkKC10TWSZbM+A=",
       "Google.Apis.Auth.wasm": "sha256-0MU5Hvd71AgsidWOCGjGZJ+MZR1yIEciCWn1oSMU3JY=",
       "Google.Apis.Core.wasm": "sha256-vm5Li9OopcQGATKgkUIlnbS7MbesQVYT6QdaZdOGG9E=",
+      "Google.Apis.Storage.v1.wasm": "sha256-URIKyeYnuG3UodnluS43yg44uFc9ZDEDv6tKY0eLa/8=",
       "Google.Cloud.Firestore.wasm": "sha256-y/2WNUnN1mgiTHspbBV8z6Ri9aLJo5pycWpGwsTAel4=",
       "Google.Cloud.Firestore.V1.wasm": "sha256-1I1Lv/vj4FDlzv3mjIYu2afsPIlN+7XCnxfr6nUqzJQ=",
       "Google.Cloud.Location.wasm": "sha256-cmV09VLgUjv1Fob7Vk61mL+0hpV6JD1YwKmxeoPBwlU=",
+      "Google.Cloud.Storage.V1.wasm": "sha256-kzQ+4A+CC28P3MejQEquDwCyR9bxdkgJNg/QEojiVgs=",
       "Google.LongRunning.wasm": "sha256-8rUpq6XO6XzT9AQlYRhnWsoE/rc4xa5/x0L8VGngpUA=",
       "Google.Protobuf.wasm": "sha256-P+eZoS0KPCFjgnFuNPiGp53Vc8Uzwek4ZRXLUJ3IUiY=",
       "Grpc.Auth.wasm": "sha256-ypk9C7w8fkZlbvfInXFBxT4HgmwCH332AxKGuRX/9jY=",
@@ -72,9 +75,9 @@
       "OpenTelemetry.wasm": "sha256-Kx8EVBYAtaTcq5ofb2++NfTeJi+Qdfj5Ufyh+455G4o=",
       "OpenTelemetry.Api.wasm": "sha256-ZaShzG9SKfF4kWih7Rv9rriLEX4Ldrb9w5XCpWZHk7s=",
       "OpenTelemetry.Api.ProviderBuilderExtensions.wasm": "sha256-cT6udyd0ysoVFdHYLzF9z3KhFxJnHub6lbRIyR2pa4k=",
-      "Paramore.Brighter.wasm": "sha256-yELbevx4M+no0XEXw0kiN60itPdKW9THEUB65AmzPDE=",
-      "Paramore.Brighter.Firestore.wasm": "sha256-jYul1Hj8S0WpGWZMurVjRICh9zHOV/WYFzIf6OcBkKk=",
-      "Paramore.Brighter.Inbox.Firestore.wasm": "sha256-Ry1lMBnLUoF0JykAxZ51ihuqeZVQmu/sOHQ0Y9t7vpI=",
+      "Paramore.Brighter.wasm": "sha256-TOgCwRHcTr5/YDMr8SfO2b4DvcSi7Qmb1x5MqqnOns4=",
+      "Paramore.Brighter.Firestore.wasm": "sha256-xuSpbjMRMVJAACIP4dUR2s/+GIubbvvVKTWn5Lnvmrs=",
+      "Paramore.Brighter.Inbox.Firestore.wasm": "sha256-YPgMmtnOopz+/71t4WQeZChJPR5yP9M8hMD8OxTVuy4=",
       "Polly.wasm": "sha256-fjy1ix52+QqFaLZHRRfrWeTC3HzOC2RidJ1mm0syTbI=",
       "Polly.Core.wasm": "sha256-R5YhZimRrAqKwjbeYtgDGmlupzzPS3UOAEhPMoUuAm4=",
       "QRCoder.wasm": "sha256-4TK6yB5uwDqrse6OA6+FmX1spHTQV/3Ltbl/ysN02/Y=",
@@ -251,12 +254,12 @@
       "mscorlib.wasm": "sha256-ovgR6YJeXMcsAhvGJVdyjhD5pU34EEAc0BGQYTUAyNk=",
       "netstandard.wasm": "sha256-90+pPOP/3NxK0buBFJlcvDw0r6Nk/i3+oM9dt2x+LPM=",
       "System.Private.CoreLib.wasm": "sha256-IXKG8p3ppN4zPjJOxht5wSXCcbFNPH6InVm7fsThBPI=",
-      "VinhKhanhTour.Shared.wasm": "sha256-KxyoO4mAAw9dP3zkdp5DK1ldO8jkosxSb3Y7DIQocak=",
-      "VinhKhanhTour.CMS.wasm": "sha256-8Rdf4iXPeHvVfQsALnwjd1Sq6RKn2xoOWrBBcql+xl0="
+      "VinhKhanhTour.Shared.wasm": "sha256-iGaYiHyJGv6zBNs4tv7Da/R69Fc1MsHzsyzjUp8YujI=",
+      "VinhKhanhTour.CMS.wasm": "sha256-a010M6iP5e6unPCDca51BhrA/nrv0l1nc4PdGNof1i0="
     },
     "pdb": {
-      "VinhKhanhTour.Shared.pdb": "sha256-0iFelKNVk8V+su6VNbi6EWarRAG893OjI6CNER4P9Ho=",
-      "VinhKhanhTour.CMS.pdb": "sha256-WDymQcn45q86oFdWFNHV2G/vLKDTvJQ96bOipF6hFEE="
+      "VinhKhanhTour.Shared.pdb": "sha256-I7pYkpZZ1l+VFzl6hN9esFMbsrGHkG789X75udI/4OA=",
+      "VinhKhanhTour.CMS.pdb": "sha256-L9jShHBPgkdi8GRYBenZdr+oV6YIIEDxncEkVDDZgVo="
     }
   },
   "cacheBootResources": true,

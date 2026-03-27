@@ -1,4 +1,4 @@
-﻿@page "/pois"
+@page "/pois"
 @using VinhKhanhTour.Shared.Models
 @using QRCoder
 @inject CmsApiService Api
@@ -6,13 +6,14 @@
 @inject IDialogService DialogService
 @inject IJSRuntime JS
 
-<MudText Typo="Typo.h4" Class="mb-4">📍 Quản lý POI</MudText>
-
-<MudButton Variant="Variant.Filled" Color="Color.Primary"
-           StartIcon="@Icons.Material.Filled.Add"
-           OnClick="OpenAddDialog" Class="mb-4">
-    Thêm POI mới
-</MudButton>
+<div class="mb-6">
+    <MudText Typo="Typo.h5" Style="font-weight: 700; color: #ffffff; display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 24px;">📍</span> Quản lý POI
+    </MudText>
+    <MudText Typo="Typo.body2" Style="color: rgba(255,255,255,0.58);">
+        Danh sách điểm tham quan · Vinh Khánh Tour
+    </MudText>
+</div>
 
 @if (_loading)
 {
@@ -20,33 +21,99 @@
 }
 else
 {
-    <MudTable Items="_pois" Hover="true" Striped="true"
-              HorizontalScrollbar="true" Breakpoint="Breakpoint.None">
+    @* ── Stats Cards ── *@
+    <MudGrid Class="mb-6" Spacing="3">
+        <MudItem xs="12" md="4">
+            <MudPaper Class="pa-4 d-flex flex-column justify-center" Style="height: 100%;">
+                <MudText Typo="Typo.caption" Style="color: rgba(255,255,255,0.45); font-weight: 600; letter-spacing: 1px; text-transform: uppercase;">TỔNG POI</MudText>
+                <MudText Typo="Typo.h3" Color="Color.Primary" Style="font-weight: 700; margin-top: 4px;">@_pois.Count</MudText>
+                <MudText Typo="Typo.body2" Style="color: rgba(255,255,255,0.58); font-size: 11px; margin-top: 4px;">↑ 3 POI mới tháng này</MudText>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="12" md="4">
+            <MudPaper Class="pa-4 d-flex flex-column justify-center" Style="height: 100%;">
+                <MudText Typo="Typo.caption" Style="color: rgba(255,255,255,0.45); font-weight: 600; letter-spacing: 1px; text-transform: uppercase;">ĐANG HOẠT ĐỘNG</MudText>
+                <MudText Typo="Typo.h3" Color="Color.Primary" Style="font-weight: 700; margin-top: 4px;">@_pois.Count(p => p.IsActive)</MudText>
+                <MudText Typo="Typo.body2" Style="color: rgba(255,255,255,0.58); font-size: 11px; margin-top: 4px;">
+                    @(Math.Round((_pois.Count(p => p.IsActive) * 100.0) / (_pois.Count == 0 ? 1 : _pois.Count)))% tổng số POI
+                </MudText>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="12" md="4">
+            <MudPaper Class="pa-4 d-flex flex-column justify-center" Style="height: 100%;">
+                <MudText Typo="Typo.caption" Style="color: rgba(255,255,255,0.45); font-weight: 600; letter-spacing: 1px; text-transform: uppercase;">LƯỢT PHÁT AUDIO</MudText>
+                <MudText Typo="Typo.h3" Color="Color.Primary" Style="font-weight: 700; margin-top: 4px;">1.2k</MudText>
+                <MudText Typo="Typo.body2" Style="color: rgba(255,255,255,0.58); font-size: 11px; margin-top: 4px;">7 ngày qua</MudText>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+
+    @* ── Filters ── *@
+    <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-4" Spacing="2">
+        <MudButton OnClick='() => SetFilter("Tất cả")' Variant='@(_currentFilter == "Tất cả" ? Variant.Outlined : Variant.Text)' Color='@(_currentFilter == "Tất cả" ? Color.Primary : Color.Default)' Size="Size.Small" Style='@(_currentFilter == "Tất cả" ? "border-radius: 99px; text-transform: none; font-weight: 600; padding: 4px 16px;" : "border-radius: 99px; color: rgba(255,255,255,0.6); text-transform: none; padding: 4px 16px;")'>Tất cả</MudButton>
+        <MudButton OnClick='() => SetFilter("Ẩm thực")' Variant='@(_currentFilter == "Ẩm thực" ? Variant.Outlined : Variant.Text)' Color='@(_currentFilter == "Ẩm thực" ? Color.Primary : Color.Default)' Size="Size.Small" Style='@(_currentFilter == "Ẩm thực" ? "border-radius: 99px; text-transform: none; font-weight: 600; padding: 4px 16px;" : "border-radius: 99px; color: rgba(255,255,255,0.6); text-transform: none; padding: 4px 16px;")'>Ẩm thực 🍜</MudButton>
+        <MudButton OnClick='() => SetFilter("Đồ uống")' Variant='@(_currentFilter == "Đồ uống" ? Variant.Outlined : Variant.Text)' Color='@(_currentFilter == "Đồ uống" ? Color.Primary : Color.Default)' Size="Size.Small" Style='@(_currentFilter == "Đồ uống" ? "border-radius: 99px; text-transform: none; font-weight: 600; padding: 4px 16px;" : "border-radius: 99px; color: rgba(255,255,255,0.6); text-transform: none; padding: 4px 16px;")'>Đồ uống 🧋</MudButton>
+        <MudButton OnClick='() => SetFilter("Địa danh")' Variant='@(_currentFilter == "Địa danh" ? Variant.Outlined : Variant.Text)' Color='@(_currentFilter == "Địa danh" ? Color.Primary : Color.Default)' Size="Size.Small" Style='@(_currentFilter == "Địa danh" ? "border-radius: 99px; text-transform: none; font-weight: 600; padding: 4px 16px;" : "border-radius: 99px; color: rgba(255,255,255,0.6); text-transform: none; padding: 4px 16px;")'>Địa danh 🏛️</MudButton>
+    </MudStack>
+
+    @* ── Table ── *@
+    <MudTable Items="_pois" Hover="true" Striped="true" Elevation="3"
+              HorizontalScrollbar="true" Breakpoint="Breakpoint.None"
+              Class="vk-poi-table" Filter="new Func<PoiModel,bool>(FilterPoi)">
+        <ToolBarContent>
+            <MudText Typo="Typo.subtitle1" Style="font-weight: 600;">Danh sách POI</MudText>
+            <MudSpacer />
+            <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.Add"
+                       OnClick="OpenAddDialog" Size="Size.Small" Style="border-radius: 99px; font-weight: 600; text-transform: none;">
+                + Thêm POI
+            </MudButton>
+        </ToolBarContent>
         <HeaderContent>
             <MudTh Style="min-width:200px">Tên POI</MudTh>
-            <MudTh Style="min-width:120px">Danh mục</MudTh>
-            <MudTh Style="min-width:180px">Tọa độ</MudTh>
-            <MudTh Style="min-width:120px">Ngôn ngữ</MudTh>
-            <MudTh Style="min-width:100px">Kích hoạt</MudTh>
+            <MudTh Style="min-width:160px">Danh mục</MudTh>
+            <MudTh>Tọa độ</MudTh>
+            <MudTh Style="min-width:140px">Ngôn ngữ</MudTh>
+            <MudTh Style="min-width:120px">Trạng thái</MudTh>
             <MudTh Style="min-width:150px">Thao tác</MudTh>
         </HeaderContent>
         <RowTemplate>
-            <MudTd DataLabel="Tên POI">@context.Name</MudTd>
+            <MudTd DataLabel="Tên POI" Style="font-weight:500;">@context.Name</MudTd>
             <MudTd DataLabel="Danh mục">
-                <MudChip T="string" Size="Size.Small" Color="Color.Info">
-                    @context.Category
-                </MudChip>
+                @if (context.Category?.ToLower().Contains("food") == true || context.Category?.ToLower().Contains("ẩm thực") == true)
+                {
+                    <MudChip T="string" Size="Size.Small" Color="Color.Warning" Icon="@Icons.Material.Filled.Fastfood" Style="border-radius: 99px;">Ẩm thực</MudChip>
+                }
+                else if (context.Category?.ToLower().Contains("drink") == true || context.Category?.ToLower().Contains("đồ uống") == true)
+                {
+                    <MudChip T="string" Size="Size.Small" Color="Color.Info" Icon="@Icons.Material.Filled.LocalCafe" Style="border-radius: 99px;">Đồ uống</MudChip>
+                }
+                else
+                {
+                    <MudChip T="string" Size="Size.Small" Color="Color.Default" Icon="@Icons.Material.Filled.AccountBalance" Style="border-radius: 99px;">Địa danh</MudChip>
+                }
             </MudTd>
             <MudTd DataLabel="Tọa độ">
-                @context.Latitude.ToString("F4"), @context.Longitude.ToString("F4")
+                <MudText Typo="Typo.body2" Style="color: rgba(255,255,255,0.6);">
+                    @context.Latitude.ToString("F4"), @context.Longitude.ToString("F4")
+                </MudText>
             </MudTd>
-            <MudTd DataLabel="Ngôn ngữ">@GetFlags(context)</MudTd>
-            <MudTd DataLabel="Kích hoạt">
-                <MudSwitch @bind-Value="context.IsActive"
-                           Color="Color.Success" T="bool" />
+            <MudTd DataLabel="Ngôn ngữ" Style="letter-spacing: 2px;">@GetFlagsRaw(context)</MudTd>
+            <MudTd DataLabel="Trạng thái">
+                @if (context.IsActive)
+                {
+                    <div @onclick="() => ToggleActive(context)" style="cursor:pointer; display:inline-flex; align-items:center; gap:6px; background: rgba(52,211,153,0.15); border: 1px solid rgba(52,211,153,0.3); border-radius: 99px; padding: 2px 10px; color: #34d399; font-size: 11px; font-weight:600; transition: all 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                        <div style="width:6px; height:6px; background:#34d399; border-radius:50%;"></div> Active
+                    </div>
+                }
+                else
+                {
+                    <div @onclick="() => ToggleActive(context)" style="cursor:pointer; display:inline-flex; align-items:center; gap:6px; background: rgba(248,113,113,0.15); border: 1px solid rgba(248,113,113,0.3); border-radius: 99px; padding: 2px 10px; color: #f87171; font-size: 11px; font-weight:600; transition: all 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                        <div style="width:6px; height:6px; background:#f87171; border-radius:50%;"></div> Inactive
+                    </div>
+                }
             </MudTd>
             <MudTd DataLabel="Thao tác">
-                @* Nút QR — mỗi POI có QR riêng *@
                 <MudIconButton Icon="@Icons.Material.Filled.QrCode"
                                Color="Color.Secondary" Size="Size.Small"
                                Title="Xem QR thuyết minh"
@@ -117,6 +184,22 @@ else
     List<PoiModel> _pois = new();
     bool _loading = true;
 
+    string _currentFilter = "Tất cả";
+
+    void SetFilter(string filter)
+    {
+        _currentFilter = filter;
+    }
+
+    private bool FilterPoi(PoiModel poi)
+    {
+        if (_currentFilter == "Tất cả") return true;
+        if (_currentFilter == "Ẩm thực" && (poi.Category?.ToLower().Contains("food") == true || poi.Category?.ToLower().Contains("ẩm thực") == true)) return true;
+        if (_currentFilter == "Đồ uống" && (poi.Category?.ToLower().Contains("drink") == true || poi.Category?.ToLower().Contains("đồ uống") == true)) return true;
+        if (_currentFilter == "Địa danh" && !poi.Category?.ToLower().Contains("food") == true && !poi.Category?.ToLower().Contains("ẩm thực") == true && !poi.Category?.ToLower().Contains("drink") == true && !poi.Category?.ToLower().Contains("đồ uống") == true) return true;
+        return false;
+    }
+
     // QR dialog
     bool _showQrDialog = false;
     PoiModel? _qrPoi = null;
@@ -183,11 +266,26 @@ else
             .Select(f => f.Item2));
     }
 
+    string GetFlagsRaw(PoiModel p)
+    {
+        var flags = new[] { ("vi", "VI"), ("en", "EN"), ("zh", "ZH"), ("ja", "JA"), ("ko", "KO") };
+        return string.Join(" - ", flags
+            .Where(f => p.Content != null && p.Content.ContainsKey(f.Item1))
+            .Select(f => f.Item2));
+    }
+
     async Task DeletePoi(string id)
     {
         await Api.DeletePoiAsync(id);
         _pois.RemoveAll(p => p.Id == id);
         Snackbar.Add("Đã xóa POI!", Severity.Success);
+    }
+
+    async Task ToggleActive(PoiModel poi)
+    {
+        poi.IsActive = !poi.IsActive;
+        await Api.SavePoiAsync(poi);
+        Snackbar.Add($"Đã {(poi.IsActive ? "bật" : "tắt")} hoạt động POI!", Severity.Success);
     }
 
     async Task OpenAddDialog()

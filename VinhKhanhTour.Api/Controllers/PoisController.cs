@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using VinhKhanhTour.Api.Services;
 using VinhKhanhTour.Shared.Models;
 
@@ -19,8 +19,13 @@ public class PoisController : ControllerBase
 
     // GET api/pois
     [HttpGet]
-    public async Task<IActionResult> GetAll()
-        => Ok(await _db.GetAllPoisAsync());
+    public async Task<IActionResult> GetAll([FromQuery] bool admin = false)
+    {
+        var pois = await _db.GetAllPoisAsync();
+        if (!admin)
+            pois = pois.Where(p => p.IsActive).ToList();
+        return Ok(pois);
+    }
 
     // POST api/pois
     [HttpPost]

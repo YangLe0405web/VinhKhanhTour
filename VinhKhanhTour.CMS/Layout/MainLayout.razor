@@ -1,35 +1,79 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
+@inject NavigationManager Nav
 
-<MudThemeProvider />
+<MudThemeProvider IsDarkMode="true" />
 <MudPopoverProvider />
-<MudDialogProvider />
+<MudDialogProvider FullWidth="true" MaxWidth="MaxWidth.Medium" />
 <MudSnackbarProvider />
 
-<MudLayout>
-    <MudAppBar Color="Color.Primary" Fixed="true">
-        <MudText Typo="Typo.h6">🍜 Vĩnh Khánh Tour CMS</MudText>
-        <MudSpacer/>
-    </MudAppBar>
+@* ── Animated background ── *@
+<div class="vk-bg">
+    <div class="vk-orb vk-orb-1"></div>
+    <div class="vk-orb vk-orb-2"></div>
+    <div class="vk-orb vk-orb-3"></div>
+</div>
 
-    <MudDrawer Open="true" Variant="DrawerVariant.Persistent">
-        <MudNavMenu>
-            <MudNavLink Href="/" Icon="@Icons.Material.Filled.Dashboard">Dashboard</MudNavLink>
-            <MudNavLink Href="/pois" Icon="@Icons.Material.Filled.Place">Quản lý POI</MudNavLink>
-            <MudNavLink Href="/audio" Icon="@Icons.Material.Filled.AudioFile">Quản lý Audio</MudNavLink>
-            <MudNavLink Href="/translations"
-                        Icon="@Icons.Material.Filled.Translate">
-                Bản dịch
-            </MudNavLink>
-            <MudNavLink Href="/history"
-                        Icon="@Icons.Material.Filled.History">
-                Lịch sử
-            </MudNavLink>
-            <MudNavLink Href="/tours" Icon="@Icons.Material.Filled.Map">Tours</MudNavLink>
-            <MudNavLink Href="/analytics" Icon="@Icons.Material.Filled.BarChart">Analytics</MudNavLink>
-        </MudNavMenu>
-    </MudDrawer>
+@* ── App shell ── *@
+<div class="vk-shell">
 
-    <MudMainContent Style="padding-top:80px; padding-left:16px;">
-        @Body
-    </MudMainContent>
-</MudLayout>
+    @* ── Top bar ── *@
+    <header class="vk-topbar">
+        <div class="vk-topbar-brand">
+            <span class="vk-brand-icon">🍜</span>
+            <span class="vk-brand-text">Vĩnh Khánh Tour</span>
+            <span class="vk-brand-badge">CMS</span>
+        </div>
+        <div class="vk-topbar-right">
+            <span class="vk-topbar-hint">Admin Workspace</span>
+            <div class="vk-avatar">VK</div>
+        </div>
+    </header>
+
+    <div class="vk-body">
+
+        @* ── Sidebar ── *@
+        <nav class="vk-sidebar">
+            <div class="vk-nav-section">Navigation</div>
+
+            <NavLink class="vk-nav-item" href="/" Match="NavLinkMatch.All">
+                <span class="vk-nav-icon">🏠</span>
+                <span>Dashboard</span>
+            </NavLink>
+            <NavLink class="vk-nav-item" href="/pois">
+                <span class="vk-nav-icon">📍</span>
+                <span>Quản lý POI</span>
+            </NavLink>
+            <NavLink class="vk-nav-item" href="/audio">
+                <span class="vk-nav-icon">🎵</span>
+                <span>Quản lý Audio</span>
+            </NavLink>
+            <NavLink class="vk-nav-item" href="/translations">
+                <span class="vk-nav-icon">🌐</span>
+                <span>Bản dịch</span>
+            </NavLink>
+            <NavLink class="vk-nav-item" href="/history">
+                <span class="vk-nav-icon">🕘</span>
+                <span>Lịch sử</span>
+            </NavLink>
+            <NavLink class="vk-nav-item" href="/tours">
+                <span class="vk-nav-icon">🗺️</span>
+                <span>Tours</span>
+            </NavLink>
+            <NavLink class="vk-nav-item" href="/analytics">
+                <span class="vk-nav-icon">📊</span>
+                <span>Analytics</span>
+            </NavLink>
+
+            <div class="vk-sidebar-footer">
+                <div class="vk-nav-section" style="margin-top:0;">v1.0 · VinhKhanhTour</div>
+            </div>
+        </nav>
+
+        @* ── Main content ── *@
+        <main class="vk-main">
+            <div class="vk-content">
+                @Body
+            </div>
+        </main>
+    </div>
+</div>

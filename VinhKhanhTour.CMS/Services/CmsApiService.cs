@@ -1,4 +1,4 @@
-﻿using System.Net.Http.Json;
+using System.Net.Http.Json;
 using System.Text.Json.Serialization;
 using VinhKhanhTour.Shared.Models;
 
@@ -12,7 +12,7 @@ public class CmsApiService
 
     // ── POI ───────────────────────────────────────────
     public Task<List<PoiModel>?> GetPoisAsync()
-        => _http.GetFromJsonAsync<List<PoiModel>>("api/pois");
+        => _http.GetFromJsonAsync<List<PoiModel>>("api/pois?admin=true");
 
     public Task<HttpResponseMessage> SavePoiAsync(PoiModel poi)
         => _http.PostAsJsonAsync("api/pois", poi);

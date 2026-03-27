@@ -1,4 +1,4 @@
-﻿@page "/analytics"
+@page "/analytics"
 @inject HttpClient Http
 @inject CmsApiService Api
 @inject IJSRuntime JS
@@ -73,9 +73,13 @@ else
         <MudItem xs="12">
             <MudPaper Class="pa-4" Elevation="2">
                 <MudText Typo="Typo.h6" Class="mb-3">📋 Chi tiết sự kiện</MudText>
-                <MudGrid Class="mb-3">
-                    <MudItem xs="12" sm="4">
-                        <MudSelect @bind-Value="_filterType" Label="Lọc theo loại"
+                <MudGrid Class="mb-3" AlignItems="AlignItems.Center">
+                    <MudItem xs="12" sm="3">
+                        <MudDatePicker @bind-Date="_filterDate" Label="Chọn ngày cụ thể"
+                                       Clearable="true" Variant="Variant.Outlined" Dense="true" />
+                    </MudItem>
+                    <MudItem xs="12" sm="3">
+                        <MudSelect @bind-Value="_filterType" Label="Lọc theo hành động"
                                    Clearable="true" Variant="Variant.Outlined" Dense="true">
                             <MudSelectItem Value="@("")">(Tất cả)</MudSelectItem>
                             <MudSelectItem Value="@("poi_play")">🔊 Nghe POI</MudSelectItem>
@@ -84,7 +88,7 @@ else
                             <MudSelectItem Value="@("open_app")">📱 Mở app</MudSelectItem>
                         </MudSelect>
                     </MudItem>
-                    <MudItem xs="12" sm="4">
+                    <MudItem xs="12" sm="3">
                         <MudSelect @bind-Value="_filterLang" Label="Lọc theo ngôn ngữ"
                                    Clearable="true" Variant="Variant.Outlined" Dense="true">
                             <MudSelectItem Value="@("")">(Tất cả)</MudSelectItem>
@@ -95,7 +99,7 @@ else
                             <MudSelectItem Value="@("ko")">🇰🇷 한국어</MudSelectItem>
                         </MudSelect>
                     </MudItem>
-                    <MudItem xs="12" sm="4" Class="d-flex align-center">
+                    <MudItem xs="12" sm="3" Class="d-flex align-center">
                         <MudText Typo="Typo.caption" Color="Color.Secondary">
                             Hiển thị @FilteredUnified.Count() / @_unified.Count bản ghi
                         </MudText>
@@ -197,8 +201,10 @@ else
 
     string _filterType = "";
     string _filterLang = "";
+    DateTime? _filterDate = null;
 
     IEnumerable<UnifiedEvent> FilteredUnified => _unified
+        .Where(e => _filterDate == null || e.Timestamp.ToLocalTime().Date == _filterDate.Value.Date)
         .Where(e => string.IsNullOrEmpty(_filterType) || e.EventType == _filterType)
         .Where(e => string.IsNullOrEmpty(_filterLang) ||
             e.Language.ToLower().StartsWith(_filterLang));
@@ -207,6 +213,7 @@ else
     List<LocationTrace> _traces = new();
     List<AnalyticsEvent> _events = new();
     List<AppHistory> _history = new();
+    List<PoiModel> _pois = new();
     List<UnifiedEvent> _unified = new();
     bool _loading = true;
 
@@ -219,10 +226,15 @@ else
         var t1 = Api.GetAnalyticsAsync();
         var t2 = Api.GetTracesAsync();
         var t3 = Api.GetHistoryAsync();
-        await Task.WhenAll(t1, t2, t3);
+        var t4 = Api.GetPoisAsync();
+        
+        await Task.WhenAll(t1, t2, t3, t4);
+        
         _events = t1.Result ?? new();
         _traces = t2.Result ?? new();
         _history = t3.Result ?? new();
+        _pois = t4.Result ?? new();
+        
         BuildUnified();
         ComputeStats();
         _loading = false;
@@ -232,30 +244,54 @@ else
     {
         var list = new List<UnifiedEvent>();
 
-        // Từ analytics (MAUI GPS)
-        foreach (var e in _events)
-            list.Add(new UnifiedEvent
-            {
-                Timestamp = e.Timestamp,
-                EventType = e.EventType,
-                PoiId = e.PoiId,
-                Language = e.Language,
-                Duration = e.Duration,
-                Lat = e.Lat,
-                Lng = e.Lng,
-            });
-
-        // Từ history (QR web + MAUI manual)
+        // 1. Nạp History trước (Có sẵn Device, Action)
         foreach (var h in _history)
+        {
             list.Add(new UnifiedEvent
             {
                 Timestamp = h.Timestamp,
-                EventType = h.Action,
+                EventType = h.Action == "play_poi" ? "poi_play" : h.Action, // Gom loại event
                 PoiId = h.PoiId,
-                PoiName = h.PoiName,
+                PoiName = string.IsNullOrEmpty(h.PoiName) ? (_pois.FirstOrDefault(p => p.Id == h.PoiId)?.Name ?? "") : h.PoiName,
                 Language = h.Language,
                 Device = h.Device,
             });
+        }
+
+        // 2. Nạp Analytics Event (Có Thời lượng, Vị trí) gộp vào Dòng History tương ứng
+        foreach (var e in _events.OrderBy(x => x.Timestamp))
+        {
+            // Tìm History event gần nhất chưa có Thời lượng
+            var match = list.Where(u => 
+                u.PoiId == e.PoiId && 
+                u.EventType == "poi_play" && 
+                u.Duration == 0 && 
+                u.Timestamp <= e.Timestamp.AddMinutes(15))
+                .OrderByDescending(u => u.Timestamp)
+                .FirstOrDefault();
+
+            if (match != null)
+            {
+                match.Duration = e.Duration;
+                match.Lat = e.Lat;
+                match.Lng = e.Lng;
+            }
+            else
+            {
+                // Nếu người dùng không có history tương ứng, thì hiển thị thêm dòng mới
+                list.Add(new UnifiedEvent
+                {
+                    Timestamp = e.Timestamp,
+                    EventType = e.EventType,
+                    PoiId = e.PoiId,
+                    PoiName = _pois.FirstOrDefault(p => p.Id == e.PoiId)?.Name ?? e.PoiId,
+                    Language = e.Language,
+                    Duration = e.Duration,
+                    Lat = e.Lat,
+                    Lng = e.Lng,
+                });
+            }
+        }
 
         _unified = list.OrderByDescending(e => e.Timestamp).ToList();
     }
