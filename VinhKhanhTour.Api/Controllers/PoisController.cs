@@ -50,19 +50,23 @@ public class PoisController : ControllerBase
             Console.WriteLine($"[Upload] Start: poi={id}, lang={lang}, file={file?.FileName}, size={file?.Length}");
             
             using var stream = file.OpenReadStream();
-            var url = await _storage.UploadAudioAsync(
+            var path = await _storage.UploadAudioAsync(
                 stream, id, lang, file.ContentType);
 
-            Console.WriteLine($"[Upload] GCS OK: {url}");
+            // Tạo URL đầy đủ để lưu vào POI
+            var baseUrl = $"{Request.Scheme}://{Request.Host}";
+            var fullUrl = $"{baseUrl}{path}";
+
+            Console.WriteLine($"[Upload] Firestore OK: {fullUrl}");
 
             var pois = await _db.GetAllPoisAsync();
             var poi = pois.FirstOrDefault(p => p.Id == id);
             if (poi == null) return NotFound($"POI {id} not found");
 
-            poi.AudioUrls[lang] = url;
+            poi.AudioUrls[lang] = fullUrl;
             await _db.SavePoiAsync(poi);
-            Console.WriteLine($"[Upload] Saved to Firestore OK");
-            return Ok(new { url });
+            Console.WriteLine($"[Upload] Saved to POI OK");
+            return Ok(new { url = fullUrl });
         }
         catch (Exception ex)
         {
@@ -71,10 +75,12 @@ public class PoisController : ControllerBase
         }
     }
 
-    // POST api/analytics
-
-    // TẠM: Debug - Liệt kê buckets
-    [HttpGet("debug/buckets")]
-    public IActionResult ListBuckets()
-        => Ok(_storage.ListBuckets());
+    // GET api/pois/{id}/audio/{lang} — Phát audio file
+    [HttpGet("{id}/audio/{lang}")]
+    public async Task<IActionResult> GetAudio(string id, string lang)
+    {
+        var (data, contentType) = await _storage.GetAudioAsync(id, lang);
+        if (data == null) return NotFound("Audio not found");
+        return File(data, contentType ?? "audio/mpeg");
+    }
 }
