@@ -1,4 +1,4 @@
-﻿using Google.Apis.Auth.OAuth2;
+using Google.Apis.Auth.OAuth2;
 using Google.Cloud.Storage.V1;
 
 namespace VinhKhanhTour.Api.Services;
@@ -6,7 +6,7 @@ namespace VinhKhanhTour.Api.Services;
 public class StorageService
 {
     private readonly StorageClient _client;
-    const string BUCKET = "vinhkhanhtour-c8e3f.appspot.com";
+    const string BUCKET = "vinhkhanhtour-c8e3f.firebasestorage.app";
 
     public StorageService()
      => _client = StorageClient.Create();
