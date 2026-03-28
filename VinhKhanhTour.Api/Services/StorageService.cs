@@ -11,6 +11,20 @@ public class StorageService
     public StorageService()
      => _client = StorageClient.Create();
 
+    // Tạm: liệt kê tất cả buckets trong project
+    public IEnumerable<string> ListBuckets()
+    {
+        try
+        {
+            return _client.ListBuckets("vinhkhanhtour-c8e3f")
+                .Select(b => b.Name);
+        }
+        catch (Exception ex)
+        {
+            return new[] { $"Error: {ex.Message}" };
+        }
+    }
+
     public async Task<string> UploadAudioAsync(
         Stream fileStream, string poiId, string lang, string contentType)
     {

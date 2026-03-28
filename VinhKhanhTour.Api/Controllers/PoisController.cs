@@ -73,4 +73,8 @@ public class PoisController : ControllerBase
 
     // POST api/analytics
 
+    // TẠM: Debug - Liệt kê buckets
+    [HttpGet("debug/buckets")]
+    public IActionResult ListBuckets()
+        => Ok(_storage.ListBuckets());
 }
