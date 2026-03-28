@@ -45,17 +45,30 @@ public class PoisController : ControllerBase
     public async Task<IActionResult> UploadAudio(
         string id, string lang, IFormFile file)
     {
-        using var stream = file.OpenReadStream();
-        var url = await _storage.UploadAudioAsync(
-            stream, id, lang, file.ContentType);
+        try
+        {
+            Console.WriteLine($"[Upload] Start: poi={id}, lang={lang}, file={file?.FileName}, size={file?.Length}");
+            
+            using var stream = file.OpenReadStream();
+            var url = await _storage.UploadAudioAsync(
+                stream, id, lang, file.ContentType);
 
-        var pois = await _db.GetAllPoisAsync();
-        var poi = pois.FirstOrDefault(p => p.Id == id);
-        if (poi == null) return NotFound();
+            Console.WriteLine($"[Upload] GCS OK: {url}");
 
-        poi.AudioUrls[lang] = url;
-        await _db.SavePoiAsync(poi);
-        return Ok(new { url });
+            var pois = await _db.GetAllPoisAsync();
+            var poi = pois.FirstOrDefault(p => p.Id == id);
+            if (poi == null) return NotFound($"POI {id} not found");
+
+            poi.AudioUrls[lang] = url;
+            await _db.SavePoiAsync(poi);
+            Console.WriteLine($"[Upload] Saved to Firestore OK");
+            return Ok(new { url });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"🔥 UPLOAD ERROR: {ex}");
+            return StatusCode(500, new { error = ex.Message, stack = ex.StackTrace });
+        }
     }
 
     // POST api/analytics
