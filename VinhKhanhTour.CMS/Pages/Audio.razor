@@ -1,4 +1,4 @@
-﻿@page "/audio"
+@page "/audio"
 @inject CmsApiService Api
 @inject ISnackbar Snackbar
 
@@ -104,6 +104,7 @@ else
             if (url != null)
             {
                 poi.AudioUrls[lang] = url;
+                await Api.SavePoiAsync(poi);
                 Snackbar.Add($"Upload {lang} thành công!", Severity.Success);
             }
             else
