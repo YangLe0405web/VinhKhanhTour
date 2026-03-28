@@ -41,14 +41,14 @@ var app = builder.Build();
 
 app.UseSwagger();
 app.UseSwaggerUI();
-app.UseHttpsRedirection();
 
-// 1. Thêm Routing trước
+// 1. Routing trước
 app.UseRouting();
 
-// 2. Thêm Cors sau Routing nhưng trước MapControllers
+// 2. CORS phải đặt TRƯỚC HttpsRedirection để preflight OPTIONS không bị redirect
 app.UseCors("CmsPolicy");
 
+app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
 app.Run();
