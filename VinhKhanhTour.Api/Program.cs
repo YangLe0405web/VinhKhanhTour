@@ -37,6 +37,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddMemoryCache(); // Thêm dịch vụ bộ nhớ đệm
 builder.Services.AddSingleton<FirestoreService>();
 builder.Services.AddSingleton<StorageService>();
 builder.Services.AddHttpClient();
@@ -68,7 +69,20 @@ app.Use(async (context, next) =>
         await context.Response.CompleteAsync();
         return;
     }
-    await next();
+
+    try
+    {
+        await next();
+    }
+    catch (Exception ex) when (ex.ToString().Contains("Quota exceeded") || ex.ToString().Contains("429"))
+    {
+        context.Response.StatusCode = 429;
+        context.Response.ContentType = "application/json";
+        await context.Response.WriteAsJsonAsync(new { 
+            error = "Firestore Quota Exceeded", 
+            message = "Hạn mức Firebase miễn phí đã hết. Vui lòng quay lại sau 24h hoặc nâng cấp gói Blaze." 
+        });
+    }
 });
 
 app.UseSwagger();

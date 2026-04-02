@@ -4,10 +4,11 @@
 @inject IJSRuntime JS
 
 <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
-    <MudText Typo="Typo.h4">📊 Analytics</MudText>
+    <MudText Typo="Typo.h4">📊 Analytics v2 (Cached)</MudText>
     <MudButton Variant="Variant.Filled" Color="Color.Primary" 
                StartIcon="@Icons.Material.Filled.Refresh" 
-               OnClick="OnInitializedAsync">Làm mới</MudButton>
+               Disabled="_loading"
+               OnClick="LoadAllData">Làm mới</MudButton>
 </MudStack>
 
 @if (_loading)
@@ -175,21 +176,39 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        var t1 = Api.GetAnalyticsAsync();
-        var t2 = Api.GetTracesAsync();
-        var t3 = Api.GetHistoryAsync();
-        var t4 = Api.GetPoisAsync();
-        
-        await Task.WhenAll(t1, t2, t3, t4);
-        
-        _events = (t1.Result ?? new()).Where(e => e.EventType != "open_app").ToList();
-        _traces = t2.Result ?? new();
-        _history = (t3.Result ?? new()).Where(h => h.Action != "open_app").ToList();
-        _pois = t4.Result ?? new();
-        
-        BuildUnified();
-        ComputeStats();
-        _loading = false;
+        await LoadAllData();
+    }
+
+    async Task LoadAllData()
+    {
+        _loading = true;
+        StateHasChanged();
+        try 
+        {
+            var t1 = Api.GetAnalyticsAsync();
+            var t2 = Api.GetTracesAsync();
+            var t3 = Api.GetHistoryAsync();
+            var t4 = Api.GetPoisAsync();
+            
+            await Task.WhenAll(t1, t2, t3, t4);
+            
+            _events = (t1.Result ?? new()).Where(e => e.EventType != "open_app").ToList();
+            _traces = t2.Result ?? new();
+            _history = (t3.Result ?? new()).Where(h => h.Action != "open_app").ToList();
+            _pois = t4.Result ?? new();
+            
+            BuildUnified();
+            ComputeStats();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading analytics: {ex.Message}");
+        }
+        finally
+        {
+            _loading = false;
+            StateHasChanged();
+        }
     }
 
     void BuildUnified()
