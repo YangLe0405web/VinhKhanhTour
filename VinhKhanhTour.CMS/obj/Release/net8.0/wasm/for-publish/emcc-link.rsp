@@ -4,7 +4,7 @@
 -s EXPORT_ES6=1 -lexports.js
 -s LLD_REPORT_UNDEFINED
 -s ERROR_ON_UNDEFINED_SYMBOLS=1
--s INITIAL_MEMORY=17956864
+-s INITIAL_MEMORY=17891328
 -s STACK_SIZE=5MB
 -s WASM_BIGINT=1
 --js-library "C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Runtime.Mono.browser-wasm\8.0.25\runtimes\browser-wasm\native\src\pal_random.lib.js"

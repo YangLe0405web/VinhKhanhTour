@@ -1,6 +1,8 @@
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
 using VinhKhanhTour.Api.Services;
+using Microsoft.AspNetCore.HttpOverrides;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,12 +23,22 @@ if (File.Exists(keyPath))
     }
 }
 
+// ── 1.5 Cấu hình ForwardedHeaders (Rất quan trọng cho Render/Proxy) ──
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
+
+
 // ── 2. Cấu hình CORS (Phải thật chuẩn để CMS không bị chặn) ──
 builder.Services.AddCors(opt => opt.AddPolicy("CmsPolicy", p =>
-    p.AllowAnyOrigin() // Cho phép tất cả để test, sau này chạy thật sẽ siết lại sau
+    p.AllowAnyOrigin() 
      .AllowAnyHeader()
      .AllowAnyMethod()
 ));
+
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -39,16 +51,22 @@ builder.Services.AddHttpClient();
 
 var app = builder.Build();
 
-app.UseSwagger();
-app.UseSwaggerUI();
+// 0. Forwarded Headers đầu tiên để lấy đúng IP/Scheme
+app.UseForwardedHeaders();
 
-// 1. Routing trước
-app.UseRouting();
-
-// 2. CORS phải đặt TRƯỚC HttpsRedirection để preflight OPTIONS không bị redirect
+// 1. CORS phải đặt rât sớm để OPTIONS request từ trình duyệt không bị redirect/block
 app.UseCors("CmsPolicy");
 
-app.UseHttpsRedirection();
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+// app.UseHttpsRedirection(); // Bỏ cái này nếu Render proxy đã ép HTTPS hoặc gây lỗi loop 307
+app.UseRouting();
 app.UseAuthorization();
+
+app.MapGet("/", () => "Vinh Khanh Tour API is running!");
 app.MapControllers();
-app.Run();
+app.Run();
