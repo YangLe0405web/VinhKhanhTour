@@ -534,9 +534,9 @@
                 if (!("geolocation" in navigator)) return resolve(null);
                 
                 const timer = setTimeout(() => {
-                    console.warn("⏱️ Location timeout (2s)");
+                    console.warn("⏱️ Location timeout (5s)");
                     resolve(null);
-                }, 2000);
+                }, 5000);
 
                 navigator.geolocation.getCurrentPosition((pos) => {
                     clearTimeout(timer);
@@ -554,26 +554,43 @@
 
         async function logEvent(action, extra = {}) {
             if (!poiData) return;
+            
+            // Fallback: Nếu không lấy được vị trí GPS (0,0), lấy vị trí của POI luôn
+            let logLat = userLat;
+            let logLng = userLng;
+            if (logLat === 0 && logLng === 0) {
+                logLat = poiData.latitude || 0;
+                logLng = poiData.longitude || 0;
+                console.log("📍 GPS failed, using POI location fallback:", logLat, logLng);
+            }
+
             const body = {
                 action: action,
                 poiId: poiData.id,
                 poiName: poiData.name,
                 language: currentLang,
                 device: 'Web',
-                lat: userLat,
-                lng: userLng,
+                lat: logLat,
+                lng: logLng,
                 duration: extra.duration || 0,
                 timestamp: new Date().toISOString()
             };
             
-            // Nếu thoát trang, dùng sendBeacon cho chắc
-            if (extra.isLeaving && navigator.sendBeacon) {
-                navigator.sendBeacon(`${API}/api/history`, JSON.stringify(body));
+            const url = `${API}/api/history`;
+
+            // Dùng sendBeacon khi thoát trang hoặc khi cần độ tin cậy cao trên Mobile
+            if (extra.isLeaving || extra.urgent) {
+                if (navigator.sendBeacon) {
+                    const blob = new Blob([JSON.stringify(body)], { type: 'application/json' });
+                    navigator.sendBeacon(url, blob);
+                } else {
+                    fetch(url, { method: 'POST', body: JSON.stringify(body), keepalive: true }).catch(()=>{});
+                }
                 return;
             }
 
             try {
-                await fetch(`${API}/api/history`, {
+                await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(body)
@@ -592,16 +609,35 @@
             }
         }
 
+        let isUnlocked = false;
+        async function unlockAudio() {
+            if (isUnlocked) return;
+            try {
+                // Unlock TTS
+                const silent = new SpeechSynthesisUtterance(' ');
+                silent.volume = 0;
+                window.speechSynthesis.speak(silent);
+                
+                // Unlock MP3 Player Context
+                mp3Player.play().then(() => {
+                    mp3Player.pause();
+                    mp3Player.currentTime = 0;
+                }).catch(() => {});
+
+                isUnlocked = true;
+                console.log("🔊 Audio & TTS Context Unlocked");
+            } catch(e) {}
+        }
+
         // Bắt sự kiện thoát trang Mobile chính xác hơn
         document.addEventListener("visibilitychange", () => {
             if (document.visibilityState === "hidden") {
                 stopTrackDuration();
                 if (totalTimeHeard > 0) {
                     logEvent('listen_poi', { duration: totalTimeHeard, isLeaving: true });
-                    totalTimeHeard = 0; // Reset sau khi gửi
+                    totalTimeHeard = 0; 
                 }
             } else {
-                // Nếu quay lại mà đang phát thì đếm tiếp
                 if (isSpeaking || isMP3Playing) startTrackDuration();
             }
         });
@@ -680,14 +716,20 @@
         }
 
         // ── 3. TTS Logic ──
-        function toggleSpeak() {
+        async function toggleSpeak() {
+            await unlockAudio();
             if (isSpeaking) {
                 stopSpeak();
                 stopTrackDuration();
+                if (totalTimeHeard > 0) {
+                    logEvent('listen_poi', { duration: totalTimeHeard });
+                    totalTimeHeard = 0;
+                }
             } else {
-                pauseMP3(); // Stop MP3 if playing
+                pauseMP3(); 
                 speak();
                 startTrackDuration();
+                logEvent('play_poi', { urgent: true }); // Log ngay lập tức
             }
         }
 
@@ -696,9 +738,21 @@
             if (!text) return;
 
             window.speechSynthesis.cancel();
+            
+            // Đảm bảo tạo utterance ngay trong stack này để iOS không chặn
             const utter = new SpeechSynthesisUtterance(text);
+            
+            // Xử lý giọng đọc mobile
+            const voices = window.speechSynthesis.getVoices();
+            if (voices.length > 0) {
+                const preferredVoice = voices.find(v => v.lang.startsWith(currentLang));
+                if (preferredVoice) utter.voice = preferredVoice;
+            }
+
             utter.lang = LANGS[currentLang]?.tts || 'vi-VN';
             utter.rate = 1;
+            utter.pitch = 1;
+            utter.volume = 1;
 
             utter.onstart = () => {
                 isSpeaking = true;
@@ -709,6 +763,7 @@
                 stopTrackDuration();
                 updateTTSUI();
             };
+            
             window.speechSynthesis.speak(utter);
         }
 
@@ -755,14 +810,20 @@
             }
         }
 
-        function toggleMP3() {
+        async function toggleMP3() {
+            await unlockAudio();
             if (isMP3Playing) {
                 pauseMP3();
                 stopTrackDuration();
+                if (totalTimeHeard > 0) {
+                    logEvent('listen_poi', { duration: totalTimeHeard });
+                    totalTimeHeard = 0;
+                }
             } else {
-                stopSpeak(); // Stop TTS if speaking
+                stopSpeak(); 
                 playMP3();
                 startTrackDuration();
+                logEvent('play_poi', { urgent: true }); // Log ngay lập tức
             }
         }
 
@@ -777,6 +838,16 @@
             isMP3Playing = false;
             updateMP3UI();
         }
+
+        mp3Player.onended = () => {
+            isMP3Playing = false;
+            stopTrackDuration();
+            if (totalTimeHeard > 0) {
+                logEvent('listen_poi', { duration: totalTimeHeard });
+                totalTimeHeard = 0;
+            }
+            updateMP3UI();
+        };
 
         function updateMP3UI() {
             const svgPlay = document.getElementById('pro-svg-play');

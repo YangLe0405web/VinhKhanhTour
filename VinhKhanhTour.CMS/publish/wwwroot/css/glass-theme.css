@@ -1,0 +1,553 @@
+/* ═══════════════════════════════════════════════════════════════
+   glass-theme.css  —  VinhKhanhTour CMS  —  MudBlazor override
+   Nhúng vào index.html SAU MudBlazor.min.css:
+     <link href="css/glass-theme.css" rel="stylesheet" />
+═══════════════════════════════════════════════════════════════ */
+
+/* ════════════════════════════════════════════════════════
+   ✅ FIX QUAN TRỌNG: Override MudBlazor CSS custom properties
+   MudBlazor dùng var(--mud-palette-*) nên class override
+   không đủ — phải đặt lại các biến này ở :root
+════════════════════════════════════════════════════════ */
+:root, body {
+    /* Backgrounds */
+    --mud-palette-background: #0f172a;
+    --mud-palette-background-grey: rgba(255,255,255,0.03);
+    --mud-palette-surface: rgba(255,255,255,0.06);
+    --mud-palette-drawer-background: rgba(15,23,42,0.58);
+    --mud-palette-appbar-background: rgba(15,23,42,0.65);
+    /* Text */
+    --mud-palette-text-primary: rgba(255,255,255,0.88);
+    --mud-palette-text-secondary: rgba(255,255,255,0.58);
+    --mud-palette-text-disabled: rgba(255,255,255,0.32);
+    --mud-palette-action-default: rgba(255,255,255,0.54);
+    --mud-palette-action-disabled: rgba(255,255,255,0.26);
+    --mud-palette-action-disabled-background: rgba(255,255,255,0.10);
+    /* Divider / lines */
+    --mud-palette-divider: rgba(255,255,255,0.08);
+    --mud-palette-divider-light: rgba(255,255,255,0.05);
+    /* Table */
+    --mud-palette-table-lines: rgba(255,255,255,0.06);
+    --mud-palette-table-hover: rgba(56,189,248,0.06);
+    --mud-palette-table-striped: rgba(255,255,255,0.025);
+    /* Brand colors */
+    --mud-palette-primary: #38bdf8;
+    --mud-palette-primary-darken: #0ea5e9;
+    --mud-palette-primary-lighten: #7dd3fc;
+    --mud-palette-primary-text: #ffffff;
+    --mud-palette-primary-contrasttext: #ffffff;
+    --mud-palette-secondary: #818cf8;
+    --mud-palette-secondary-text: #ffffff;
+    --mud-palette-secondary-contrasttext: #ffffff;
+    --mud-palette-success: #34d399;
+    --mud-palette-success-text: #ffffff;
+    --mud-palette-warning: #fbbf24;
+    --mud-palette-warning-text: #ffffff;
+    --mud-palette-error: #f87171;
+    --mud-palette-error-text: #ffffff;
+    --mud-palette-info: #60a5fa;
+    --mud-palette-info-text: #ffffff;
+    /* Input / outlined */
+    --mud-palette-lines-default: rgba(255,255,255,0.14);
+    --mud-palette-lines-inputs: rgba(255,255,255,0.20);
+    --mud-palette-grey-default: rgba(255,255,255,0.10);
+    --mud-palette-grey-light: rgba(255,255,255,0.06);
+    --mud-palette-grey-lighter: rgba(255,255,255,0.04);
+    --mud-palette-dark: rgba(15,23,42,0.85);
+    --mud-palette-white: #ffffff;
+    --mud-palette-black: #0f172a;
+    /* Elevation / shadow */
+    --mud-elevation-1: 0 2px 12px rgba(0,0,0,0.45);
+    --mud-elevation-2: 0 4px 20px rgba(0,0,0,0.50);
+    --mud-elevation-4: 0 8px 32px rgba(0,0,0,0.55);
+    --mud-elevation-8: 0 16px 48px rgba(0,0,0,0.60);
+    --mud-elevation-12: 0 20px 56px rgba(0,0,0,0.65);
+    /* Border radius */
+    --mud-default-borderradius: 10px;
+}
+
+/* ── Global reset ────────────────────────────────────── */
+html, body {
+    background: #0f172a !important;
+    color: rgba(255,255,255,0.88) !important;
+    font-family: 'Roboto', sans-serif;
+}
+
+/* ── MudLayout: background transparent ──────────────── */
+.mud-layout,
+.mud-main-content {
+    background: transparent !important;
+}
+
+/* ── MudAppBar: hidden (replaced by .vk-topbar) ─────── */
+.mud-appbar {
+    display: none !important;
+}
+
+/* ── MudDrawer: hidden (replaced by .vk-sidebar) ────── */
+.mud-drawer,
+.mud-drawer-content {
+    display: none !important;
+}
+
+/* ── MudMainContent: remove default padding offset ───── */
+.mud-main-content {
+    padding-left: 0 !important;
+    padding-top: 0 !important;
+    margin: 0 !important;
+}
+
+/* ════════════════════════════════════════════════════════
+   COMPONENT OVERRIDES
+════════════════════════════════════════════════════════ */
+
+/* ── MudPaper ────────────────────────────────────────── */
+.mud-paper,
+.mud-paper-outlined {
+    background: rgba(255,255,255,0.06) !important;
+    backdrop-filter: blur(18px) saturate(150%) !important;
+    -webkit-backdrop-filter: blur(18px) saturate(150%) !important;
+    border: 1px solid rgba(255,255,255,0.10) !important;
+    border-radius: 14px !important;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.35) !important;
+    color: rgba(255,255,255,0.88) !important;
+    transition: background 0.2s, box-shadow 0.2s;
+}
+
+    .mud-paper:hover {
+        background: rgba(255,255,255,0.09) !important;
+        box-shadow: 0 12px 40px rgba(0,0,0,0.45) !important;
+    }
+
+/* ── MudCard ─────────────────────────────────────────── */
+.mud-card {
+    background: rgba(255,255,255,0.06) !important;
+    backdrop-filter: blur(18px) saturate(150%) !important;
+    -webkit-backdrop-filter: blur(18px) saturate(150%) !important;
+    border: 1px solid rgba(255,255,255,0.10) !important;
+    border-radius: 14px !important;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.35) !important;
+    color: rgba(255,255,255,0.88) !important;
+}
+
+.mud-card-header {
+    border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+    color: rgba(255,255,255,0.88) !important;
+}
+
+.mud-card-content {
+    color: rgba(255,255,255,0.78) !important;
+}
+
+/* ── Typography ──────────────────────────────────────── */
+.mud-typography {
+    color: rgba(255,255,255,0.88) !important;
+}
+
+    .mud-typography.mud-typography-h3,
+    .mud-typography.mud-typography-h4,
+    .mud-typography.mud-typography-h5,
+    .mud-typography.mud-typography-h6 {
+        color: #ffffff !important;
+        font-weight: 700 !important;
+    }
+
+    .mud-typography.mud-typography-subtitle1,
+    .mud-typography.mud-typography-subtitle2 {
+        color: rgba(255,255,255,0.70) !important;
+    }
+
+    .mud-typography.mud-typography-caption {
+        color: rgba(255,255,255,0.45) !important;
+    }
+
+    .mud-typography.mud-typography-body1,
+    .mud-typography.mud-typography-body2 {
+        color: rgba(255,255,255,0.80) !important;
+    }
+
+/* Color props on MudText */
+.mud-primary-text {
+    color: #38bdf8 !important;
+}
+
+.mud-secondary-text {
+    color: #818cf8 !important;
+}
+
+.mud-success-text {
+    color: #34d399 !important;
+}
+
+.mud-warning-text {
+    color: #fbbf24 !important;
+}
+
+.mud-error-text {
+    color: #f87171 !important;
+}
+
+.mud-info-text {
+    color: #60a5fa !important;
+}
+
+/* ── MudButton ───────────────────────────────────────── */
+.mud-button-filled.mud-button-filled-primary,
+.mud-button-filled.mud-button-filled-size-medium {
+    background: linear-gradient(135deg, #38bdf8, #818cf8) !important;
+    color: #ffffff !important;
+    border: none !important;
+    font-weight: 600 !important;
+    box-shadow: 0 4px 14px rgba(56,189,248,0.30) !important;
+    transition: transform 0.18s, box-shadow 0.18s !important;
+}
+
+    .mud-button-filled.mud-button-filled-primary:hover {
+        transform: translateY(-1px) !important;
+        box-shadow: 0 6px 20px rgba(56,189,248,0.45) !important;
+        filter: brightness(1.08);
+    }
+
+.mud-button-outlined {
+    border: 1px solid rgba(56,189,248,0.40) !important;
+    color: #38bdf8 !important;
+    background: rgba(56,189,248,0.07) !important;
+}
+
+    .mud-button-outlined:hover {
+        background: rgba(56,189,248,0.13) !important;
+        border-color: #38bdf8 !important;
+    }
+
+.mud-icon-button {
+    color: rgba(255,255,255,0.55) !important;
+    transition: color 0.18s, background 0.18s !important;
+}
+
+    .mud-icon-button:hover {
+        color: #38bdf8 !important;
+        background: rgba(56,189,248,0.10) !important;
+    }
+
+/* ── MudTable ────────────────────────────────────────── */
+.mud-table-root,
+.mud-table-container,
+.mud-table {
+    background: transparent !important;
+    color: rgba(255,255,255,0.88) !important;
+}
+
+    /* Table wrapper paper — override lại vì MudTable inject paper */
+    .mud-table-root .mud-paper,
+    .mud-table-container .mud-paper {
+        background: rgba(255,255,255,0.05) !important;
+        border: 1px solid rgba(255,255,255,0.09) !important;
+        backdrop-filter: blur(16px) !important;
+        -webkit-backdrop-filter: blur(16px) !important;
+    }
+
+.mud-table-head .mud-table-cell {
+    background: rgba(255,255,255,0.03) !important;
+    color: rgba(255,255,255,0.38) !important;
+    font-size: 10.5px !important;
+    font-weight: 600 !important;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+}
+
+.mud-table-body .mud-table-row {
+    background: transparent !important;
+    border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+    transition: background 0.15s;
+}
+
+    .mud-table-body .mud-table-row:hover {
+        background: rgba(56,189,248,0.06) !important;
+    }
+
+.mud-table-body .mud-table-cell {
+    color: rgba(255,255,255,0.78) !important;
+    border: none !important;
+    background: transparent !important;
+    font-size: 13px;
+}
+
+.mud-table-body .mud-table-row:last-child .mud-table-cell {
+    border-bottom: none !important;
+}
+
+/* Striped rows */
+.mud-table-body .mud-table-row:nth-child(even) {
+    background: rgba(255,255,255,0.02) !important;
+}
+
+/* ── MudChip ─────────────────────────────────────────── */
+.mud-chip {
+    background: rgba(255,255,255,0.08) !important;
+    border: 1px solid rgba(255,255,255,0.12) !important;
+    color: rgba(255,255,255,0.80) !important;
+    font-size: 11px !important;
+    font-weight: 500 !important;
+    border-radius: 99px !important;
+}
+
+.mud-chip-color-primary {
+    background: rgba(56,189,248,0.18) !important;
+    border-color: rgba(56,189,248,0.32) !important;
+    color: #38bdf8 !important;
+}
+
+.mud-chip-color-secondary {
+    background: rgba(129,140,248,0.18) !important;
+    border-color: rgba(129,140,248,0.32) !important;
+    color: #818cf8 !important;
+}
+
+.mud-chip-color-success {
+    background: rgba(52,211,153,0.18) !important;
+    border-color: rgba(52,211,153,0.32) !important;
+    color: #34d399 !important;
+}
+
+.mud-chip-color-warning {
+    background: rgba(251,191,36,0.18) !important;
+    border-color: rgba(251,191,36,0.32) !important;
+    color: #fbbf24 !important;
+}
+
+.mud-chip-color-error {
+    background: rgba(248,113,113,0.18) !important;
+    border-color: rgba(248,113,113,0.32) !important;
+    color: #f87171 !important;
+}
+
+.mud-chip-color-info {
+    background: rgba(96,165,250,0.18) !important;
+    border-color: rgba(96,165,250,0.32) !important;
+    color: #60a5fa !important;
+}
+
+/* ── MudTextField / Input ────────────────────────────── */
+.mud-input-outlined .mud-notched-outline {
+    border-color: rgba(255,255,255,0.15) !important;
+    border-radius: 10px !important;
+    background: rgba(255,255,255,0.04) !important;
+}
+
+.mud-input-outlined:hover .mud-notched-outline {
+    border-color: rgba(56,189,248,0.45) !important;
+}
+
+.mud-input-outlined.mud-input-outlined-focused .mud-notched-outline {
+    border-color: #38bdf8 !important;
+    border-width: 1.5px !important;
+}
+
+.mud-input-root {
+    color: rgba(255,255,255,0.88) !important;
+}
+
+.mud-input-label {
+    color: rgba(255,255,255,0.45) !important;
+}
+
+.mud-input-label-inputcontrol {
+    color: #38bdf8 !important;
+}
+
+.mud-input-helper-text {
+    color: rgba(255,255,255,0.38) !important;
+}
+
+/* ── MudSelect ───────────────────────────────────────── */
+.mud-select-input .mud-notched-outline {
+    border-color: rgba(255,255,255,0.15) !important;
+    border-radius: 10px !important;
+    background: rgba(255,255,255,0.04) !important;
+}
+
+.mud-select-input .mud-input-root {
+    color: rgba(255,255,255,0.88) !important;
+}
+
+/* ── MudPopover / Dropdown list ──────────────────────── */
+.mud-popover-paper,
+.mud-popover {
+    background: rgba(15,23,42,0.92) !important;
+    backdrop-filter: blur(24px) !important;
+    -webkit-backdrop-filter: blur(24px) !important;
+    border: 1px solid rgba(255,255,255,0.12) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.5) !important;
+    color: rgba(255,255,255,0.88) !important;
+}
+
+.mud-list-item-text {
+    color: rgba(255,255,255,0.80) !important;
+}
+
+.mud-list-item:hover {
+    background: rgba(56,189,248,0.10) !important;
+}
+
+.mud-list-item.mud-list-item-selected {
+    background: rgba(56,189,248,0.15) !important;
+    color: #38bdf8 !important;
+}
+
+/* ── MudDialog ───────────────────────────────────────── */
+.mud-overlay {
+    background: rgba(0,0,0,0.60) !important;
+    backdrop-filter: blur(5px) !important;
+}
+
+.mud-dialog {
+    background: rgba(13,20,38,0.92) !important;
+    backdrop-filter: blur(32px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(32px) saturate(180%) !important;
+    border: 1px solid rgba(255,255,255,0.12) !important;
+    border-radius: 18px !important;
+    box-shadow: 0 30px 70px rgba(0,0,0,0.65) !important;
+    color: rgba(255,255,255,0.88) !important;
+}
+
+.mud-dialog-title {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+    padding-bottom: 14px !important;
+}
+
+.mud-dialog-content {
+    color: rgba(255,255,255,0.78) !important;
+}
+
+.mud-dialog-actions {
+    border-top: 1px solid rgba(255,255,255,0.08) !important;
+}
+
+/* ── MudSnackbar ─────────────────────────────────────── */
+.mud-snackbar {
+    background: rgba(15,23,42,0.92) !important;
+    backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(255,255,255,0.12) !important;
+    border-radius: 12px !important;
+    color: rgba(255,255,255,0.88) !important;
+}
+
+/* ── MudProgressLinear ───────────────────────────────── */
+.mud-progress-linear {
+    background: rgba(255,255,255,0.10) !important;
+    border-radius: 99px !important;
+}
+
+.mud-progress-linear-bar,
+.mud-progress-linear-bar.mud-progress-linear-bar-color-primary {
+    background: linear-gradient(90deg, #38bdf8, #818cf8) !important;
+    border-radius: 99px !important;
+}
+
+    .mud-progress-linear-bar.mud-progress-linear-bar-color-success {
+        background: linear-gradient(90deg, #34d399, #06b6d4) !important;
+    }
+
+    .mud-progress-linear-bar.mud-progress-linear-bar-color-warning {
+        background: linear-gradient(90deg, #fbbf24, #f59e0b) !important;
+    }
+
+/* ── MudSwitch ───────────────────────────────────────── */
+.mud-switch-track {
+    background: rgba(255,255,255,0.18) !important;
+}
+
+    .mud-switch-track.mud-switch-track-color-primary {
+        background: #38bdf8 !important;
+    }
+
+/* ── MudAlert ────────────────────────────────────────── */
+.mud-alert {
+    background: rgba(255,255,255,0.06) !important;
+    border: 1px solid rgba(255,255,255,0.10) !important;
+    border-radius: 10px !important;
+    color: rgba(255,255,255,0.82) !important;
+    backdrop-filter: blur(12px) !important;
+}
+
+.mud-alert-color-info {
+    border-color: rgba(96,165,250,0.35) !important;
+    background: rgba(96,165,250,0.10) !important;
+}
+
+.mud-alert-color-success {
+    border-color: rgba(52,211,153,0.35) !important;
+    background: rgba(52,211,153,0.10) !important;
+}
+
+.mud-alert-color-warning {
+    border-color: rgba(251,191,36,0.35) !important;
+    background: rgba(251,191,36,0.10) !important;
+}
+
+.mud-alert-color-error {
+    border-color: rgba(248,113,113,0.35) !important;
+    background: rgba(248,113,113,0.10) !important;
+}
+
+/* ── MudDivider ──────────────────────────────────────── */
+.mud-divider {
+    border-color: rgba(255,255,255,0.08) !important;
+}
+
+/* ── MudGrid ─────────────────────────────────────────── */
+.mud-grid {
+    color: rgba(255,255,255,0.88) !important;
+}
+
+/* ── MudCheckbox ─────────────────────────────────────── */
+.mud-checkbox .mud-icon-root {
+    color: rgba(255,255,255,0.45) !important;
+}
+
+.mud-checkbox.mud-checked .mud-icon-root {
+    color: #38bdf8 !important;
+}
+
+/* ── MudBadge ────────────────────────────────────────── */
+.mud-badge {
+    background: linear-gradient(135deg, #38bdf8, #818cf8) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+}
+
+/* ── Global scrollbar ────────────────────────────────── */
+::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.14);
+    border-radius: 99px;
+}
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: rgba(56,189,248,0.40);
+    }
+
+/* ── Blazor loading screen ───────────────────────────── */
+.loading-progress {
+    stroke: #38bdf8 !important;
+}
+
+#blazor-error-ui {
+    background: rgba(248,113,113,0.15) !important;
+    border: 1px solid rgba(248,113,113,0.35) !important;
+    color: #f87171 !important;
+    border-radius: 12px;
+    backdrop-filter: blur(12px);
+}

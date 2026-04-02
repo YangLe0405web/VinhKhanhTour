@@ -62,6 +62,13 @@ else
                     </HeaderContent>
                     <RowTemplate>
                         <MudTd>@GetLangFlag(context.Key)</MudTd>
+                        <MudTd>@context.Value</MudTd>
+                        <MudTd>
+                            <MudStack Row="true" AlignItems="AlignItems.Center">
+                                <MudProgressLinear Value="@GetPercent(context.Value)" Color="Color.Info" Class="flex-grow-1" />
+                                <MudText Typo="Typo.caption">@GetPercent(context.Value).ToString("F1")%</MudText>
+                            </MudStack>
+                        </MudTd>
                     </RowTemplate>
                 </MudTable>
             </MudPaper>
@@ -74,7 +81,7 @@ else
                 @if (_chartSeries.Count > 0)
                 {
                     <MudChart ChartType="ChartType.Line" ChartSeries="@_chartSeries" 
-                              @bind-SelectedIndex="_chartIndex" XAxisLabels="@_chartLabels" 
+                              @bind-SelectedIndex="_chartIndex" ChartLabels="@_chartLabels" 
                               Width="100%" Height="350px" ChartOptions="@_chartOptions" />
                 }
                 else
@@ -83,14 +90,7 @@ else
                 }
 
                 <MudStack Row="true" Justify="Justify.Center" Class="mt-4">
-                    <div class="d-flex align-center mr-4">
-                        <div style="width:12px; height:12px; border-radius:50%; background:#ff9800; margin-right:8px;"></div>
-                        <MudText Typo="Typo.caption">Lượt quét QR</MudText>
-                    </div>
-                    <div class="d-flex align-center">
-                        <div style="width:12px; height:12px; border-radius:50%; background:#4caf50; margin-right:8px;"></div>
-                        <MudText Typo="Typo.caption">Lượt nghe Audio</MudText>
-                    </div>
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">Biểu đồ tổng tích lũy trong 7 ngày</MudText>
                 </MudStack>
             </MudPaper>
         </MudItem>
@@ -224,19 +224,20 @@ else
 
     void ComputeStats()
     {
-        _total = _unified.Count(e => e.EventType == "poi_play");
+        _total = _unified.Count(e => e.EventType == "poi_play" || e.EventType == "play_poi" || e.EventType == "listen_poi");
         _totalQr = _unified.Count(h => h.EventType == "scan_qr");
         _avgDuration = _unified.Any(e => e.Duration > 0)
             ? (int)_unified.Where(e => e.Duration > 0).Average(e => e.Duration) : 0;
         _uniquePois = _unified.Where(e => !string.IsNullOrEmpty(e.PoiId))
             .Select(e => e.PoiId).Distinct().Count();
         
-        _topPois = _unified.Where(e => !string.IsNullOrEmpty(e.PoiId))
+        _topPois = _unified.Where(e => !string.IsNullOrEmpty(e.PoiId) && (e.EventType == "poi_play" || e.EventType == "play_poi" || e.EventType == "listen_poi"))
             .GroupBy(e => string.IsNullOrEmpty(e.PoiName) ? e.PoiId : e.PoiName)
             .OrderByDescending(g => g.Count()).Take(5)
             .Select(g => new KeyValuePair<string, int>(g.Key, g.Count())).ToList();
             
-        _langStats = _unified.GroupBy(e => e.Language)
+        _langStats = _unified.Where(e => !string.IsNullOrEmpty(e.Language))
+            .GroupBy(e => e.Language)
             .OrderByDescending(g => g.Count())
             .Select(g => new KeyValuePair<string, int>(g.Key, g.Count())).ToList();
 
@@ -247,18 +248,28 @@ else
     void PrepareChartData()
     {
         var localNow = DateTime.Now.Date;
+        var startDate = localNow.AddDays(-6);
         var labels = new List<string>();
         var scanData = new List<double>();
         var playData = new List<double>();
 
+        // Start with absolute total before the 7-day window
+        double cumulativeScan = _unified.Count(e => e.Timestamp.ToLocalTime().Date < startDate && e.EventType == "scan_qr");
+        double cumulativePlay = _unified.Count(e => e.Timestamp.ToLocalTime().Date < startDate && (e.EventType == "poi_play" || e.EventType == "play_poi" || e.EventType == "listen_poi"));
+
+        // Calculate cumulative sums for each of the last 7 days
         for (int i = 6; i >= 0; i--)
         {
             var date = localNow.AddDays(-i);
             labels.Add(date.ToString("dd/MM"));
 
             var dayEvents = _unified.Where(e => e.Timestamp.ToLocalTime().Date == date);
-            scanData.Add(dayEvents.Count(e => e.EventType == "scan_qr"));
-            playData.Add(dayEvents.Count(e => e.EventType == "poi_play"));
+            
+            cumulativeScan += dayEvents.Count(e => e.EventType == "scan_qr");
+            cumulativePlay += dayEvents.Count(e => e.EventType == "poi_play" || e.EventType == "play_poi" || e.EventType == "listen_poi");
+            
+            scanData.Add(cumulativeScan);
+            playData.Add(cumulativePlay);
         }
 
         _chartLabels = labels.ToArray();
@@ -267,6 +278,8 @@ else
             new ChartSeries<double>() { Name = "Quét QR", Data = scanData.ToArray() },
             new ChartSeries<double>() { Name = "Nghe Audio", Data = playData.ToArray() }
         };
+        
+        _chartOptions.ShowLegend = false;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

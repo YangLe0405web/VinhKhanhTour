@@ -8,8 +8,8 @@
         ],
         "rewrites": [
             {
-                "source": "/tour",
-                "destination": "/tour.html"
+                "source": "/poi/**",
+                "destination": "/poi.html"
             },
             {
                 "source": "**",
