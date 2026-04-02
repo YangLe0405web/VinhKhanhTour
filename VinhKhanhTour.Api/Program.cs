@@ -22,7 +22,26 @@ if (File.Exists(keyPath))
     }
 }
 
-// ── 2. Forwarded Headers (Crucial for Render/Reverse Proxy) ──
+// ── 2. CORS Policy ──
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.SetIsOriginAllowed(_ => true) 
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials(); // Một số trình duyệt yêu cầu cái này nếu có header đặc biệt
+    });
+});
+
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+builder.Services.AddSingleton<FirestoreService>();
+builder.Services.AddSingleton<StorageService>();
+builder.Services.AddHttpClient();
+
+// Cấu hình Forwarded Headers chuẩn cho Render
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
@@ -30,39 +49,36 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
     options.KnownProxies.Clear();
 });
 
-// ── 3. CORS Configuration (Bulletproof Default Policy) ──
-builder.Services.AddCors(options =>
-{
-    options.AddDefaultPolicy(policy =>
-    {
-        policy.SetIsOriginAllowed(_ => true) // Allow any origin
-              .AllowAnyHeader()
-              .AllowAnyMethod();
-    });
-});
-
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-// Dependency Injection
-builder.Services.AddSingleton<FirestoreService>();
-builder.Services.AddSingleton<StorageService>();
-builder.Services.AddHttpClient();
-
 var app = builder.Build();
 
-// Enable Swagger for all environments just so Render health-check can hit it if configured
+app.UseForwardedHeaders();
+
+// ── CHIÊU CUỐI: Custom CORS Middleware ──
+// Ép buộc thêm header CORS cho mọi túi tin trả về, kể cả khi server lỗi 500
+app.Use(async (context, next) =>
+{
+    context.Response.Headers.Append("Access-Control-Allow-Origin", context.Request.Headers.Origin.ToString() ?? "*");
+    context.Response.Headers.Append("Access-Control-Allow-Headers", "*");
+    context.Response.Headers.Append("Access-Control-Allow-Methods", "*");
+    context.Response.Headers.Append("Access-Control-Allow-Credentials", "true");
+
+    if (context.Request.Method == "OPTIONS")
+    {
+        context.Response.StatusCode = 200;
+        await context.Response.CompleteAsync();
+        return;
+    }
+    await next();
+});
+
 app.UseSwagger();
 app.UseSwaggerUI();
 
-// Essential Middleware Order
-app.UseForwardedHeaders();
 app.UseRouting();
-app.UseCors(); // Must be between UseRouting and UseAuthorization
+app.UseCors("AllowAll");
 app.UseAuthorization();
 
-app.MapGet("/", () => "Vinh Khanh Tour API is running!");
+app.MapGet("/", () => "Vinh Khanh Tour API is running (CORS Secured)!");
 app.MapControllers();
 
 app.Run();

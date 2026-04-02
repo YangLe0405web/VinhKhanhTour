@@ -17,7 +17,23 @@
 
 @if (_loading)
 {
-    <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+    <div class="d-flex flex-column align-items-center justify-center mt-12 py-12">
+        <MudProgressCircular Color="Color.Primary" Indeterminate="true" Size="Size.Large" />
+        <MudText Typo="Typo.body1" Class="mt-4" Style="color: rgba(255,255,255,0.5);">Đang kết nối tới API...</MudText>
+    </div>
+}
+else if (_error)
+{
+    <div class="d-flex flex-column align-items-center justify-center mt-12 py-12" style="background: rgba(244, 67, 54, 0.05); border: 1px dashed rgba(244, 67, 54, 0.3); border-radius: 16px;">
+        <MudIcon Icon="@Icons.Material.Filled.WifiOff" Color="Color.Error" Style="font-size: 48px;" />
+        <MudText Typo="Typo.h6" Class="mt-4" Style="color: #f44336; font-weight: 700;">Lỗi kết nối tới API Backend</MudText>
+        <MudText Typo="Typo.body2" Class="mb-6 px-6 text-center" Style="color: rgba(255,255,255,0.6); max-width: 400px;">
+            Server Render có thể đang ngủ hoặc gặp sự cố. Vui lòng đợi 30-60 giây để server khởi động lại rồi nhấn thử lại.
+        </MudText>
+        <MudButton Variant="Variant.Filled" Color="Color.Error" StartIcon="@Icons.Material.Filled.Refresh" OnClick="LoadData" Style="border-radius: 99px; text-transform: none; font-weight: 600;">
+            Thử lại ngay
+        </MudButton>
+    </div>
 }
 else
 {
@@ -255,8 +271,29 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        _pois = await Api.GetPoisAsync() ?? new();
-        _loading = false;
+        await LoadData();
+    }
+
+    async Task LoadData()
+    {
+        _loading = true;
+        _error = false;
+        StateHasChanged();
+        try
+        {
+            _pois = await Api.GetPoisAsync() ?? new();
+        }
+        catch (Exception ex)
+        {
+            _error = true;
+            Snackbar.Add("❌ Lỗi kết nối API. Vui lòng thử lại sau.", Severity.Error);
+            Console.WriteLine($"🔥 API ERROR: {ex}");
+        }
+        finally
+        {
+            _loading = false;
+            StateHasChanged();
+        }
     }
 
     // Web link → quét QR mở trang landing, có nút nghe audio + nút mở App
