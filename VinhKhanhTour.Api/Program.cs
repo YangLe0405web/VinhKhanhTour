@@ -37,18 +37,23 @@ builder.Services.AddSingleton<FirestoreService>();
 builder.Services.AddSingleton<StorageService>();
 builder.Services.AddHttpClient();
 
+// ── 3. Pipeline ──────────────────────────────────────────
 var app = builder.Build();
 
-app.UseSwagger();
-app.UseSwaggerUI();
-
-// 1. Routing trước
-app.UseRouting();
-
-// 2. CORS phải đặt TRƯỚC HttpsRedirection để preflight OPTIONS không bị redirect
+// Thạnh: Đặt CORS ở ĐẦU TIÊN để xử lý Preflight nhanh nhất
 app.UseCors("CmsPolicy");
 
-app.UseHttpsRedirection();
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+app.UseRouting();
+
+// Render đã xử lý HTTPS ở tầng Load Balancer, tắt cái này để tránh lỗi Redirect CORS
+// app.UseHttpsRedirection();
+
 app.UseAuthorization();
 app.MapControllers();
 app.Run();
