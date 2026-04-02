@@ -103,6 +103,16 @@
         "tags": [
           "Pois"
         ],
+        "parameters": [
+          {
+            "name": "admin",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -274,6 +284,28 @@
         }
       }
     },
+    "/api/Tours/{id}/scan": {
+      "post": {
+        "tags": [
+          "Tours"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Trace": {
       "post": {
         "tags": [
@@ -308,6 +340,37 @@
         "tags": [
           "Trace"
         ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Translate": {
+      "post": {
+        "tags": [
+          "Translate"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TranslateRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TranslateRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/TranslateRequest"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK"
@@ -511,6 +574,16 @@
           "updatedAt": {
             "type": "string",
             "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "TranslateRequest": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
