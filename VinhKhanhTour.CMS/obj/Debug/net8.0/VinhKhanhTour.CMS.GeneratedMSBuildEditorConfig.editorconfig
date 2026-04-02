@@ -49,6 +49,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUG9pRGlhbG9nLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
+[D:/Projects/VinhKhanhTour/VinhKhanhTour.CMS/Pages/PoiLanding.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUG9pTGFuZGluZy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
 [D:/Projects/VinhKhanhTour/VinhKhanhTour.CMS/Pages/Pois.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUG9pcy5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 

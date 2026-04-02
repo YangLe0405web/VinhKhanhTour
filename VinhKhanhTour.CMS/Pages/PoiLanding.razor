@@ -1,0 +1,144 @@
+@page "/poi/{PoiId}"
+@using VinhKhanhTour.Shared.Models
+@inject CmsApiService Api
+@inject IJSRuntime JS
+
+<PageTitle>@(_poi?.Name ?? "POI") — Vinh Khánh Tour</PageTitle>
+
+<div style="min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px;">
+    <div style="max-width:420px; width:100%; text-align:center;">
+        @if (_loading)
+        {
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" Size="Size.Large" />
+            <MudText Typo="Typo.body1" Class="mt-4" Style="color:rgba(255,255,255,0.7)">Đang tải thông tin...</MudText>
+        }
+        else if (_poi == null)
+        {
+            <MudIcon Icon="@Icons.Material.Filled.Error" Color="Color.Error" Size="Size.Large" />
+            <MudText Typo="Typo.h6" Class="mt-3">Không tìm thấy điểm tham quan</MudText>
+            <MudText Typo="Typo.body2" Style="color:rgba(255,255,255,0.5)">Mã QR có thể không hợp lệ.</MudText>
+        }
+        else
+        {
+            @* ── Header ── *@
+            <div style="font-size:48px; margin-bottom:8px;">
+                @(_poi.Category?.ToLower() switch
+                {
+                    "food" => "🍜",
+                    "drink" => "🥤",
+                    _ => "🏛️"
+                })
+            </div>
+            <MudText Typo="Typo.h4" Style="font-weight:800; color:#fff; margin-bottom:4px;">
+                @_poi.Name
+            </MudText>
+            <MudText Typo="Typo.body2" Style="color:rgba(255,255,255,0.5); margin-bottom:24px;">
+                📍 Vinh Khánh Tour
+            </MudText>
+
+            @* ── Audio Section ── *@
+            @if (HasAudio())
+            {
+                <MudPaper Elevation="4" Class="pa-5" Style="border-radius:16px; background:rgba(76,175,80,0.08); border:1px solid rgba(76,175,80,0.3);">
+                    <MudText Typo="Typo.h6" Style="color:#66bb6a; font-weight:700; margin-bottom:12px;">
+                        🎵 Audio thuyết minh có sẵn!
+                    </MudText>
+
+                    @foreach (var kv in _poi.AudioUrls.Where(a => !string.IsNullOrEmpty(a.Value)))
+                    {
+                        <div style="margin-bottom:12px;">
+                            <MudChip T="string" Size="Size.Small" Color="Color.Success" Style="border-radius:99px; margin-bottom:6px;">
+                                @GetLangFlag(kv.Key) @GetLangName(kv.Key)
+                            </MudChip>
+                            <audio controls style="width:100%; border-radius:8px;" preload="none">
+                                <source src="@kv.Value" type="audio/mpeg" />
+                                Trình duyệt không hỗ trợ phát audio.
+                            </audio>
+                        </div>
+                    }
+
+                    <MudText Typo="Typo.caption" Style="color:rgba(255,255,255,0.5); margin-top:8px;">
+                        Nhấn ▶ để nghe thuyết minh ngay trên trình duyệt
+                    </MudText>
+                </MudPaper>
+            }
+            else
+            {
+                <MudPaper Elevation="4" Class="pa-5" Style="border-radius:16px; background:rgba(255,167,38,0.08); border:1px solid rgba(255,167,38,0.3);">
+                    <MudText Typo="Typo.h6" Style="color:#ffa726; font-weight:700; margin-bottom:8px;">
+                        🗣 Thuyết minh giọng đọc
+                    </MudText>
+                    <MudText Typo="Typo.body2" Style="color:rgba(255,255,255,0.6);">
+                        Điểm này chưa có file Audio. Mở App <b>Vinh Khánh Tour</b> để nghe thuyết minh bằng giọng đọc tự động (TTS).
+                    </MudText>
+                </MudPaper>
+            }
+
+            @* ── Nút mở App ── *@
+            <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                       Size="Size.Large" FullWidth="true"
+                       StartIcon="@Icons.Material.Filled.PhoneAndroid"
+                       Style="border-radius:12px; font-weight:700; text-transform:none; margin-top:20px; font-size:16px; padding:14px;"
+                       OnClick="OpenInApp">
+                📱 Mở trong App Vinh Khánh Tour
+            </MudButton>
+
+            <MudText Typo="Typo.caption" Style="color:rgba(255,255,255,0.35); margin-top:12px;">
+                Nếu chưa cài App, hãy tải về từ cửa hàng ứng dụng
+            </MudText>
+
+            @* ── Mô tả ngắn ── *@
+            @if (_poi.Content.TryGetValue("vi", out var viContent) && !string.IsNullOrEmpty(viContent))
+            {
+                <MudPaper Elevation="2" Class="pa-4 mt-5" Style="border-radius:12px; text-align:left;">
+                    <MudText Typo="Typo.subtitle2" Style="color:rgba(255,255,255,0.5); margin-bottom:8px;">📖 Giới thiệu</MudText>
+                    <MudText Typo="Typo.body2" Style="color:rgba(255,255,255,0.8); line-height:1.7;">
+                        @(viContent.Length > 300 ? viContent[..300] + "..." : viContent)
+                    </MudText>
+                </MudPaper>
+            }
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public string PoiId { get; set; } = "";
+
+    PoiModel? _poi;
+    bool _loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var pois = await Api.GetPoisAsync();
+        _poi = pois?.FirstOrDefault(p => p.Id == PoiId);
+        _loading = false;
+    }
+
+    bool HasAudio() => _poi?.AudioUrls != null && _poi.AudioUrls.Any(a => !string.IsNullOrEmpty(a.Value));
+
+    string GetLangFlag(string lang) => lang switch
+    {
+        "vi" => "🇻🇳",
+        "en" => "🇬🇧",
+        "zh" => "🇨🇳",
+        "ja" => "🇯🇵",
+        "ko" => "🇰🇷",
+        _ => "🌐"
+    };
+
+    string GetLangName(string lang) => lang switch
+    {
+        "vi" => "Tiếng Việt",
+        "en" => "English",
+        "zh" => "中文",
+        "ja" => "日本語",
+        "ko" => "한국어",
+        _ => lang
+    };
+
+    async Task OpenInApp()
+    {
+        var deepLink = $"vinhkhanh://poi/{PoiId}";
+        await JS.InvokeVoidAsync("open", deepLink);
+    }
+}

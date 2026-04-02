@@ -1,0 +1,9 @@
+﻿  Determining projects to restore...
+  All projects are up-to-date for restore.
+  VinhKhanhTour.Shared -> D:\Projects\VinhKhanhTour\VinhKhanhTour.Shared\bin\Release\net8.0\VinhKhanhTour.Shared.dll
+  VinhKhanhTour.CMS -> D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\bin\Release\net8.0\VinhKhanhTour.CMS.dll
+  VinhKhanhTour.CMS (Blazor output) -> D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\bin\Release\net8.0\wwwroot
+  Optimizing assemblies for size may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink
+  VinhKhanhTour.Shared -> D:\Projects\VinhKhanhTour\VinhKhanhTour.Shared\bin\Release\net8.0\VinhKhanhTour.Shared.dll
+  Optimizing assemblies for size may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink
+  VinhKhanhTour.CMS -> D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\bin\Release\net8.0\publish\

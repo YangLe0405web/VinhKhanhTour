@@ -1,0 +1,23 @@
+﻿  Determining projects to restore...
+  All projects are up-to-date for restore.
+  VinhKhanhTour.Shared -> D:\Projects\VinhKhanhTour\VinhKhanhTour.Shared\bin\Release\net8.0\VinhKhanhTour.Shared.dll
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\Pages\Audio.razor(57,5): warning RZ10012: Found markup element with unexpected name 'ButtonTemplate'. If this is intended to be a component, add a @using directive for its namespace. [D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\VinhKhanhTour.CMS.csproj]
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\Pages\Pois.razor(353,14): warning CS8602: Dereference of a possibly null reference. [D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\VinhKhanhTour.CMS.csproj]
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\Pages\Pois.razor(371,14): warning CS8602: Dereference of a possibly null reference. [D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\VinhKhanhTour.CMS.csproj]
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\Pages\Audio.razor(1,1): warning MUD0002: Illegal Attribute 'ChildContent' on 'MudFileUpload' using pattern 'LowerCase' source location '(640,32)-(735,34)' (https://mudblazor.com/features/analyzers) [D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\VinhKhanhTour.CMS.csproj]
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\Pages\PoiDialog.razor(1,1): warning MUD0002: Illegal Attribute 'Checked' on 'MudSwitch' using pattern 'LowerCase' source location '(914,24)-(922,25)' (https://mudblazor.com/features/analyzers) [D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\VinhKhanhTour.CMS.csproj]
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\Pages\PoiDialog.razor(1,1): warning MUD0002: Illegal Attribute 'CheckedChanged' on 'MudSwitch' using pattern 'LowerCase' source location '(923,24)-(923,235)' (https://mudblazor.com/features/analyzers) [D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\VinhKhanhTour.CMS.csproj]
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\Pages\Analytics.razor(1,1): warning MUD0002: Illegal Attribute 'AlignItems' on 'MudGrid' using pattern 'LowerCase' source location '(1400,24)-(1400,96)' (https://mudblazor.com/features/analyzers) [D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\VinhKhanhTour.CMS.csproj]
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\Pages\Analytics.razor(1,1): warning MUD0002: Illegal Attribute 'Dense' on 'MudDatePicker' using pattern 'LowerCase' source location '(1482,32)-(1482,86)' (https://mudblazor.com/features/analyzers) [D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\VinhKhanhTour.CMS.csproj]
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\Pages\Tours.razor(1,1): warning MUD0002: Illegal Attribute 'Title' on 'MudIconButton' using pattern 'LowerCase' source location '(754,20)-(754,81)' (https://mudblazor.com/features/analyzers) [D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\VinhKhanhTour.CMS.csproj]
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\Pages\Tours.razor(1,1): warning MUD0002: Illegal Attribute 'Title' on 'MudIconButton' using pattern 'LowerCase' source location '(826,20)-(826,79)' (https://mudblazor.com/features/analyzers) [D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\VinhKhanhTour.CMS.csproj]
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\Pages\Tours.razor(1,1): warning MUD0002: Illegal Attribute 'Title' on 'MudIconButton' using pattern 'LowerCase' source location '(898,20)-(898,73)' (https://mudblazor.com/features/analyzers) [D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\VinhKhanhTour.CMS.csproj]
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\Pages\Tours.razor(1,1): warning MUD0002: Illegal Attribute 'Title' on 'MudIconButton' using pattern 'LowerCase' source location '(1381,28)-(1381,86)' (https://mudblazor.com/features/analyzers) [D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\VinhKhanhTour.CMS.csproj]
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\Pages\Pois.razor(1,1): warning MUD0002: Illegal Attribute 'Title' on 'MudIconButton' using pattern 'LowerCase' source location '(2133,20)-(2133,88)' (https://mudblazor.com/features/analyzers) [D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\VinhKhanhTour.CMS.csproj]
+  VinhKhanhTour.CMS -> D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\bin\Release\net8.0\VinhKhanhTour.CMS.dll
+  VinhKhanhTour.CMS (Blazor output) -> D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\bin\Release\net8.0\wwwroot
+  Optimizing assemblies for size may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink
+  Optimizing assemblies for size. This process might take a while.
+  VinhKhanhTour.Shared -> D:\Projects\VinhKhanhTour\VinhKhanhTour.Shared\bin\Release\net8.0\VinhKhanhTour.Shared.dll
+  Optimizing assemblies for size may change the behavior of the app. Be sure to test after publishing. See: https://aka.ms/dotnet-illink
+  VinhKhanhTour.CMS -> D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\bin\Release\net8.0\publish\

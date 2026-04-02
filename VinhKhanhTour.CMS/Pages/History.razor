@@ -1,4 +1,4 @@
-﻿@page "/history"
+@page "/history"
 @inject CmsApiService Api
 
 <MudText Typo="Typo.h4" Class="mb-4">📋 Lịch sử ứng dụng</MudText>
@@ -50,10 +50,12 @@ else
             <MudTh Style="min-width:180px">POI</MudTh>
             <MudTh Style="min-width:100px">Ngôn ngữ</MudTh>
             <MudTh Style="min-width:140px">Thiết bị</MudTh>
+            <MudTh Style="min-width:100px">Thời lượng</MudTh>
+            <MudTh Style="min-width:120px">Vị trí</MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd>
-                @context.Timestamp.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                @context.Timestamp.ToLocalTime().ToString("dd/MM HH:mm")
             </MudTd>
             <MudTd>
                 <MudChip T="string" Size="Size.Small"
@@ -64,6 +66,31 @@ else
             <MudTd>@context.PoiName</MudTd>
             <MudTd>@GetLangFlag(context.Language)</MudTd>
             <MudTd>@context.Device</MudTd>
+            <MudTd>
+                @if (context.Duration > 0)
+                {
+                    <MudChip T="string" Size="Size.Small" Color="Color.Success" Variant="Variant.Outlined">
+                        @(context.Duration) s
+                    </MudChip>
+                }
+                else
+                {
+                    <MudText Typo="Typo.caption" Color="Color.Default">--</MudText>
+                }
+            </MudTd>
+            <MudTd>
+                @if (context.Lat != 0 && context.Lng != 0)
+                {
+                    <MudLink href="@($"https://www.google.com/maps?q={context.Lat},{context.Lng}")" Target="_blank">
+                        <MudIcon Icon="@Icons.Material.Filled.LocationOn" Size="Size.Small" Color="Color.Error" />
+                        @($"{context.Lat:F3},{context.Lng:F3}")
+                    </MudLink>
+                }
+                else
+                {
+                    <MudText Typo="Typo.caption" Color="Color.Default">--</MudText>
+                }
+            </MudTd>
         </RowTemplate>
         <NoRecordsContent>
             <MudText Class="pa-4">Chưa có dữ liệu lịch sử</MudText>

@@ -147,6 +147,47 @@ else
                          style="width:240px;height:240px;display:block" />
                 </MudPaper>
 
+                @* ── Audio Status ── *@
+                @if (HasAnyAudio(_qrPoi))
+                {
+                    <MudAlert Severity="Severity.Success" Dense="true" Class="mt-1" Style="width:100%">
+                        <MudText Typo="Typo.body2" Style="font-weight:600">
+                            🎵 POI này có file Audio thuyết minh
+                        </MudText>
+                        <MudText Typo="Typo.caption">
+                            Khi khách quét QR, app sẽ hỏi: <b>"Nghe Audio hay dùng giọng đọc?"</b>
+                        </MudText>
+                    </MudAlert>
+
+                    @* Hiện danh sách audio có sẵn theo từng ngôn ngữ *@
+                    <MudPaper Outlined="true" Class="pa-3" Style="width:100%;border-radius:8px">
+                        <MudText Typo="Typo.subtitle2" Class="mb-2">Audio có sẵn:</MudText>
+                        @foreach (var kv in _qrPoi.AudioUrls)
+                        {
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-1" Spacing="2">
+                                <MudChip T="string" Size="Size.Small" Color="Color.Success" Style="border-radius:99px">
+                                    @GetLangFlag(kv.Key) @kv.Key.ToUpper()
+                                </MudChip>
+                                <audio controls style="height:32px;flex:1" preload="none">
+                                    <source src="@kv.Value" type="audio/mpeg" />
+                                </audio>
+                            </MudStack>
+                        }
+                    </MudPaper>
+                }
+                else
+                {
+                    <MudAlert Severity="Severity.Warning" Dense="true" Class="mt-1" Style="width:100%">
+                        <MudText Typo="Typo.body2" Style="font-weight:600">
+                            🗣 Chưa có file Audio
+                        </MudText>
+                        <MudText Typo="Typo.caption">
+                            Khi khách quét QR, app sẽ dùng <b>giọng đọc TTS</b> tự động.
+                            Vào trang <b>Quản lý Audio</b> để upload file MP3 nếu muốn.
+                        </MudText>
+                    </MudAlert>
+                }
+
                 <MudPaper Outlined="true" Class="pa-2 px-3"
                           Style="width:100%;border-radius:8px">
                     <MudStack Row="true" AlignItems="AlignItems.Center"
@@ -218,7 +259,7 @@ else
         _loading = false;
     }
 
-    // https://vinhkhanhtour-c8e3f.web.app/poi/{poiId} → app nhận → TTS đọc ngay, không GPS
+    // Web link → quét QR mở trang landing, có nút nghe audio + nút mở App
     string GetQrUrl(PoiModel poi) => $"https://vinhkhanhtour-c8e3f.web.app/poi/{poi.Id}";
 
     void ShowQr(PoiModel poi)
@@ -273,6 +314,18 @@ else
             .Where(f => p.Content != null && p.Content.ContainsKey(f.Item1))
             .Select(f => f.Item2));
     }
+
+    bool HasAnyAudio(PoiModel p) => p.AudioUrls != null && p.AudioUrls.Count > 0;
+
+    string GetLangFlag(string lang) => lang switch
+    {
+        "vi" => "🇻🇳",
+        "en" => "🇬🇧",
+        "zh" => "🇨🇳",
+        "ja" => "🇯🇵",
+        "ko" => "🇰🇷",
+        _ => "🌐"
+    };
 
     async Task DeletePoi(string id)
     {

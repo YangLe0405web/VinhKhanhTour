@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "VinhKhanhTour.CMS",
   "resources": {
-    "hash": "sha256-PvWuiUdJJp4SyBCR+TLkxueL8U+/sfKI1wpn2MrWR5k=",
+    "hash": "sha256-URGh7Y9kxEqVmJyeZEqFoKGBRDGQIAEuQ/rvthMqqW0=",
     "jsModuleNative": {
       "dotnet.native.js": "sha256-zuMINBgM7/v7pnooIJY2oxN7FcvZ3ZQdnoDdnMnkyuQ="
     },
@@ -9,7 +9,7 @@
       "dotnet.runtime.js": "sha256-sRdYoaUiZmrqOtPGSBpgxZxxSQsILEw5kzx7dL4zlfw="
     },
     "wasmNative": {
-      "dotnet.native.wasm": "sha256-cf8S8yiaA/FLDNlmOwHMrt2SUAzK33Lk/l7oWnyvILg="
+      "dotnet.native.wasm": "sha256-WSHVZeSy5BgPzk5ntdhR7JYq+rqKryBywXQG85aWCN0="
     },
     "icu": {
       "icudt_CJK.dat": "sha256-SZLtQnRc0JkwqHab0VUVP7T3uBPSeYzxzDnpxPpUnHk=",
@@ -60,7 +60,7 @@
       "Microsoft.Extensions.Primitives.wasm": "sha256-P/lvQNtw5OGg/LmiJbGjChsT9rWxwajIHSkba1zjvP8=",
       "Microsoft.JSInterop.WebAssembly.wasm": "sha256-YKFXGtvlhUfQEU9Nshy5p9J3WOa7o3QEPtSoduaCmZM=",
       "Microsoft.JSInterop.wasm": "sha256-rusig2gOrx/+/w+OxXAlgpvN1uPcsjLzI5QSdrgxMXU=",
-      "MudBlazor.wasm": "sha256-/8EMQrH8jFLefXqJMsrsjT54UZn0gy0TbTNHD0lJVpk=",
+      "MudBlazor.wasm": "sha256-iLRnA42oPO6ILRoBcMPx6hzEix7r3jD2jSGVzqD3YGg=",
       "NJsonSchema.Annotations.wasm": "sha256-fmFZ1ILmpVVoj4icAAg3W0ysiVY7V+dJLdhwmnsLxns=",
       "NJsonSchema.wasm": "sha256-04OeKpHs2U3dJxF7Bq4fSvwQbJH8jmZOn0sLcyBekLI=",
       "Namotion.Reflection.wasm": "sha256-iPqH9YyuZshjs2f8Bc5qrCL9vKVeF7e9/hs1KErpL04=",
@@ -142,8 +142,8 @@
       "System.Xml.XDocument.wasm": "sha256-otJYF3T5FZwRklgpunZw9QOak4pzkrb39QcUqqMuUFw=",
       "System.Xml.XPath.XDocument.wasm": "sha256-o+10xZjBmO/yxLHVAE4wzZxCxb5SLZW35JRveSAgpp4=",
       "System.wasm": "sha256-25KTxVbx+rD8S9iyUye7jmbj1e4TZ5Ca+elup4oegJA=",
-      "VinhKhanhTour.CMS.wasm": "sha256-a010M6iP5e6unPCDca51BhrA/nrv0l1nc4PdGNof1i0=",
-      "VinhKhanhTour.Shared.wasm": "sha256-iGaYiHyJGv6zBNs4tv7Da/R69Fc1MsHzsyzjUp8YujI=",
+      "VinhKhanhTour.CMS.wasm": "sha256-BiyUB7HAPv2UjRCtYd9cSj/02teObEC/TVndKO+r3z0=",
+      "VinhKhanhTour.Shared.wasm": "sha256-FxH9PqgnLazPD/afI9frY/JkQc7uEsMYXW7CPakTRW0=",
       "netstandard.wasm": "sha256-/nnxVqKSpyUI5Y5kwmhOJyLlfB3D7HeGgcSp7K2CgNo="
     }
   },

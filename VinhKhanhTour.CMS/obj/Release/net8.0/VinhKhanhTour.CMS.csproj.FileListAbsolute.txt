@@ -1273,8 +1273,8 @@ D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Release\net8.0\compressed\r7sf2j
 D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Release\net8.0\compressed\v00kiskb7y-{0}-ssov9ol4p6-ssov9ol4p6.gz
 D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Release\net8.0\compressed\bc3sww7lnx-{0}-eegzzpmxgt-eegzzpmxgt.gz
 D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Release\net8.0\compressed\gbe990n0w3-{0}-krwn2wkglp-krwn2wkglp.gz
-D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Release\net8.0\compressed\y9nkrrfk5s-{0}-og2kwg33nz-og2kwg33nz.gz
-D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Release\net8.0\compressed\8ps1r8qx05-{0}-1nyq4kodqv-1nyq4kodqv.gz
-D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Release\net8.0\compressed\l79v5z028x-{0}-xhxsmlp58n-xhxsmlp58n.gz
-D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Release\net8.0\compressed\vae8dy7az7-{0}-fs732bks0j-fs732bks0j.gz
-D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Release\net8.0\compressed\2krq0yhw91-{0}-d57ul4o0pb-d57ul4o0pb.gz
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Release\net8.0\compressed\y9nkrrfk5s-{0}-y640iwftsj-y640iwftsj.gz
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Release\net8.0\compressed\8ps1r8qx05-{0}-brbqpgmgbw-brbqpgmgbw.gz
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Release\net8.0\compressed\l79v5z028x-{0}-h4cv13s42v-h4cv13s42v.gz
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Release\net8.0\compressed\vae8dy7az7-{0}-3golqdlelo-3golqdlelo.gz
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Release\net8.0\compressed\2krq0yhw91-{0}-ztek6kgyly-ztek6kgyly.gz

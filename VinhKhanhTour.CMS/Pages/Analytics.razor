@@ -62,107 +62,36 @@ else
                     </HeaderContent>
                     <RowTemplate>
                         <MudTd>@GetLangFlag(context.Key)</MudTd>
-                        <MudTd>@context.Value</MudTd>
-                        <MudTd><MudProgressLinear Value="@GetPercent(context.Value)" Color="Color.Primary" Rounded="true" /></MudTd>
                     </RowTemplate>
                 </MudTable>
             </MudPaper>
         </MudItem>
 
-        <!-- Filter + Bảng chi tiết gộp analytics + history -->
         <MudItem xs="12">
-            <MudPaper Class="pa-4" Elevation="2">
-                <MudText Typo="Typo.h6" Class="mb-3">📋 Chi tiết sự kiện</MudText>
-                <MudGrid Class="mb-3" AlignItems="AlignItems.Center">
-                    <MudItem xs="12" sm="3">
-                        <MudDatePicker @bind-Date="_filterDate" Label="Chọn ngày cụ thể"
-                                       Clearable="true" Variant="Variant.Outlined" Dense="true" />
-                    </MudItem>
-                    <MudItem xs="12" sm="3">
-                        <MudSelect @bind-Value="_filterType" Label="Lọc theo hành động"
-                                   Clearable="true" Variant="Variant.Outlined" Dense="true">
-                            <MudSelectItem Value="@("")">(Tất cả)</MudSelectItem>
-                            <MudSelectItem Value="@("poi_play")">🔊 Nghe POI</MudSelectItem>
-                            <MudSelectItem Value="@("scan_qr")">📷 Quét QR</MudSelectItem>
-                            <MudSelectItem Value="@("route_start")">🗺️ Chỉ đường</MudSelectItem>
-                            <MudSelectItem Value="@("open_app")">📱 Mở app</MudSelectItem>
-                        </MudSelect>
-                    </MudItem>
-                    <MudItem xs="12" sm="3">
-                        <MudSelect @bind-Value="_filterLang" Label="Lọc theo ngôn ngữ"
-                                   Clearable="true" Variant="Variant.Outlined" Dense="true">
-                            <MudSelectItem Value="@("")">(Tất cả)</MudSelectItem>
-                            <MudSelectItem Value="@("vi")">🇻🇳 Tiếng Việt</MudSelectItem>
-                            <MudSelectItem Value="@("en")">🇬🇧 English</MudSelectItem>
-                            <MudSelectItem Value="@("zh")">🇨🇳 中文</MudSelectItem>
-                            <MudSelectItem Value="@("ja")">🇯🇵 日本語</MudSelectItem>
-                            <MudSelectItem Value="@("ko")">🇰🇷 한국어</MudSelectItem>
-                        </MudSelect>
-                    </MudItem>
-                    <MudItem xs="12" sm="3" Class="d-flex align-center">
-                        <MudText Typo="Typo.caption" Color="Color.Secondary">
-                            Hiển thị @FilteredUnified.Count() / @_unified.Count bản ghi
-                        </MudText>
-                    </MudItem>
-                </MudGrid>
-                <MudTable Items="FilteredUnified" Hover="true" Striped="true" Dense="true"
-                          HorizontalScrollbar="true" Breakpoint="Breakpoint.None">
-                    <HeaderContent>
-                        <MudTh Style="min-width:140px">Thời gian</MudTh>
-                        <MudTh Style="min-width:130px">Loại</MudTh>
-                        <MudTh Style="min-width:180px">POI</MudTh>
-                        <MudTh Style="min-width:80px">Ngôn ngữ</MudTh>
-                        <MudTh Style="min-width:80px">Thời lượng</MudTh>
-                        <MudTh Style="min-width:140px">Thiết bị</MudTh>
-                        <MudTh Style="min-width:120px">Vị trí</MudTh>
-                    </HeaderContent>
-                    <RowTemplate>
-                        <MudTd>@context.Timestamp.ToLocalTime().ToString("dd/MM HH:mm")</MudTd>
-                        <MudTd>
-                            <MudChip T="string" Size="Size.Small" Color="@GetEventColor(context.EventType)">
-                                @GetEventLabel(context.EventType)
-                            </MudChip>
-                        </MudTd>
-                        <MudTd>@(!string.IsNullOrEmpty(context.PoiName) ? context.PoiName : context.PoiId)</MudTd>
-                        <MudTd>@GetLangFlag(context.Language)</MudTd>
-                        <MudTd>
-                            @if (context.Duration > 0)
-                            {
-                                <MudChip T="string" Size="Size.Small" Color="Color.Success">@context.Duration s</MudChip>
-                            }
-                            else
-                            {
+            <MudPaper Class="pa-6" Elevation="2">
+                <MudText Typo="Typo.h6" Class="mb-4">📈 Thống kê tương tác (7 ngày gần nhất)</MudText>
+                
+                @if (_chartSeries.Count > 0)
+                {
+                    <MudChart ChartType="ChartType.Line" ChartSeries="@_chartSeries" 
+                              @bind-SelectedIndex="_chartIndex" XAxisLabels="@_chartLabels" 
+                              Width="100%" Height="350px" ChartOptions="@_chartOptions" />
+                }
+                else
+                {
+                    <MudAlert Severity="Severity.Info">Chưa đủ dữ liệu để vẽ biểu đồ</MudAlert>
+                }
 
-                                <MudText Typo="Typo.caption" Color="Color.Secondary">—</MudText>
-                            }
-                        </MudTd>
-                        <MudTd>
-                            @if (!string.IsNullOrEmpty(context.Device))
-                            {
-                                <MudText Typo="Typo.caption">@context.Device</MudText>
-                            }
-                            else
-                            {
-
-                                <MudText Typo="Typo.caption" Color="Color.Secondary">—</MudText>
-                            }
-                        </MudTd>
-                        <MudTd>
-                            @if (context.Lat != 0)
-                            {
-                                @($"{context.Lat:F3}, {context.Lng:F3}")
-                            }
-                            else
-                            {
-
-                                <MudText Typo="Typo.caption" Color="Color.Secondary">—</MudText>
-                            }
-                        </MudTd>
-                    </RowTemplate>
-                    <NoRecordsContent>
-                        <MudText Class="pa-4">Chưa có dữ liệu</MudText>
-                    </NoRecordsContent>
-                </MudTable>
+                <MudStack Row="true" Justify="Justify.Center" Class="mt-4">
+                    <div class="d-flex align-center mr-4">
+                        <div style="width:12px; height:12px; border-radius:50%; background:#ff9800; margin-right:8px;"></div>
+                        <MudText Typo="Typo.caption">Lượt quét QR</MudText>
+                    </div>
+                    <div class="d-flex align-center">
+                        <div style="width:12px; height:12px; border-radius:50%; background:#4caf50; margin-right:8px;"></div>
+                        <MudText Typo="Typo.caption">Lượt nghe Audio</MudText>
+                    </div>
+                </MudStack>
             </MudPaper>
         </MudItem>
 
@@ -199,15 +128,11 @@ else
         public double Lng { get; set; }
     }
 
-    string _filterType = "";
-    string _filterLang = "";
-    DateTime? _filterDate = null;
-
-    IEnumerable<UnifiedEvent> FilteredUnified => _unified
-        .Where(e => _filterDate == null || e.Timestamp.ToLocalTime().Date == _filterDate.Value.Date)
-        .Where(e => string.IsNullOrEmpty(_filterType) || e.EventType == _filterType)
-        .Where(e => string.IsNullOrEmpty(_filterLang) ||
-            e.Language.ToLower().StartsWith(_filterLang));
+    // Chart
+    private int _chartIndex = -1;
+    private ChartOptions _chartOptions = new ChartOptions();
+    private List<ChartSeries<double>> _chartSeries = new();
+    private string[] _chartLabels = Array.Empty<string>();
 
     bool _mapsInitialized = false;
     List<LocationTrace> _traces = new();
@@ -244,24 +169,26 @@ else
     {
         var list = new List<UnifiedEvent>();
 
-        // 1. Nạp History trước (Có sẵn Device, Action)
+        // 1. Nạp History trước
         foreach (var h in _history)
         {
             list.Add(new UnifiedEvent
             {
                 Timestamp = h.Timestamp,
-                EventType = h.Action == "play_poi" ? "poi_play" : h.Action, // Gom loại event
+                EventType = h.Action == "play_poi" ? "poi_play" : h.Action,
                 PoiId = h.PoiId,
                 PoiName = string.IsNullOrEmpty(h.PoiName) ? (_pois.FirstOrDefault(p => p.Id == h.PoiId)?.Name ?? "") : h.PoiName,
                 Language = h.Language,
                 Device = h.Device,
+                Duration = h.Duration,
+                Lat = h.Lat,
+                Lng = h.Lng
             });
         }
 
-        // 2. Nạp Analytics Event (Có Thời lượng, Vị trí) gộp vào Dòng History tương ứng
+        // 2. Nạp Analytics Event gộp vào dòng tương ứng (Cho data cũ)
         foreach (var e in _events.OrderBy(x => x.Timestamp))
         {
-            // Tìm History event gần nhất chưa có Thời lượng
             var match = list.Where(u => 
                 u.PoiId == e.PoiId && 
                 u.EventType == "poi_play" && 
@@ -278,7 +205,6 @@ else
             }
             else
             {
-                // Nếu người dùng không có history tương ứng, thì hiển thị thêm dòng mới
                 list.Add(new UnifiedEvent
                 {
                     Timestamp = e.Timestamp,
@@ -298,19 +224,49 @@ else
 
     void ComputeStats()
     {
-        _total = _events.Count(e => e.EventType == "poi_play");
-        _totalQr = _history.Count(h => h.Action == "scan_qr");
-        _avgDuration = _events.Any(e => e.Duration > 0)
-            ? (int)_events.Where(e => e.Duration > 0).Average(e => e.Duration) : 0;
+        _total = _unified.Count(e => e.EventType == "poi_play");
+        _totalQr = _unified.Count(h => h.EventType == "scan_qr");
+        _avgDuration = _unified.Any(e => e.Duration > 0)
+            ? (int)_unified.Where(e => e.Duration > 0).Average(e => e.Duration) : 0;
         _uniquePois = _unified.Where(e => !string.IsNullOrEmpty(e.PoiId))
             .Select(e => e.PoiId).Distinct().Count();
+        
         _topPois = _unified.Where(e => !string.IsNullOrEmpty(e.PoiId))
             .GroupBy(e => string.IsNullOrEmpty(e.PoiName) ? e.PoiId : e.PoiName)
             .OrderByDescending(g => g.Count()).Take(5)
             .Select(g => new KeyValuePair<string, int>(g.Key, g.Count())).ToList();
+            
         _langStats = _unified.GroupBy(e => e.Language)
             .OrderByDescending(g => g.Count())
             .Select(g => new KeyValuePair<string, int>(g.Key, g.Count())).ToList();
+
+        // Chuẩn bị dữ liệu biểu đồ
+        PrepareChartData();
+    }
+
+    void PrepareChartData()
+    {
+        var localNow = DateTime.Now.Date;
+        var labels = new List<string>();
+        var scanData = new List<double>();
+        var playData = new List<double>();
+
+        for (int i = 6; i >= 0; i--)
+        {
+            var date = localNow.AddDays(-i);
+            labels.Add(date.ToString("dd/MM"));
+
+            var dayEvents = _unified.Where(e => e.Timestamp.ToLocalTime().Date == date);
+            scanData.Add(dayEvents.Count(e => e.EventType == "scan_qr"));
+            playData.Add(dayEvents.Count(e => e.EventType == "poi_play"));
+        }
+
+        _chartLabels = labels.ToArray();
+        _chartSeries = new List<ChartSeries<double>>()
+        {
+            new ChartSeries<double>() { Name = "Quét QR", Data = scanData.ToArray() },
+            new ChartSeries<double>() { Name = "Nghe Audio", Data = playData.ToArray() }
+        };
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -331,26 +287,6 @@ else
     }
 
     double GetPercent(int val) => _unified.Count == 0 ? 0 : (double)val / _unified.Count * 100;
-
-    Color GetEventColor(string t) => t switch
-    {
-        "poi_play" => Color.Success,
-        "scan_qr" => Color.Warning,
-        "route_start" => Color.Primary,
-        "language_change" => Color.Secondary,
-        "open_app" => Color.Info,
-        _ => Color.Default
-    };
-
-    string GetEventLabel(string t) => t switch
-    {
-        "poi_play" => "🔊 Nghe POI",
-        "scan_qr" => "📷 Quét QR",
-        "route_start" => "🗺️ Chỉ đường",
-        "language_change" => "🌐 Đổi ngôn ngữ",
-        "open_app" => "📱 Mở app",
-        _ => t
-    };
 
     string GetLangFlag(string lang) => lang switch
     {
