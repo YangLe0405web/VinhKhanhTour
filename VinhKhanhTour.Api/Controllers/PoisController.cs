@@ -53,8 +53,10 @@ public class PoisController : ControllerBase
             var path = await _storage.UploadAudioAsync(
                 stream, id, lang, file.ContentType);
 
-            // Tạo URL đầy đủ để lưu vào POI
-            var baseUrl = $"{Request.Scheme}://{Request.Host}";
+            // Dùng forwarded proto để luôn ra https khi chạy sau reverse proxy (Render/Nginx)
+            var forwardedProto = Request.Headers["X-Forwarded-Proto"].FirstOrDefault();
+            var scheme = string.IsNullOrWhiteSpace(forwardedProto) ? Request.Scheme : forwardedProto;
+            var baseUrl = $"{scheme}://{Request.Host}";
             var fullUrl = $"{baseUrl}{path}";
 
             Console.WriteLine($"[Upload] Firestore OK: {fullUrl}");
