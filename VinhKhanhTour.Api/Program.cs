@@ -32,12 +32,13 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 });
 
 
-// ── 2. Cấu hình CORS (Phải thật chuẩn để CMS không bị chặn) ──
-builder.Services.AddCors(opt => opt.AddPolicy("CmsPolicy", p =>
-    p.AllowAnyOrigin() 
+// ── 2. Cấu hình CORS (Dùng Default Policy cho chắc chắn) ──
+builder.Services.AddCors(opt => opt.AddDefaultPolicy(p =>
+    p.SetIsOriginAllowed(origin => true) // Chấp nhận mọi origin, cực kỳ hiệu quả
      .AllowAnyHeader()
      .AllowAnyMethod()
 ));
+
 
 
 builder.Services.AddControllers();
@@ -54,19 +55,14 @@ var app = builder.Build();
 // 0. Forwarded Headers đầu tiên để lấy đúng IP/Scheme
 app.UseForwardedHeaders();
 
-// 1. CORS phải đặt rât sớm để OPTIONS request từ trình duyệt không bị redirect/block
-app.UseCors("CmsPolicy");
-
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-// app.UseHttpsRedirection(); // Bỏ cái này nếu Render proxy đã ép HTTPS hoặc gây lỗi loop 307
 app.UseRouting();
+
+// 1. CORS đặt SAU Routing nhưng TRƯỚC MapControllers/Authorization
+app.UseCors(); 
+
 app.UseAuthorization();
 
 app.MapGet("/", () => "Vinh Khanh Tour API is running!");
 app.MapControllers();
-app.Run();
+app.Run();
+
