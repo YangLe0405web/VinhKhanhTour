@@ -3,11 +3,22 @@
 @inject CmsApiService Api
 @inject IJSRuntime JS
 
-<MudText Typo="Typo.h4" Class="mb-4">📊 Analytics</MudText>
+<MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
+    <MudText Typo="Typo.h4">📊 Analytics</MudText>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" 
+               StartIcon="@Icons.Material.Filled.Refresh" 
+               OnClick="OnInitializedAsync">Làm mới</MudButton>
+</MudStack>
 
 @if (_loading)
 {
     <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+    <MudText Typo="Typo.caption" Class="mt-2 d-block align-center">Đang nạp số liệu từ Server, vui lòng đợi...</MudText>
+}
+else if (!string.IsNullOrEmpty(_errorMessage))
+{
+    <MudAlert Severity="Severity.Error" Class="mb-4">@_errorMessage</MudAlert>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OnInitializedAsync">Thử lại</MudButton>
 }
 else
 {
@@ -111,6 +122,28 @@ else
                 <div id="tracemap" style="height:400px; width:100%; border-radius:8px;"></div>
             </MudPaper>
         </MudItem>
+
+        <MudItem xs="12">
+            <MudPaper Class="pa-4" Elevation="2">
+                <MudText Typo="Typo.h6" Class="mb-3">🕒 Sự kiện gần nhất (Kiểm tra Log)</MudText>
+                <MudTable Items="_unified.Take(10)" Hover="true" Dense="true">
+                    <HeaderContent>
+                        <MudTh>Thời gian</MudTh>
+                        <MudTh>Hành động</MudTh>
+                        <MudTh>POI</MudTh>
+                        <MudTh>Thiết bị</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>@context.Timestamp.ToLocalTime().ToString("HH:mm:ss dd/MM")</MudTd>
+                        <MudTd>
+                            <MudChip T="string" Size="Size.Small" Color="@GetActionColor(context.EventType)">@context.EventType</MudChip>
+                        </MudTd>
+                        <MudTd>@context.PoiName</MudTd>
+                        <MudTd>@context.Device</MudTd>
+                    </RowTemplate>
+                </MudTable>
+            </MudPaper>
+        </MudItem>
     </MudGrid>
 }
 
@@ -146,22 +179,33 @@ else
     List<KeyValuePair<string, int>> _topPois = new();
     List<KeyValuePair<string, int>> _langStats = new();
 
+    string _errorMessage = "";
     protected override async Task OnInitializedAsync()
     {
-        var t1 = Api.GetAnalyticsAsync();
-        var t2 = Api.GetTracesAsync();
-        var t3 = Api.GetHistoryAsync();
-        var t4 = Api.GetPoisAsync();
-        
-        await Task.WhenAll(t1, t2, t3, t4);
-        
-        _events = t1.Result ?? new();
-        _traces = t2.Result ?? new();
-        _history = t3.Result ?? new();
-        _pois = t4.Result ?? new();
-        
-        BuildUnified();
-        ComputeStats();
+        _loading = true;
+        _errorMessage = "";
+        try
+        {
+            var t1 = Api.GetAnalyticsAsync();
+            var t2 = Api.GetTracesAsync();
+            var t3 = Api.GetHistoryAsync();
+            var t4 = Api.GetPoisAsync();
+            
+            await Task.WhenAll(t1, t2, t3, t4);
+            
+            _events = (t1.Result ?? new()).Where(e => e.EventType != "open_app" && !string.Equals(e.EventType, "open_app", StringComparison.OrdinalIgnoreCase)).ToList();
+            _traces = t2.Result ?? new();
+            _history = (t3.Result ?? new()).Where(h => h.Action != "open_app" && !string.Equals(h.Action, "open_app", StringComparison.OrdinalIgnoreCase)).ToList();
+            _pois = t4.Result ?? new();
+            
+            BuildUnified();
+            ComputeStats();
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = "Không thể kết nối đến hệ thống Analytics. Vui lòng kiểm tra lại sau 30 giây.";
+            Console.WriteLine($"Analytics Error: {ex.Message}");
+        }
         _loading = false;
     }
 
@@ -224,26 +268,44 @@ else
 
     void ComputeStats()
     {
-        _total = _unified.Count(e => e.EventType == "poi_play" || e.EventType == "play_poi" || e.EventType == "listen_poi");
-        _totalQr = _unified.Count(h => h.EventType == "scan_qr");
+        _total = _unified.Count(e => IsPlayAction(e.EventType));
+        _totalQr = _unified.Count(h => IsScanAction(h.EventType));
+        
         _avgDuration = _unified.Any(e => e.Duration > 0)
             ? (int)_unified.Where(e => e.Duration > 0).Average(e => e.Duration) : 0;
+            
         _uniquePois = _unified.Where(e => !string.IsNullOrEmpty(e.PoiId))
             .Select(e => e.PoiId).Distinct().Count();
         
-        _topPois = _unified.Where(e => !string.IsNullOrEmpty(e.PoiId) && (e.EventType == "poi_play" || e.EventType == "play_poi" || e.EventType == "listen_poi"))
+        _topPois = _unified.Where(e => !string.IsNullOrEmpty(e.PoiId) && IsPlayAction(e.EventType))
             .GroupBy(e => string.IsNullOrEmpty(e.PoiName) ? e.PoiId : e.PoiName)
             .OrderByDescending(g => g.Count()).Take(5)
             .Select(g => new KeyValuePair<string, int>(g.Key, g.Count())).ToList();
             
         _langStats = _unified.Where(e => !string.IsNullOrEmpty(e.Language))
-            .GroupBy(e => e.Language)
+            .GroupBy(e => NormalizeLang(e.Language))
             .OrderByDescending(g => g.Count())
             .Select(g => new KeyValuePair<string, int>(g.Key, g.Count())).ToList();
 
-        // Chuẩn bị dữ liệu biểu đồ
         PrepareChartData();
     }
+
+    bool IsPlayAction(string action) => 
+        string.Equals(action, "poi_play", StringComparison.OrdinalIgnoreCase) || 
+        string.Equals(action, "play_poi", StringComparison.OrdinalIgnoreCase) || 
+        string.Equals(action, "listen_poi", StringComparison.OrdinalIgnoreCase);
+
+    bool IsScanAction(string action) => 
+        string.Equals(action, "scan_qr", StringComparison.OrdinalIgnoreCase);
+
+    Color GetActionColor(string action) => action.ToLower() switch
+    {
+        "scan_qr" => Color.Success,
+        "poi_play" or "play_poi" or "listen_poi" => Color.Primary,
+        "route_start" => Color.Warning,
+        "language_change" => Color.Secondary,
+        _ => Color.Default
+    };
 
     void PrepareChartData()
     {
@@ -265,8 +327,8 @@ else
 
             var dayEvents = _unified.Where(e => e.Timestamp.ToLocalTime().Date == date);
             
-            cumulativeScan += dayEvents.Count(e => e.EventType == "scan_qr");
-            cumulativePlay += dayEvents.Count(e => e.EventType == "poi_play" || e.EventType == "play_poi" || e.EventType == "listen_poi");
+            cumulativeScan += dayEvents.Count(e => IsScanAction(e.EventType));
+            cumulativePlay += dayEvents.Count(e => IsPlayAction(e.EventType));
             
             scanData.Add(cumulativeScan);
             playData.Add(cumulativePlay);
@@ -301,13 +363,23 @@ else
 
     double GetPercent(int val) => _unified.Count == 0 ? 0 : (double)val / _unified.Count * 100;
 
-    string GetLangFlag(string lang) => lang switch
+    string NormalizeLang(string lang) => lang.ToLowerInvariant().Trim() switch
     {
-        "vi" or "vietnamese" => "🇻🇳 VI",
-        "en" or "english" => "🇬🇧 EN",
-        "zh" or "chinese" => "🇨🇳 ZH",
-        "ja" or "japanese" => "🇯🇵 JA",
-        "ko" or "korean" => "🇰🇷 KO",
-        _ => lang
+        "vi" or "vietnamese" or "vn" => "vi",
+        "en" or "english" or "gb" => "en",
+        "zh" or "chinese" or "cn" => "zh",
+        "ja" or "japanese" or "jp" => "ja",
+        "ko" or "korean" or "kr" => "ko",
+        _ => lang.ToLowerInvariant().Trim()
+    };
+
+    string GetLangFlag(string lang) => lang.ToLowerInvariant() switch
+    {
+        "vi" or "vn" or "vietnamese" => "🇻🇳 Tiếng Việt",
+        "en" or "english" or "gb" => "🇬🇧 English",
+        "zh" or "chinese" or "cn" => "🇨🇳 中文",
+        "ja" or "japanese" or "jp" => "🇯🇵 日本語",
+        "ko" or "korean" or "kr" => "🇰🇷 한국어",
+        _ => lang.ToUpperInvariant()
     };
 }

@@ -23,7 +23,7 @@ if (File.Exists(keyPath))
 
 // ── 2. Cấu hình CORS (Phải thật chuẩn để CMS không bị chặn) ──
 builder.Services.AddCors(opt => opt.AddPolicy("CmsPolicy", p =>
-    p.AllowAnyOrigin() // Cho phép tất cả để test, sau này chạy thật sẽ siết lại sau
+    p.AllowAnyOrigin()
      .AllowAnyHeader()
      .AllowAnyMethod()
 ));

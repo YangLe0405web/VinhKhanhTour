@@ -5,19 +5,18 @@
 
 <MudPaper Class="pa-3 mb-4" Elevation="1">
     <MudGrid>
-        <MudItem xs="12" sm="4">
-            <MudSelect @bind-Value="_filterAction" Label="Lọc theo hành động"
+        <MudItem xs="12" sm="3">
+            <MudSelect @bind-Value="_filterAction" Label="Hành động"
                        Clearable="true" Variant="Variant.Outlined">
                 <MudSelectItem Value="@("")">Tất cả</MudSelectItem>
-                <MudSelectItem Value="@("open_app")">📱 Mở app</MudSelectItem>
                 <MudSelectItem Value="@("play_poi")">🔊 Nghe POI</MudSelectItem>
                 <MudSelectItem Value="@("scan_qr")">📷 Quét QR</MudSelectItem>
                 <MudSelectItem Value="@("route_start")">🗺️ Chỉ đường</MudSelectItem>
                 <MudSelectItem Value="@("language_change")">🌐 Đổi ngôn ngữ</MudSelectItem>
             </MudSelect>
         </MudItem>
-        <MudItem xs="12" sm="4">
-            <MudSelect @bind-Value="_filterLang" Label="Lọc theo ngôn ngữ"
+        <MudItem xs="12" sm="3">
+            <MudSelect @bind-Value="_filterLang" Label="Ngôn ngữ"
                        Clearable="true" Variant="Variant.Outlined">
                 <MudSelectItem Value="@("")">Tất cả</MudSelectItem>
                 <MudSelectItem Value="@("vi")">🇻🇳 Tiếng Việt</MudSelectItem>
@@ -27,8 +26,13 @@
                 <MudSelectItem Value="@("ko")">🇰🇷 한국어</MudSelectItem>
             </MudSelect>
         </MudItem>
-        <MudItem xs="12" sm="4" Class="d-flex align-center">
-            <MudButton Variant="Variant.Filled" Color="Color.Primary"
+        <MudItem xs="12" sm="3">
+            <MudDatePicker Label="Lọc theo ngày" @bind-Date="_filterDate" 
+                           Editable="true" Clearable="true" Variant="Variant.Outlined" 
+                           DateFormat="dd/MM/yyyy" Placeholder="Chọn ngày..." />
+        </MudItem>
+        <MudItem xs="12" sm="3" Class="d-flex align-center">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true"
                        OnClick="LoadData" StartIcon="@Icons.Material.Filled.Refresh">
                 Tải lại
             </MudButton>
@@ -39,6 +43,12 @@
 @if (_loading)
 {
     <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+    <MudText Typo="Typo.caption" Class="mt-2 d-block align-center">Đang kết nối Server, vui lòng đợi...</MudText>
+}
+else if (!string.IsNullOrEmpty(_errorMessage))
+{
+    <MudAlert Severity="Severity.Error" Class="mb-4">@_errorMessage</MudAlert>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="LoadData">Thử lại</MudButton>
 }
 else
 {
@@ -107,19 +117,34 @@ else
     bool _loading = true;
     string _filterAction = "";
     string _filterLang = "";
-
+    DateTime? _filterDate;
+ 
     IEnumerable<AppHistory> FilteredHistory => _history
         .Where(h => string.IsNullOrEmpty(_filterAction) || h.Action == _filterAction)
-        .Where(h => string.IsNullOrEmpty(_filterLang) || h.Language == _filterLang);
+        .Where(h => string.IsNullOrEmpty(_filterLang) || h.Language == _filterLang)
+        .Where(h => !_filterDate.HasValue || h.Timestamp.ToLocalTime().Date == _filterDate.Value.Date);
 
     protected override async Task OnInitializedAsync() => await LoadData();
 
     async Task LoadData()
     {
         _loading = true;
-        _history = await Api.GetHistoryAsync() ?? new();
+        _errorMessage = "";
+        try
+        {
+            _history = (await Api.GetHistoryAsync() ?? new())
+                .Where(h => h.Action != "open_app")
+                .ToList();
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = "Không thể kết nối đến Server. Có thể Server đang khởi động lại (vui lòng đợi 30s).";
+            Console.WriteLine($"Error loading history: {ex.Message}");
+        }
         _loading = false;
     }
+    
+    string _errorMessage = "";
 
     string GetActionLabel(string action) => action switch
     {

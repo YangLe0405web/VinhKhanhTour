@@ -78,7 +78,6 @@ D:\Projects\VinhKhanhTour\VinhKhanhTour.Api\obj\Debug\net8.0\staticwebassets.bui
 D:\Projects\VinhKhanhTour\VinhKhanhTour.Api\obj\Debug\net8.0\staticwebassets.development.json
 D:\Projects\VinhKhanhTour\VinhKhanhTour.Api\obj\Debug\net8.0\staticwebassets.build.endpoints.json
 D:\Projects\VinhKhanhTour\VinhKhanhTour.Api\obj\Debug\net8.0\swae.build.ex.cache
-D:\Projects\VinhKhanhTour\VinhKhanhTour.Api\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
 D:\Projects\VinhKhanhTour\VinhKhanhTour.Api\obj\Debug\net8.0\VinhKhan.C03F2B94.Up2Date
 D:\Projects\VinhKhanhTour\VinhKhanhTour.Api\obj\Debug\net8.0\VinhKhanhTour.Api.dll
 D:\Projects\VinhKhanhTour\VinhKhanhTour.Api\obj\Debug\net8.0\refint\VinhKhanhTour.Api.dll

@@ -576,14 +576,21 @@
                 timestamp: new Date().toISOString()
             };
             
-            // Nếu thoát trang, dùng sendBeacon cho chắc
-            if (extra.isLeaving && navigator.sendBeacon) {
-                navigator.sendBeacon(`${API}/api/history`, JSON.stringify(body));
+            const url = `${API}/api/history`;
+
+            // Dùng sendBeacon khi thoát trang hoặc khi cần độ tin cậy cao trên Mobile
+            if (extra.isLeaving || extra.urgent) {
+                if (navigator.sendBeacon) {
+                    const blob = new Blob([JSON.stringify(body)], { type: 'application/json' });
+                    navigator.sendBeacon(url, blob);
+                } else {
+                    fetch(url, { method: 'POST', body: JSON.stringify(body), keepalive: true }).catch(()=>{});
+                }
                 return;
             }
 
             try {
-                await fetch(`${API}/api/history`, {
+                await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(body)
@@ -603,15 +610,22 @@
         }
 
         let isUnlocked = false;
-        function unlockAudio() {
+        async function unlockAudio() {
             if (isUnlocked) return;
-            // Silent utterance to unlock iOS/Android TTS engine context
             try {
+                // Unlock TTS
                 const silent = new SpeechSynthesisUtterance(' ');
                 silent.volume = 0;
                 window.speechSynthesis.speak(silent);
+                
+                // Unlock MP3 Player Context
+                mp3Player.play().then(() => {
+                    mp3Player.pause();
+                    mp3Player.currentTime = 0;
+                }).catch(() => {});
+
                 isUnlocked = true;
-                console.log("🔊 Audio Context Unlocked");
+                console.log("🔊 Audio & TTS Context Unlocked");
             } catch(e) {}
         }
 
@@ -702,8 +716,8 @@
         }
 
         // ── 3. TTS Logic ──
-        function toggleSpeak() {
-            unlockAudio();
+        async function toggleSpeak() {
+            await unlockAudio();
             if (isSpeaking) {
                 stopSpeak();
                 stopTrackDuration();
@@ -715,7 +729,7 @@
                 pauseMP3(); 
                 speak();
                 startTrackDuration();
-                logEvent('play_poi'); // Log starting play immediately
+                logEvent('play_poi', { urgent: true }); // Log ngay lập tức
             }
         }
 
@@ -724,9 +738,21 @@
             if (!text) return;
 
             window.speechSynthesis.cancel();
+            
+            // Đảm bảo tạo utterance ngay trong stack này để iOS không chặn
             const utter = new SpeechSynthesisUtterance(text);
+            
+            // Xử lý giọng đọc mobile
+            const voices = window.speechSynthesis.getVoices();
+            if (voices.length > 0) {
+                const preferredVoice = voices.find(v => v.lang.startsWith(currentLang));
+                if (preferredVoice) utter.voice = preferredVoice;
+            }
+
             utter.lang = LANGS[currentLang]?.tts || 'vi-VN';
             utter.rate = 1;
+            utter.pitch = 1;
+            utter.volume = 1;
 
             utter.onstart = () => {
                 isSpeaking = true;
@@ -735,12 +761,9 @@
             utter.onend = utter.onerror = () => {
                 isSpeaking = false;
                 stopTrackDuration();
-                if (totalTimeHeard > 0) {
-                    logEvent('listen_poi', { duration: totalTimeHeard });
-                    totalTimeHeard = 0;
-                }
                 updateTTSUI();
             };
+            
             window.speechSynthesis.speak(utter);
         }
 
@@ -787,8 +810,8 @@
             }
         }
 
-        function toggleMP3() {
-            unlockAudio();
+        async function toggleMP3() {
+            await unlockAudio();
             if (isMP3Playing) {
                 pauseMP3();
                 stopTrackDuration();
@@ -800,7 +823,7 @@
                 stopSpeak(); 
                 playMP3();
                 startTrackDuration();
-                logEvent('play_poi'); // Log starting play immediately
+                logEvent('play_poi', { urgent: true }); // Log ngay lập tức
             }
         }
 
