@@ -1,4 +1,4 @@
-﻿using Google.Cloud.Firestore;
+using Google.Cloud.Firestore;
 
 namespace VinhKhanhTour.Shared.Models;
 
@@ -12,5 +12,8 @@ public class AppHistory
     [FirestoreProperty] public string PoiName { get; set; } = "";
     [FirestoreProperty] public string Language { get; set; } = "vi";
     [FirestoreProperty] public string Device { get; set; } = "";
+    [FirestoreProperty] public int Duration { get; set; } = 0;
+    [FirestoreProperty] public double Lat { get; set; } = 0;
+    [FirestoreProperty] public double Lng { get; set; } = 0;
     [FirestoreProperty] public DateTime Timestamp { get; set; } = DateTime.UtcNow;
 }

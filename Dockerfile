@@ -12,7 +12,5 @@ WORKDIR /app
 COPY --from=build /out .
 
 
-ENV ASPNETCORE_URLS=http://+:8080
-ENV PORT=8080
-
-ENTRYPOINT ["dotnet", "VinhKhanhTour.Api.dll"]
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
+ENTRYPOINT ["sh", "-c", "dotnet VinhKhanhTour.Api.dll --urls http://0.0.0.0:${PORT:-8080}"]

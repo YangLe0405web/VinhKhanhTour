@@ -528,18 +528,28 @@
 
         const mp3Player = document.getElementById('audio-player');
 
-        // Request Location
+        // Request Location (Promise with timeout)
         function requestLocation() {
-            if ("geolocation" in navigator) {
+            return new Promise((resolve) => {
+                if (!("geolocation" in navigator)) return resolve(null);
+                
+                const timer = setTimeout(() => {
+                    console.warn("⏱️ Location timeout (2s)");
+                    resolve(null);
+                }, 2000);
+
                 navigator.geolocation.getCurrentPosition((pos) => {
+                    clearTimeout(timer);
                     userLat = pos.coords.latitude;
                     userLng = pos.coords.longitude;
                     console.log("📍 Location captured:", userLat, userLng);
-                    // Re-send scan if position was found late (optional but good)
+                    resolve({ lat: userLat, lng: userLng });
                 }, () => {
+                    clearTimeout(timer);
                     console.warn("⚠️ Location access denied.");
+                    resolve(null);
                 });
-            }
+            });
         }
 
         async function logEvent(action, extra = {}) {
@@ -555,6 +565,13 @@
                 duration: extra.duration || 0,
                 timestamp: new Date().toISOString()
             };
+            
+            // Nếu thoát trang, dùng sendBeacon cho chắc
+            if (extra.isLeaving && navigator.sendBeacon) {
+                navigator.sendBeacon(`${API}/api/history`, JSON.stringify(body));
+                return;
+            }
+
             try {
                 await fetch(`${API}/api/history`, {
                     method: 'POST',
@@ -575,28 +592,25 @@
             }
         }
 
-        // Send final duration when leaving
-        window.addEventListener('beforeunload', () => {
-            stopTrackDuration();
-            if (totalTimeHeard > 0) {
-                // Sử dụng keepalive để đảm bảo request đi được khi đóng tab
-                const body = JSON.stringify({
-                    action: 'listen_poi',
-                    poiId: poiData.id,
-                    poiName: poiData.name,
-                    language: currentLang,
-                    device: 'Web',
-                    duration: totalTimeHeard,
-                    lat: userLat,
-                    lng: userLng
-                });
-                fetch(`${API}/api/history`, { method: 'POST', body, headers: { 'Content-Type': 'application/json' }, keepalive: true });
+        // Bắt sự kiện thoát trang Mobile chính xác hơn
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === "hidden") {
+                stopTrackDuration();
+                if (totalTimeHeard > 0) {
+                    logEvent('listen_poi', { duration: totalTimeHeard, isLeaving: true });
+                    totalTimeHeard = 0; // Reset sau khi gửi
+                }
+            } else {
+                // Nếu quay lại mà đang phát thì đếm tiếp
+                if (isSpeaking || isMP3Playing) startTrackDuration();
             }
         });
 
         // ── 1. Load Data ──
         async function loadPoi() {
-            requestLocation();
+            // Đợi lấy GPS tối đa 2s trước khi log scan
+            await requestLocation();
+            
             try {
                 const res = await fetch(`${API}/api/pois`);
                 if (!res.ok) throw new Error();
@@ -618,7 +632,7 @@
                 // Hide loader
                 document.getElementById('loader').style.display = 'none';
 
-                // Initial scan log
+                // Log scan (Đã có GPS nếu user cho phép)
                 logEvent('scan_qr');
 
                 // Tăng lượt quét counter

@@ -1,5 +1,0 @@
-﻿  Determining projects to restore...
-  All projects are up-to-date for restore.
-  VinhKhanhTour.Shared -> D:\Projects\VinhKhanhTour\VinhKhanhTour.Shared\bin\Release\net8.0\VinhKhanhTour.Shared.dll
-D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\Pages\Audio.razor(57,5): warning RZ10012: Found markup element with unexpected name 'ButtonTemplate'. If this is intended to be a component, add a @using directive for its namespace. [D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\VinhKhanhTour.CMS.csproj]
-D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\Pages\Analytics.razor(138,18): error CS0305: Using the generic type 'ChartSeries<T>' requires 1 type arguments [D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\VinhKhanhTour.CMS.csproj]
