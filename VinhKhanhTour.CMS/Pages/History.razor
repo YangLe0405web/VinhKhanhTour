@@ -43,12 +43,6 @@
 @if (_loading)
 {
     <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
-    <MudText Typo="Typo.caption" Class="mt-2 d-block align-center">Đang kết nối Server, vui lòng đợi...</MudText>
-}
-else if (!string.IsNullOrEmpty(_errorMessage))
-{
-    <MudAlert Severity="Severity.Error" Class="mb-4">@_errorMessage</MudAlert>
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="LoadData">Thử lại</MudButton>
 }
 else
 {
@@ -129,22 +123,11 @@ else
     async Task LoadData()
     {
         _loading = true;
-        _errorMessage = "";
-        try
-        {
-            _history = (await Api.GetHistoryAsync() ?? new())
-                .Where(h => h.Action != "open_app")
-                .ToList();
-        }
-        catch (Exception ex)
-        {
-            _errorMessage = "Không thể kết nối đến Server. Có thể Server đang khởi động lại (vui lòng đợi 30s).";
-            Console.WriteLine($"Error loading history: {ex.Message}");
-        }
+        _history = (await Api.GetHistoryAsync() ?? new())
+            .Where(h => h.Action != "open_app")
+            .ToList();
         _loading = false;
     }
-    
-    string _errorMessage = "";
 
     string GetActionLabel(string action) => action switch
     {

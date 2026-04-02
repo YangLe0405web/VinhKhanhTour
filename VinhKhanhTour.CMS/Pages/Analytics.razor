@@ -13,12 +13,6 @@
 @if (_loading)
 {
     <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
-    <MudText Typo="Typo.caption" Class="mt-2 d-block align-center">Đang nạp số liệu từ Server, vui lòng đợi...</MudText>
-}
-else if (!string.IsNullOrEmpty(_errorMessage))
-{
-    <MudAlert Severity="Severity.Error" Class="mb-4">@_errorMessage</MudAlert>
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OnInitializedAsync">Thử lại</MudButton>
 }
 else
 {
@@ -179,33 +173,22 @@ else
     List<KeyValuePair<string, int>> _topPois = new();
     List<KeyValuePair<string, int>> _langStats = new();
 
-    string _errorMessage = "";
     protected override async Task OnInitializedAsync()
     {
-        _loading = true;
-        _errorMessage = "";
-        try
-        {
-            var t1 = Api.GetAnalyticsAsync();
-            var t2 = Api.GetTracesAsync();
-            var t3 = Api.GetHistoryAsync();
-            var t4 = Api.GetPoisAsync();
-            
-            await Task.WhenAll(t1, t2, t3, t4);
-            
-            _events = (t1.Result ?? new()).Where(e => e.EventType != "open_app" && !string.Equals(e.EventType, "open_app", StringComparison.OrdinalIgnoreCase)).ToList();
-            _traces = t2.Result ?? new();
-            _history = (t3.Result ?? new()).Where(h => h.Action != "open_app" && !string.Equals(h.Action, "open_app", StringComparison.OrdinalIgnoreCase)).ToList();
-            _pois = t4.Result ?? new();
-            
-            BuildUnified();
-            ComputeStats();
-        }
-        catch (Exception ex)
-        {
-            _errorMessage = "Không thể kết nối đến hệ thống Analytics. Vui lòng kiểm tra lại sau 30 giây.";
-            Console.WriteLine($"Analytics Error: {ex.Message}");
-        }
+        var t1 = Api.GetAnalyticsAsync();
+        var t2 = Api.GetTracesAsync();
+        var t3 = Api.GetHistoryAsync();
+        var t4 = Api.GetPoisAsync();
+        
+        await Task.WhenAll(t1, t2, t3, t4);
+        
+        _events = (t1.Result ?? new()).Where(e => e.EventType != "open_app").ToList();
+        _traces = t2.Result ?? new();
+        _history = (t3.Result ?? new()).Where(h => h.Action != "open_app").ToList();
+        _pois = t4.Result ?? new();
+        
+        BuildUnified();
+        ComputeStats();
         _loading = false;
     }
 
