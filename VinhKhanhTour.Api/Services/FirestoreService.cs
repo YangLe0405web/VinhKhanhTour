@@ -95,8 +95,8 @@ public class FirestoreService
 
             await _db.Collection("analytics").AddAsync(data);
             
-            // Invalidate analytics cache occasionally (or wait for expiry)
-            // For analytics, we skip manual removal to save on write-followed-by-read quota if possible
+            // Invalidate analytics cache for real-time feedback
+            _cache.Remove(CACHE_ANALYTICS);
         }
         catch (Exception ex)
         {
@@ -160,7 +160,10 @@ public class FirestoreService
     {
         history.Id = Guid.NewGuid().ToString("N")[..8];
         await _db.Collection("history").Document(history.Id).SetAsync(history);
-        // Note: We don't invalidate history cache here as it's meant to be eventually consistent
+        
+        // Invalidate history cache (including versions with common limits like 100)
+        _cache.Remove(CACHE_HISTORY);
+        _cache.Remove($"{CACHE_HISTORY}_100");
     }
 
     // ── Location Trace ────────────────────────────────

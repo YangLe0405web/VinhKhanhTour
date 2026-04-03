@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("VinhKhanhTour.CMS")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+21c2e6db35b3989d5c80ce301c84cab7f7fb39cb")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d7b6b7743bd73113a6175910006b1febbf162890")]
 [assembly: System.Reflection.AssemblyProductAttribute("VinhKhanhTour.CMS")]
 [assembly: System.Reflection.AssemblyTitleAttribute("VinhKhanhTour.CMS")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

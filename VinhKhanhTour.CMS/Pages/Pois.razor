@@ -238,8 +238,9 @@ else
 </MudDialog>
 
 @code {
-    List<PoiModel> _pois = new();
     bool _loading = true;
+    bool _error = false;
+    List<PoiModel> _pois = new();
 
     string _currentFilter = "Tất cả";
 
