@@ -1,3 +1,4 @@
+@page "/tours/new"
 @page "/tours/edit/{Id}"
 @using VinhKhanhTour.Shared.Models
 @using System.Net.Http.Json
@@ -44,19 +45,17 @@
             <div class="vk-upload-area">
                 @if (!string.IsNullOrEmpty(_tour.ImageUrl))
                 {
-                    <img src="@_tour.ImageUrl" class="vk-upload-preview" />
+                    <img src="@(_tour.ImageUrl.StartsWith("/") ? "https://vinhkhanh-api.onrender.com" + _tour.ImageUrl : _tour.ImageUrl)" class="vk-upload-preview" />
                 }
                 <div class="vk-upload-overlay">
                     <MudFileUpload T="IBrowserFile" FilesChanged="UploadImage">
-                        <ButtonTemplate>
-                            <MudButton HtmlTag="label"
-                                       Variant="Variant.Filled"
+                        <ActivatorContent>
+                            <MudButton Variant="Variant.Filled"
                                        Color="Color.Primary"
-                                       StartIcon="@Icons.Material.Filled.CloudUpload"
-                                       for="@context">
+                                       StartIcon="@Icons.Material.Filled.CloudUpload">
                                 Tải ảnh lên
                             </MudButton>
-                        </ButtonTemplate>
+                        </ActivatorContent>
                     </MudFileUpload>
                 </div>
             </div>
@@ -65,6 +64,11 @@
         </div>
 
         <MudDivider Class="my-6 opacity-10" />
+
+        <MudSelect T="string" @bind-Value="_tour.QrType" Label="Loại Mã QR" Variant="Variant.Outlined" Class="mb-4">
+            <MudSelectItem Value="@("play")">🔊 Play Audio (Quét là nghe)</MudSelectItem>
+            <MudSelectItem Value="@("navigate")">🗺️ Navigate (Chỉ đường)</MudSelectItem>
+        </MudSelect>
 
         <MudSwitch @bind-Value="_tour.IsActive" Label="Kích hoạt Tour" Color="Color.Success" />
     </div>
@@ -205,6 +209,7 @@
     private List<PoiModel> _poisOnRoute = new();
     private bool _loading = true;
     private bool _saving = false;
+    private bool _mapInitialized = false;
     private double _distance = 0;
     private DotNetObjectReference<TourEditor>? _objRef;
 
@@ -223,52 +228,32 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender && !_loading)
+        if (!_loading && !_mapInitialized)
         {
+            _mapInitialized = true;
             _objRef = DotNetObjectReference.Create(this);
             await JS.InvokeVoidAsync("initTourEditorMap", _objRef);
-            
-            // Nếu là Edit, vẽ luôn route cũ nếu có tọa độ
-            // (Hiện tại model Tour chưa lưu tọa độ route, ta sẽ bổ sung logic sau)
         }
     }
 
     [JSInvokable]
     public async Task OnRouteSelected(double lat1, double lng1, double lat2, double lng2)
     {
-        // Gọi OSRM API để lấy lộ trình thực tế
-        using var client = new HttpClient();
-        var url = $"https://router.project-osrm.org/route/v1/driving/{lng1},{lat1};{lng2},{lat2}?overview=full&geometries=polyline";
-        
-        try 
-        {
-            var response = await client.GetFromJsonAsync<OsrmResponse>(url);
-            if (response != null && response.Routes.Any())
-            {
-                var route = response.Routes.First();
-                _distance = route.Distance / 1000.0; // Meeters -> Km
-                
-                // Giải mã polyline (đơn giản hóa: dùng luôn điểm OSRM trả về)
-                // OSRM encoded polyline decoder is complex, for demo we just use it string or assume points
-                // Let's use a simpler way: just draw straight line first or pass points to JS
-                
-                // In a real app, you'd decode 'route.Geometry'
-                // For now, let's just pass the 2 points to JS and let it handle drawing or use OSRM in JS
-                
-                await JS.InvokeVoidAsync("drawTourRoute", new[] { 
-                    new[] { lat1, lng1 }, 
-                    new[] { lat2, lng2 } 
-                });
+        // Tính quãng đường bằng Haversine (không dùng API ngoài)
+        _distance = GetDistance(lat1, lng1, lat2, lng2);
 
-                // Tự động tìm POI quanh lộ trình (đơn giản hóa: quanh 2 điểm A, B và trung điểm)
-                FindPoisAround(lat1, lng1, lat2, lng2);
-                StateHasChanged();
-            }
-        }
-        catch (Exception ex)
+        var coords = new[]
         {
-            Snackbar.Add("Lỗi tính toán lộ trình: " + ex.Message, Severity.Error);
-        }
+            new[] { lat1, lng1 },
+            new[] { lat2, lng2 }
+        };
+
+        // Vẽ đường thẳng A → B trên bản đồ
+        await JS.InvokeVoidAsync("drawTourRoute", new object[] { coords });
+
+        // Tự động gợi ý POI dọc lộ trình
+        FindPoisAround(lat1, lng1, lat2, lng2);
+        StateHasChanged();
     }
 
     private void FindPoisAround(double lat1, double lng1, double lat2, double lng2)

@@ -51,7 +51,14 @@ public class CmsApiService
 
         var result = await resp.Content
             .ReadFromJsonAsync<Dictionary<string, string>>();
-        return result?["url"];
+        
+        var url = result?["url"];
+        if (!string.IsNullOrEmpty(url) && url.StartsWith("/"))
+        {
+            return _http.BaseAddress?.ToString().TrimEnd('/') + url;
+        }
+
+        return url;
     }
 
     // ── History ───────────────────────────────────────

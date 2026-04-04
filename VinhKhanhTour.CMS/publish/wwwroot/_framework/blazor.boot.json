@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "VinhKhanhTour.CMS",
   "resources": {
-    "hash": "sha256-5Eduoo34Mlpuptpfynvn+lqHR2mwZYQFOTvi1zVUTwI=",
+    "hash": "sha256-JaiSfE+3S4XTTxAtnAzlHE5Io5kYPr+MDTJiooOlAIQ=",
     "jsModuleNative": {
       "dotnet.native.js": "sha256-zuMINBgM7/v7pnooIJY2oxN7FcvZ3ZQdnoDdnMnkyuQ="
     },
@@ -71,8 +71,8 @@
       "Paramore.Brighter.Firestore.wasm": "sha256-xuSpbjMRMVJAACIP4dUR2s/+GIubbvvVKTWn5Lnvmrs=",
       "Paramore.Brighter.Inbox.Firestore.wasm": "sha256-YPgMmtnOopz+/71t4WQeZChJPR5yP9M8hMD8OxTVuy4=",
       "Paramore.Brighter.wasm": "sha256-TOgCwRHcTr5/YDMr8SfO2b4DvcSi7Qmb1x5MqqnOns4=",
-      "Polly.Core.wasm": "sha256-KTJauctpPXJ5ou3dyR+y5E+Nx2sM1RjkXb55FqC0Auc=",
-      "Polly.wasm": "sha256-fjy1ix52+QqFaLZHRRfrWeTC3HzOC2RidJ1mm0syTbI=",
+      "Polly.Core.wasm": "sha256-ZyCENxMxb5EIjXTEmbhsaD69WkIuGfbEpuHWmurzrRM=",
+      "Polly.wasm": "sha256-Eca9VaIUMW0GpQHVz+QFUhNSWQISwTw7uBBM/5si2PM=",
       "QRCoder.wasm": "sha256-2nBq1NcGTfWUHUKqES7ICJv2L5XGHQLFpAWiTVnB/dM=",
       "System.CodeDom.wasm": "sha256-bfK544jMUpUiNA09b7vzgsWbHoETYSwxx8thBEVhKrE=",
       "System.Collections.Concurrent.wasm": "sha256-QSXOMB8mzR4GSyFARA+0MLFvXmonbkOa3HZ80ef4zdk=",
@@ -142,8 +142,8 @@
       "System.Xml.XDocument.wasm": "sha256-otJYF3T5FZwRklgpunZw9QOak4pzkrb39QcUqqMuUFw=",
       "System.Xml.XPath.XDocument.wasm": "sha256-o+10xZjBmO/yxLHVAE4wzZxCxb5SLZW35JRveSAgpp4=",
       "System.wasm": "sha256-25KTxVbx+rD8S9iyUye7jmbj1e4TZ5Ca+elup4oegJA=",
-      "VinhKhanhTour.CMS.wasm": "sha256-MJLyyyyC7e4amkv8nruTf/JLcNgJ0FKtB1eySdaEydo=",
-      "VinhKhanhTour.Shared.wasm": "sha256-igyFOY5d7Yg5TnBu4X3kbur3rqPDlmbiTzAWtUHC2Iw=",
+      "VinhKhanhTour.CMS.wasm": "sha256-gRmX3WdCg9ZCGB6DMJs4f2uHdftwRVrt/rUZIySdAOo=",
+      "VinhKhanhTour.Shared.wasm": "sha256-t8s6tdMt4fu9u1cZxrEFoM5UU/hInjWg+/8NLS2bJ0c=",
       "netstandard.wasm": "sha256-/nnxVqKSpyUI5Y5kwmhOJyLlfB3D7HeGgcSp7K2CgNo="
     }
   },

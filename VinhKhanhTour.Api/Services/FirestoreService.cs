@@ -112,7 +112,7 @@ public class FirestoreService
             entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10);
             var snap = await _db.Collection("analytics")
                 .OrderByDescending("Timestamp")
-                .Limit(300) // Giảm còn 300 để tiết kiệm
+                .Limit(2000)
                 .GetSnapshotAsync();
 
             return snap.Documents.Select(d =>
@@ -139,7 +139,7 @@ public class FirestoreService
     }
 
     // ── App History ───────────────────────────────────
-    public async Task<List<AppHistory>> GetHistoryAsync(int limit = 100)
+    public async Task<List<AppHistory>> GetHistoryAsync(int limit = 2000)
     {
         // History cache key includes limit to be safe
         var key = $"{CACHE_HISTORY}_{limit}";
@@ -161,9 +161,9 @@ public class FirestoreService
         history.Id = Guid.NewGuid().ToString("N")[..8];
         await _db.Collection("history").Document(history.Id).SetAsync(history);
         
-        // Invalidate history cache (including versions with common limits like 100)
+        // Invalidate history cache
         _cache.Remove(CACHE_HISTORY);
-        _cache.Remove($"{CACHE_HISTORY}_100");
+        _cache.Remove($"{CACHE_HISTORY}_2000");
     }
 
     // ── Location Trace ────────────────────────────────
