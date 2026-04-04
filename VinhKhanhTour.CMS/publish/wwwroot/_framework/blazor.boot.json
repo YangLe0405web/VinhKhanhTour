@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "VinhKhanhTour.CMS",
   "resources": {
-    "hash": "sha256-jD1MP7yYpcNNW9Nze+T14Zg9WwH1hp21R7s9arGSLSg=",
+    "hash": "sha256-5Eduoo34Mlpuptpfynvn+lqHR2mwZYQFOTvi1zVUTwI=",
     "jsModuleNative": {
       "dotnet.native.js": "sha256-zuMINBgM7/v7pnooIJY2oxN7FcvZ3ZQdnoDdnMnkyuQ="
     },
@@ -142,8 +142,8 @@
       "System.Xml.XDocument.wasm": "sha256-otJYF3T5FZwRklgpunZw9QOak4pzkrb39QcUqqMuUFw=",
       "System.Xml.XPath.XDocument.wasm": "sha256-o+10xZjBmO/yxLHVAE4wzZxCxb5SLZW35JRveSAgpp4=",
       "System.wasm": "sha256-25KTxVbx+rD8S9iyUye7jmbj1e4TZ5Ca+elup4oegJA=",
-      "VinhKhanhTour.CMS.wasm": "sha256-Z9SS1FNCjcOfYGvlPJmpNFRvGtoIp3ODL19XqAGT3cU=",
-      "VinhKhanhTour.Shared.wasm": "sha256-bC/A8/evpAJyEY8Gz+ZPlKXBJqX9cvSRpdizgnNIAzA=",
+      "VinhKhanhTour.CMS.wasm": "sha256-MJLyyyyC7e4amkv8nruTf/JLcNgJ0FKtB1eySdaEydo=",
+      "VinhKhanhTour.Shared.wasm": "sha256-igyFOY5d7Yg5TnBu4X3kbur3rqPDlmbiTzAWtUHC2Iw=",
       "netstandard.wasm": "sha256-/nnxVqKSpyUI5Y5kwmhOJyLlfB3D7HeGgcSp7K2CgNo="
     }
   },

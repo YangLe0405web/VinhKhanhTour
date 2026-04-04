@@ -1,4 +1,4 @@
-﻿using Google.Cloud.Firestore;
+using Google.Cloud.Firestore;
 
 namespace VinhKhanhTour.Shared.Models;
 
@@ -12,6 +12,7 @@ public class TourModel
     [FirestoreProperty] public bool IsActive { get; set; } = true;
     [FirestoreProperty] public int QrScans { get; set; } = 0;
     [FirestoreProperty] public string QrType { get; set; } = "play";
+    [FirestoreProperty] public string ImageUrl { get; set; } = "";
     [FirestoreProperty] public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     [FirestoreProperty] public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 }      

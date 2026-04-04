@@ -4,7 +4,7 @@
 @inject IJSRuntime JS
 
 <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
-    <MudText Typo="Typo.h4">📊 Analytics v2.2 (Verified Cache)</MudText>
+    <MudText Typo="Typo.h4">📊 Analytics v2.3 (Precision Stats)</MudText>
     <MudButton Variant="Variant.Filled" Color="Color.Primary" 
                StartIcon="@Icons.Material.Filled.Refresh" 
                Disabled="_loading"
@@ -237,10 +237,11 @@ else
         {
             var match = list.Where(u => 
                 u.PoiId == e.PoiId && 
-                u.EventType == "poi_play" && 
+                (u.EventType == "poi_play" || u.EventType == "play_poi") && 
                 u.Duration == 0 && 
-                u.Timestamp <= e.Timestamp.AddMinutes(15))
-                .OrderByDescending(u => u.Timestamp)
+                u.Timestamp >= e.Timestamp.AddMinutes(-5) && 
+                u.Timestamp <= e.Timestamp.AddMinutes(5))
+                .OrderBy(u => Math.Abs((u.Timestamp - e.Timestamp).TotalSeconds))
                 .FirstOrDefault();
 
             if (match != null)

@@ -1,0 +1,363 @@
+@page "/tours/edit/{Id}"
+@using VinhKhanhTour.Shared.Models
+@using System.Net.Http.Json
+@inject CmsApiService Api
+@inject ISnackbar Snackbar
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+@implements IDisposable
+
+<PageTitle>@(IsEdit ? "Sửa Tour" : "Thêm Tour Mới") — VinhKhanhTour</PageTitle>
+
+<div class="d-flex align-items-center justify-content-between mb-6">
+    <div class="d-flex align-items-center gap-3">
+        <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" 
+                       OnClick='() => Nav.NavigateTo("/tours")'
+                       Style="background: rgba(255,255,255,0.05); color: #fb923c;" />
+        <MudText Typo="Typo.h5" Style="font-weight: 800; color: #fb923c;">
+            @(IsEdit ? "✏️ Sửa Tour" : "➕ Thêm Tour Mới")
+        </MudText>
+    </div>
+
+    <MudButton Variant="Variant.Filled" 
+               Color="Color.Success"
+               StartIcon="@Icons.Material.Filled.Save"
+               OnClick="SaveTour"
+               Disabled="_saving"
+               Style="border-radius: 12px; padding: 10px 24px; font-weight: 700;">
+        @(_saving ? "Đang lưu..." : "Lưu Tour")
+    </MudButton>
+</div>
+
+<div class="vk-editor-container">
+    @* --- Left Panel: Information --- *@
+    <div class="vk-editor-panel info-panel">
+        <MudText Typo="Typo.subtitle2" Class="mb-4 opacity-50">THÔNG TIN CƠ BẢN</MudText>
+        
+        <MudTextField @bind-Value="_tour.Name" Label="Tên Tour" Variant="Variant.Outlined" FullWidth Class="mb-4" />
+        
+        <MudTextField @bind-Value="_tour.Desc" Label="Mô tả chi tiết" Variant="Variant.Outlined" 
+                      Lines="4" FullWidth Class="mb-4" />
+
+        <div class="mb-4">
+            <MudText Typo="Typo.caption" Class="mb-1 d-block opacity-70">HÌNH ẢNH ĐẠI DIỆN</MudText>
+            <div class="vk-upload-area">
+                @if (!string.IsNullOrEmpty(_tour.ImageUrl))
+                {
+                    <img src="@_tour.ImageUrl" class="vk-upload-preview" />
+                }
+                <div class="vk-upload-overlay">
+                    <MudFileUpload T="IBrowserFile" FilesChanged="UploadImage">
+                        <ButtonTemplate>
+                            <MudButton HtmlTag="label"
+                                       Variant="Variant.Filled"
+                                       Color="Color.Primary"
+                                       StartIcon="@Icons.Material.Filled.CloudUpload"
+                                       for="@context">
+                                Tải ảnh lên
+                            </MudButton>
+                        </ButtonTemplate>
+                    </MudFileUpload>
+                </div>
+            </div>
+            <MudTextField @bind-Value="_tour.ImageUrl" Label="Hoặc dán URL ảnh tại đây" 
+                          Variant="Variant.Text" Margin="Margin.Dense" Class="mt-2" />
+        </div>
+
+        <MudDivider Class="my-6 opacity-10" />
+
+        <MudSwitch @bind-Value="_tour.IsActive" Label="Kích hoạt Tour" Color="Color.Success" />
+    </div>
+
+    @* --- Right Panel: Map & Route --- *@
+    <div class="vk-editor-panel map-panel">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <MudText Typo="Typo.subtitle2" Class="opacity-50">LỘ TRÌNH TRÊN BẢN ĐỒ</MudText>
+            @if (_distance > 0)
+            {
+                <MudChip T="string" Color="Color.Warning" Variant="Variant.Filled" Size="Size.Small">
+                    📏 Quãng đường: @_distance.ToString("N2") km
+                </MudChip>
+            }
+        </div>
+
+        <MudAlert Severity="Severity.Info" Dense="true" Class="mb-3 rounded-lg py-1 px-3" Style="font-size: 13px;">
+            Click lần 1 để đặt điểm <b>A (bắt đầu)</b>, click lần 2 để đặt điểm <b>B (kết thúc)</b>.
+        </MudAlert>
+
+        <div id="tour-map" class="vk-map-container"></div>
+
+        @if (_poisOnRoute.Any())
+        {
+            <div class="mt-6">
+                <MudText Typo="Typo.subtitle2" Class="mb-3 opacity-50">ĐIỂM DỪNG TRÊN LỘ TRÌNH (@_poisOnRoute.Count)</MudText>
+                <div class="vk-poi-list">
+                    @foreach (var poi in _poisOnRoute)
+                    {
+                        <div class="vk-poi-item">
+                            <div class="vk-poi-index">@(_poisOnRoute.IndexOf(poi) + 1)</div>
+                            <div class="vk-poi-info">
+                                <MudText Typo="Typo.body2" Style="font-weight: 600;">@poi.Name</MudText>
+                                <MudText Typo="Typo.caption" Class="opacity-50">@poi.Latitude, @poi.Longitude</MudText>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .vk-editor-container {
+        display: grid;
+        grid-template-columns: 400px 1fr;
+        gap: 24px;
+        height: calc(100vh - 200px);
+    }
+
+    .vk-editor-panel {
+        background: rgba(30, 41, 59, 0.4);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255,255,255,0.05);
+        border-radius: 20px;
+        padding: 24px;
+        overflow-y: auto;
+    }
+
+    .vk-map-container {
+        height: 500px;
+        border-radius: 16px;
+        border: 1px solid rgba(255,255,255,0.1);
+        z-index: 1;
+    }
+
+    .vk-upload-area {
+        height: 200px;
+        border-radius: 16px;
+        background: rgba(0,0,0,0.2);
+        border: 2px dashed rgba(255,255,255,0.1);
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .vk-upload-preview {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .vk-upload-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0,0,0,0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .vk-upload-area:hover .vk-upload-overlay { opacity: 1; }
+
+    .vk-poi-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .vk-poi-item {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 12px;
+        background: rgba(255,255,255,0.03);
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .vk-poi-index {
+        width: 28px;
+        height: 28px;
+        background: #fb923c;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 14px;
+    }
+
+    /* Override MudBlazor colors for dark/orange theme */
+    .mud-input.mud-input-outlined { background: rgba(0,0,0,0.2); }
+</style>
+
+@code {
+    [Parameter] public string? Id { get; set; }
+    private bool IsEdit => !string.IsNullOrEmpty(Id);
+
+    private TourModel _tour = new();
+    private List<PoiModel> _allPois = new();
+    private List<PoiModel> _poisOnRoute = new();
+    private bool _loading = true;
+    private bool _saving = false;
+    private double _distance = 0;
+    private DotNetObjectReference<TourEditor>? _objRef;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _allPois = await Api.GetPoisAsync() ?? new();
+        
+        if (IsEdit)
+        {
+            var tours = await Api.GetToursAsync();
+            _tour = tours?.FirstOrDefault(t => t.Id == Id) ?? new();
+        }
+        
+        _loading = false;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_loading)
+        {
+            _objRef = DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("initTourEditorMap", _objRef);
+            
+            // Nếu là Edit, vẽ luôn route cũ nếu có tọa độ
+            // (Hiện tại model Tour chưa lưu tọa độ route, ta sẽ bổ sung logic sau)
+        }
+    }
+
+    [JSInvokable]
+    public async Task OnRouteSelected(double lat1, double lng1, double lat2, double lng2)
+    {
+        // Gọi OSRM API để lấy lộ trình thực tế
+        using var client = new HttpClient();
+        var url = $"https://router.project-osrm.org/route/v1/driving/{lng1},{lat1};{lng2},{lat2}?overview=full&geometries=polyline";
+        
+        try 
+        {
+            var response = await client.GetFromJsonAsync<OsrmResponse>(url);
+            if (response != null && response.Routes.Any())
+            {
+                var route = response.Routes.First();
+                _distance = route.Distance / 1000.0; // Meeters -> Km
+                
+                // Giải mã polyline (đơn giản hóa: dùng luôn điểm OSRM trả về)
+                // OSRM encoded polyline decoder is complex, for demo we just use it string or assume points
+                // Let's use a simpler way: just draw straight line first or pass points to JS
+                
+                // In a real app, you'd decode 'route.Geometry'
+                // For now, let's just pass the 2 points to JS and let it handle drawing or use OSRM in JS
+                
+                await JS.InvokeVoidAsync("drawTourRoute", new[] { 
+                    new[] { lat1, lng1 }, 
+                    new[] { lat2, lng2 } 
+                });
+
+                // Tự động tìm POI quanh lộ trình (đơn giản hóa: quanh 2 điểm A, B và trung điểm)
+                FindPoisAround(lat1, lng1, lat2, lng2);
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("Lỗi tính toán lộ trình: " + ex.Message, Severity.Error);
+        }
+    }
+
+    private void FindPoisAround(double lat1, double lng1, double lat2, double lng2)
+    {
+        _poisOnRoute.Clear();
+        foreach (var poi in _allPois)
+        {
+            // Kiểm tra POI có gần điểm A hoặc điểm B hoặc trung điểm không (bán kính ~500m)
+            var d1 = GetDistance(lat1, lng1, poi.Latitude, poi.Longitude);
+            var d2 = GetDistance(lat2, lng2, poi.Latitude, poi.Longitude);
+            var midLat = (lat1 + lat2) / 2;
+            var midLng = (lng1 + lng2) / 2;
+            var d3 = GetDistance(midLat, midLng, poi.Latitude, poi.Longitude);
+
+            if (d1 < 0.5 || d2 < 0.5 || d3 < 0.5)
+            {
+                if (!_poisOnRoute.Any(p => p.Id == poi.Id))
+                    _poisOnRoute.Add(poi);
+            }
+        }
+    }
+
+    private double GetDistance(double lat1, double lon1, double lat2, double lon2)
+    {
+        var R = 6371; // km
+        var dLat = (lat2 - lat1) * Math.PI / 180;
+        var dLon = (lon2 - lon1) * Math.PI / 180;
+        var a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+                Math.Cos(lat1 * Math.PI / 180) * Math.Cos(lat2 * Math.PI / 180) *
+                Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+        var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+        return R * c;
+    }
+
+    private async Task UploadImage(IBrowserFile file)
+    {
+        try 
+        {
+            using var stream = file.OpenReadStream(maxAllowedSize: 5 * 1024 * 1024); // 5MB
+            var url = await Api.UploadImageAsync(stream, file.Name);
+            if (!string.IsNullOrEmpty(url))
+            {
+                _tour.ImageUrl = url;
+                Snackbar.Add("Đã tải ảnh lên thành công!", Severity.Success);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("Lỗi upload: " + ex.Message, Severity.Error);
+        }
+    }
+
+    private async Task SaveTour()
+    {
+        if (string.IsNullOrEmpty(_tour.Name))
+        {
+            Snackbar.Add("Vui lòng nhập tên tour!", Severity.Warning);
+            return;
+        }
+
+        _saving = true;
+        
+        // Cập nhật danh sách POI ID vào tour
+        _tour.PoiIds = _poisOnRoute.Select(p => p.Id).ToList();
+
+        var resp = await Api.SaveTourAsync(_tour);
+        if (resp.IsSuccessStatusCode)
+        {
+            Snackbar.Add("✅ Đã lưu tour thành công!", Severity.Success);
+            Nav.NavigateTo("/tours");
+        }
+        else
+        {
+            Snackbar.Add("❌ Lỗi khi lưu tour!", Severity.Error);
+        }
+        _saving = false;
+    }
+
+    public void Dispose() => _objRef?.Dispose();
+
+    // Helper classes for OSRM
+    public class OsrmResponse {
+        [System.Text.Json.Serialization.JsonPropertyName("routes")]
+        public List<OsrmRoute> Routes { get; set; } = new();
+    }
+    public class OsrmRoute {
+        [System.Text.Json.Serialization.JsonPropertyName("distance")]
+        public double Distance { get; set; }
+        [System.Text.Json.Serialization.JsonPropertyName("geometry")]
+        public string Geometry { get; set; } = "";
+    }
+}

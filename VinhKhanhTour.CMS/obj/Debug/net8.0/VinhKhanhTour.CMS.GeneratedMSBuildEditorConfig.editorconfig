@@ -61,6 +61,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVG91ckRpYWxvZy5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
+[D:/Projects/VinhKhanhTour/VinhKhanhTour.CMS/Pages/TourEditor.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVG91ckVkaXRvci5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
 [D:/Projects/VinhKhanhTour/VinhKhanhTour.CMS/Pages/Tours.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVG91cnMucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 

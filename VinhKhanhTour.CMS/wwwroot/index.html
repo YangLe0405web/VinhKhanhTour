@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>VinhKhanhTour</title>
+    <title>VinhKhanhTour CMS</title>
     <base href="/" />
 
     <!-- CSS -->
@@ -21,13 +21,12 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    <!-- ✅ Leaflet.heat plugin — cần cho initHeatmap -->
+    <!-- Leaflet.heat plugin -->
     <script src="https://leaflet.github.io/Leaflet.heat/dist/leaflet-heat.js"></script>
 </head>
 
 <body>
 
-    <!-- App -->
     <div id="app">
         <svg class="loading-progress">
             <circle r="40%" cx="50%" cy="50%" />
@@ -36,7 +35,6 @@
         <div class="loading-progress-text"></div>
     </div>
 
-    <!-- Error -->
     <div id="blazor-error-ui">
         An error has occurred.
         <a href="" class="reload">Reload</a>
@@ -47,11 +45,8 @@
     <script src="_framework/blazor.webassembly.js"></script>
     <script src="_content/MudBlazor/MudBlazor.min.js"></script>
 
-    <!-- ===================== -->
-    <!-- 📥 DOWNLOAD           -->
-    <!-- ===================== -->
+    <!-- DOWNLOAD -->
     <script>
-        // Dùng cho nút "Tải QR PNG" trong Tours.razor
         window.downloadBase64File = (base64Data, fileName) => {
             const link = document.createElement('a');
             link.href = base64Data;
@@ -60,9 +55,7 @@
         };
     </script>
 
-    <!-- ===================== -->
-    <!-- 🔊 AUDIO              -->
-    <!-- ===================== -->
+    <!-- AUDIO -->
     <script>
         window.playAudio = (url) => {
             try {
@@ -77,267 +70,69 @@
         };
     </script>
 
-    <!-- ===================== -->
-    <!-- 🗺️ MAP (POI Dialog)   -->
-    <!-- ===================== -->
+    <!-- MAP UTILS -->
     <script>
         window.initMap = (lat, lng) => {
-            if (window._map) {
-                window._map.remove();
-            }
+            if (window._map) window._map.remove();
             var map = L.map('map').setView([lat, lng], 18);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19
-            }).addTo(map);
-            var marker = L.marker([lat, lng]).addTo(map);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+            L.marker([lat, lng]).addTo(map);
             window._map = map;
-            window._marker = marker;
         };
 
-        window._poiMarkers = {};
-
-        window.addPois = (pois) => {
-            pois.forEach(p => {
-                const marker = L.marker([p.latitude, p.longitude])
-                    .addTo(window._map)
-                    .bindPopup(p.name);
-                window._poiMarkers[p.id] = marker;
-            });
-        };
-
-        window.highlightPoi = (id) => {
-            Object.values(window._poiMarkers).forEach(m => {
-                m.setOpacity(0.5);
-            });
-            if (window._poiMarkers[id]) {
-                window._poiMarkers[id].setOpacity(1);
-                window._poiMarkers[id].openPopup();
-            }
-        };
-    </script>
-
-    <!-- ===================== -->
-    <!-- 📍 GPS TRACKING       -->
-    <!-- ===================== -->
-    <script>
-        window.startGpsTracking = (dotnetRef) => {
-            if (!navigator.geolocation) {
-                alert("GPS không hỗ trợ");
-                return;
-            }
-            navigator.geolocation.watchPosition(
-                pos => {
-                    const lat = pos.coords.latitude;
-                    const lng = pos.coords.longitude;
-                    console.log("GPS:", lat, lng);
-                    if (window._marker) {
-                        window._marker.setLatLng([lat, lng]);
-                    }
-                    if (window._map) {
-                        window._map.setView([lat, lng], 18);
-                    }
-                    dotnetRef.invokeMethodAsync("OnLocationChanged", lat, lng);
-                },
-                err => {
-                    console.log("GPS error:", err);
-                },
-                {
-                    enableHighAccuracy: true,
-                    maximumAge: 1000,
-                    timeout: 5000
-                }
-            );
-        };
-    </script>
-
-    <!-- ================================================ -->
-    <!-- 🔥 HEATMAP — initHeatmap(points)                 -->
-    <!--    points: [{lat, lng}, ...]                      -->
-    <!--    Hiển thị mật độ vị trí người dùng             -->
-    <!--    Gọi từ Analytics.razor OnAfterRenderAsync      -->
-    <!-- ================================================ -->
-    <script>
         window.initHeatmap = (points) => {
-            // Dọn map cũ nếu còn
-            if (window._heatmapInstance) {
-                window._heatmapInstance.remove();
-                window._heatmapInstance = null;
-            }
-            if (window._heatmap) {
-                window._heatmap.remove();
-                window._heatmap = null;
-            }
-
-            // Trung tâm phố Vĩnh Khánh — fallback khi không có dữ liệu
-            const CENTER_LAT = 10.7613;
-            const CENTER_LNG = 106.7047;
-
-            var lat = CENTER_LAT;
-            var lng = CENTER_LNG;
-            var zoom = 17;
-
-            // Nếu có dữ liệu, tính trung tâm thực tế
-            if (points && points.length > 0) {
-                lat = points.reduce((s, p) => s + p.lat, 0) / points.length;
-                lng = points.reduce((s, p) => s + p.lng, 0) / points.length;
-            }
-
-            // Khởi tạo bản đồ Leaflet vào div#heatmap
-            var map = L.map('heatmap').setView([lat, lng], zoom);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19,
-                attribution: '© OpenStreetMap'
-            }).addTo(map);
-
-            // Vẽ heatmap nếu có dữ liệu
+            if (window._heatmap) window._heatmap.remove();
+            var map = L.map('heatmap').setView([10.7613, 106.7047], 17);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
             if (points && points.length > 0) {
                 var heatData = points.map(p => [p.lat, p.lng, 0.6]);
-                window._heatmapInstance = L.heatLayer(heatData, {
-                    radius: 25,
-                    blur: 20,
-                    maxZoom: 17,
-                    gradient: {
-                        0.2: '#3388ff',
-                        0.4: '#00c853',
-                        0.6: '#ffeb3b',
-                        0.8: '#ff9800',
-                        1.0: '#f44336'
-                    }
-                }).addTo(map);
-
-                // Fit bounds theo dữ liệu thực
-                try {
-                    var latlngs = points.map(p => [p.lat, p.lng]);
-                    map.fitBounds(L.latLngBounds(latlngs), { padding: [30, 30], maxZoom: 18 });
-                } catch (e) {
-                    console.warn("fitBounds heatmap error:", e);
-                }
-            } else {
-                // Không có dữ liệu → hiển thị chú thích
-                var info = L.control({ position: 'topright' });
-                info.onAdd = function () {
-                    var d = L.DomUtil.create('div');
-                    d.style.cssText = 'background:white;padding:8px 12px;border-radius:8px;font-size:13px;color:#888;box-shadow:0 2px 8px rgba(0,0,0,0.15)';
-                    d.textContent = 'Chưa có dữ liệu vị trí';
-                    return d;
-                };
-                info.addTo(map);
+                L.heatLayer(heatData, { radius: 25, blur: 20 }).addTo(map);
             }
-
             window._heatmap = map;
         };
     </script>
 
-    <!-- ================================================ -->
-    <!-- 🗺️ TRACE MAP — initTraceMap(sessions)            -->
-    <!--    sessions: [[{lat,lng},...], [{lat,lng},...]]   -->
-    <!--    Mỗi session là 1 polyline màu khác nhau        -->
-    <!--    Gọi từ Analytics.razor OnAfterRenderAsync      -->
-    <!-- ================================================ -->
+    <!-- TOUR EDITOR -->
     <script>
-        window.initTraceMap = (sessions) => {
-            // Dọn map cũ nếu còn
-            if (window._tracemap) {
-                window._tracemap.remove();
-                window._tracemap = null;
-            }
+        window.initTourEditorMap = (dotnet) => {
+            if (window._tourMap) window._tourMap.remove();
+            
+            // Map container: tour-map (cần khớp ID trong Razor)
+            window._tourMap = L.map('tour-map').setView([10.7613, 106.7047], 17);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(window._tourMap);
+            
+            window._tourMarkers = [];
+            window._tourRouteLayer = null;
 
-            const CENTER_LAT = 10.7613;
-            const CENTER_LNG = 106.7047;
-
-            // Màu polyline theo thứ tự session
-            const SESSION_COLORS = [
-                '#1A237E', '#E65100', '#1B5E20', '#880E4F',
-                '#006064', '#F57F17', '#4A148C', '#B71C1C',
-                '#0D47A1', '#33691E'
-            ];
-
-            var map = L.map('tracemap').setView([CENTER_LAT, CENTER_LNG], 17);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19,
-                attribution: '© OpenStreetMap'
-            }).addTo(map);
-
-            var allPoints = [];
-
-            if (sessions && sessions.length > 0) {
-                sessions.forEach((session, idx) => {
-                    if (!session || session.length === 0) return;
-
-                    var color = SESSION_COLORS[idx % SESSION_COLORS.length];
-                    var latlngs = session.map(p => [p.lat, p.lng]);
-
-                    // Vẽ polyline cho session này
-                    L.polyline(latlngs, {
-                        color: color,
-                        weight: 3,
-                        opacity: 0.75,
-                        lineJoin: 'round'
-                    }).addTo(map);
-
-                    // Marker điểm bắt đầu (xanh lá)
-                    if (latlngs.length > 0) {
-                        L.circleMarker(latlngs[0], {
-                            radius: 6,
-                            fillColor: '#00c853',
-                            color: '#fff',
-                            weight: 2,
-                            fillOpacity: 1
-                        }).addTo(map).bindTooltip(`Session ${idx + 1} — Bắt đầu`, { sticky: true });
-                    }
-
-                    // Marker điểm kết thúc (đỏ)
-                    if (latlngs.length > 1) {
-                        var last = latlngs[latlngs.length - 1];
-                        L.circleMarker(last, {
-                            radius: 6,
-                            fillColor: '#f44336',
-                            color: '#fff',
-                            weight: 2,
-                            fillOpacity: 1
-                        }).addTo(map).bindTooltip(`Session ${idx + 1} — Kết thúc`, { sticky: true });
-                    }
-
-                    allPoints = allPoints.concat(latlngs);
-                });
-
-                // Fit bounds theo tất cả điểm
-                if (allPoints.length > 0) {
-                    try {
-                        map.fitBounds(L.latLngBounds(allPoints), { padding: [30, 30], maxZoom: 18 });
-                    } catch (e) {
-                        console.warn("fitBounds tracemap error:", e);
-                    }
+            window._tourMap.on('click', function(e) {
+                if (window._tourMarkers.length >= 2) {
+                    window._tourMarkers.forEach(m => window._tourMap.removeLayer(m));
+                    window._tourMarkers = [];
+                    if (window._tourRouteLayer) window._tourMap.removeLayer(window._tourRouteLayer);
                 }
 
-                // Legend số session
-                var legend = L.control({ position: 'bottomright' });
-                legend.onAdd = function () {
-                    var d = L.DomUtil.create('div');
-                    d.style.cssText = 'background:white;padding:8px 12px;border-radius:8px;font-size:12px;box-shadow:0 2px 8px rgba(0,0,0,0.15);max-height:160px;overflow-y:auto';
-                    var html = '<b>Tuyến di chuyển</b><br>';
-                    sessions.forEach((s, i) => {
-                        if (!s || s.length === 0) return;
-                        var c = SESSION_COLORS[i % SESSION_COLORS.length];
-                        html += `<span style="display:inline-block;width:18px;height:4px;background:${c};border-radius:2px;margin-right:6px;vertical-align:middle"></span>Session ${i + 1} (${s.length} điểm)<br>`;
-                    });
-                    d.innerHTML = html;
-                    return d;
-                };
-                legend.addTo(map);
-            } else {
-                // Không có dữ liệu
-                var info = L.control({ position: 'topright' });
-                info.onAdd = function () {
-                    var d = L.DomUtil.create('div');
-                    d.style.cssText = 'background:white;padding:8px 12px;border-radius:8px;font-size:13px;color:#888;box-shadow:0 2px 8px rgba(0,0,0,0.15)';
-                    d.textContent = 'Chưa có dữ liệu tuyến đi';
-                    return d;
-                };
-                info.addTo(map);
-            }
+                const marker = L.circleMarker(e.latlng, {
+                    radius: 10,
+                    fillColor: window._tourMarkers.length === 0 ? "#10b981" : "#ef4444",
+                    color: "#fff",
+                    weight: 3,
+                    fillOpacity: 1
+                }).addTo(window._tourMap);
+                
+                window._tourMarkers.push(marker);
 
-            window._tracemap = map;
+                if (window._tourMarkers.length === 2) {
+                    const p1 = window._tourMarkers[0].getLatLng();
+                    const p2 = window._tourMarkers[1].getLatLng();
+                    dotnet.invokeMethodAsync("OnRouteSelected", p1.lat, p1.lng, p2.lat, p2.lng);
+                }
+            });
+        };
+
+        window.drawTourRoute = (coords) => {
+            if (window._tourRouteLayer) window._tourMap.removeLayer(window._tourRouteLayer);
+            window._tourRouteLayer = L.polyline(coords, { color: '#fb923c', weight: 6, opacity: 0.8 }).addTo(window._tourMap);
+            window._tourMap.fitBounds(window._tourRouteLayer.getBounds(), { padding: [50, 50] });
         };
     </script>
 

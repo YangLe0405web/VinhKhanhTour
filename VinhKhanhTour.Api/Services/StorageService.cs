@@ -61,4 +61,38 @@ public class StorageService
         var docId = $"{poiId}_{lang}";
         await _db.Collection("audio_files").Document(docId).DeleteAsync();
     }
+
+    /// <summary>
+    /// Lưu ảnh dưới dạng Base64 vào Firestore collection "images"
+    /// Trả về URL dạng API endpoint để lấy ảnh
+    /// </summary>
+    public async Task<string> UploadImageAsync(Stream fileStream, string fileName, string contentType)
+    {
+        using var ms = new MemoryStream();
+        await fileStream.CopyToAsync(ms);
+        var base64 = Convert.ToBase64String(ms.ToArray());
+
+        var imageId = Guid.NewGuid().ToString("N")[..12];
+        var data = new Dictionary<string, object>
+        {
+            { "id", imageId },
+            { "fileName", fileName },
+            { "contentType", contentType },
+            { "data", base64 },
+            { "updatedAt", Timestamp.GetCurrentTimestamp() }
+        };
+
+        await _db.Collection("images").Document(imageId).SetAsync(data);
+        return $"/api/tours/image/{imageId}";
+    }
+
+    public async Task<(byte[]? data, string? contentType)> GetImageAsync(string imageId)
+    {
+        var doc = await _db.Collection("images").Document(imageId).GetSnapshotAsync();
+        if (!doc.Exists) return (null, null);
+
+        var base64 = doc.GetValue<string>("data");
+        var ct = doc.ContainsField("contentType") ? doc.GetValue<string>("contentType") : "image/jpeg";
+        return (Convert.FromBase64String(base64), ct);
+    }
 }

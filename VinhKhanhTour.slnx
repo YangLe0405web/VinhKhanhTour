@@ -1,5 +1,4 @@
 <Solution>
-  <Project Path="../../C#/VinhKhanhTour/VinhKhanhTour/VinhKhanhTour.csproj" />
   <Project Path="VinhKhanhTour.Api/VinhKhanhTour.Api.csproj" />
   <Project Path="VinhKhanhTour.CMS/VinhKhanhTour.CMS.csproj" />
   <Project Path="VinhKhanhTour.Shared/VinhKhanhTour.Shared.csproj" />

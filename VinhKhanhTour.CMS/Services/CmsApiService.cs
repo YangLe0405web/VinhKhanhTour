@@ -38,6 +38,22 @@ public class CmsApiService
         return result?["url"];
     }
 
+    public async Task<string?> UploadImageAsync(Stream stream, string fileName)
+    {
+        var form = new MultipartFormDataContent();
+        var content = new StreamContent(stream);
+        content.Headers.ContentType =
+            new System.Net.Http.Headers.MediaTypeHeaderValue("image/jpeg");
+        form.Add(content, "file", fileName);
+
+        var resp = await _http.PostAsync("api/tours/upload-image", form);
+        if (!resp.IsSuccessStatusCode) return null;
+
+        var result = await resp.Content
+            .ReadFromJsonAsync<Dictionary<string, string>>();
+        return result?["url"];
+    }
+
     // ── History ───────────────────────────────────────
     public Task<List<AppHistory>?> GetHistoryAsync()
         => _http.GetFromJsonAsync<List<AppHistory>>("api/history");
