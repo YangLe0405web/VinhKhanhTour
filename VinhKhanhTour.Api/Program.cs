@@ -37,12 +37,11 @@ builder.Services.AddCors(options =>
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddMemoryCache(); // Thêm dịch vụ bộ nhớ đệm
+builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<FirestoreService>();
 builder.Services.AddSingleton<StorageService>();
 builder.Services.AddHttpClient();
 
-// Cấu hình Forwarded Headers chuẩn cho Render
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
@@ -54,11 +53,33 @@ var app = builder.Build();
 
 app.UseForwardedHeaders();
 
+// ── CHIÊU CUỐI: Middleware xử lý CORS thủ công cho mọi Request ──
+app.Use(async (context, next) =>
+{
+    var origin = context.Request.Headers["Origin"].ToString();
+    if (!string.IsNullOrEmpty(origin))
+    {
+        context.Response.Headers.Append("Access-Control-Allow-Origin", origin);
+        context.Response.Headers.Append("Access-Control-Allow-Headers", "*");
+        context.Response.Headers.Append("Access-Control-Allow-Methods", "*");
+        context.Response.Headers.Append("Access-Control-Allow-Credentials", "true");
+    }
+
+    if (context.Request.Method == "OPTIONS")
+    {
+        context.Response.StatusCode = 200;
+        await context.Response.CompleteAsync();
+        return;
+    }
+
+    await next();
+});
+
 app.UseRouting();
 app.UseCors("AllowAll");
 app.UseAuthorization();
 
-app.MapGet("/", () => "Vinh Khanh Tour API is running (CORS Secured)!");
+app.MapGet("/", () => "Vinh Khanh Tour API is running (CORS Unified)!");
 app.MapControllers();
 
 app.Run();
