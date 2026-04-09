@@ -179,17 +179,19 @@ public class FirestoreService
             if (!poi.RequirePayment) return true;
         }
 
-        // 2. Tìm lịch sử thanh toán trong 24h qua
+        // 2. Tìm lịch sử thanh toán cho thiết bị này (lọc bằng code C# để tránh lỗi thiếu Index trên Firestore)
         var cutoff = DateTime.UtcNow.AddHours(-24);
-        var snap = await _db.Collection("history")
+        var query = _db.Collection("history")
             .WhereEqualTo("Action", "pay_audio")
-            .WhereEqualTo("Device", deviceId) 
-            .WhereEqualTo("PoiId", poiId)
-            .WhereGreaterThanOrEqualTo("Timestamp", cutoff)
-            .Limit(1)
-            .GetSnapshotAsync();
+            .WhereEqualTo("Device", deviceId);
+            
+        var snap = await query.GetSnapshotAsync();
 
-        return snap.Documents.Count > 0;
+        return snap.Documents.Any(d => {
+            if (!d.Exists) return false;
+            var history = d.ConvertTo<AppHistory>();
+            return history.PoiId == poiId && history.Timestamp >= cutoff;
+        });
     }
 
     // ── Location Trace ────────────────────────────────
