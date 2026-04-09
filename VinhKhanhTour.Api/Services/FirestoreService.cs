@@ -274,4 +274,50 @@ public class FirestoreService
         };
         await LogEventAsync(ev);
     }
+
+    // ── User Management & Auth ────────────────────────
+    public async Task<AppUser?> GetUserByUsernameAsync(string username)
+    {
+        var snap = await _db.Collection("users")
+            .WhereEqualTo("Username", username)
+            .Limit(1)
+            .GetSnapshotAsync();
+
+        return snap.Documents.FirstOrDefault()?.ConvertTo<AppUser>();
+    }
+
+    public async Task<List<AppUser>> GetAllUsersAsync()
+    {
+        var snap = await _db.Collection("users").GetSnapshotAsync();
+        return snap.Documents.Select(d => d.ConvertTo<AppUser>()).ToList();
+    }
+
+    public async Task<string> SaveUserAsync(AppUser user)
+    {
+        if (string.IsNullOrEmpty(user.Id)) user.Id = Guid.NewGuid().ToString();
+        await _db.Collection("users").Document(user.Id).SetAsync(user);
+        return user.Id;
+    }
+
+    public async Task DeleteUserAsync(string id)
+    {
+        await _db.Collection("users").Document(id).DeleteAsync();
+    }
+
+    public async Task InitializeAdminAsync()
+    {
+        var admin = await GetUserByUsernameAsync("admin");
+        if (admin == null)
+        {
+            var newAdmin = new AppUser
+            {
+                Username = "admin",
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123"),
+                FullName = "System Admin",
+                Role = "admin"
+            };
+            await SaveUserAsync(newAdmin);
+            Console.WriteLine("✅ Initialized default admin account: admin / admin123");
+        }
+    }
 }

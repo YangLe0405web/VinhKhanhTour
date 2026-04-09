@@ -2,6 +2,9 @@ using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
 using VinhKhanhTour.Api.Services;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,6 +44,21 @@ builder.Services.AddSingleton<FirestoreService>();
 builder.Services.AddSingleton<StorageService>();
 builder.Services.AddHttpClient();
 
+// ── 3. JWT Authentication ──
+var jwtKey = builder.Configuration["Jwt:Secret"] ?? "vinhkhanhtour_super_secret_key_2026_!@#";
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+        };
+    });
+
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
@@ -64,7 +82,15 @@ app.UseSwaggerUI(c =>
 });
 
 app.UseCors("AllowAll");
+app.UseAuthentication();
 app.UseAuthorization();
+
+// ── 4. Initialize Admin Account ──
+using (var scope = app.Services.CreateScope())
+{
+    var firestore = scope.ServiceProvider.GetRequiredService<FirestoreService>();
+    await firestore.InitializeAdminAsync();
+}
 
 app.MapGet("/", () => "Vinh Khanh Tour API is running (Swagger Enabled)!");
 app.MapControllers();
