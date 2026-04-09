@@ -97,6 +97,27 @@ public class CmsApiService
 
         return await resp.Content.ReadFromJsonAsync<TranslateResult>();
     }
+
+    // ── Visit/Pay ──────────────────────────────────
+    public async Task<bool> CheckAccessAsync(string poiId, string deviceId)
+    {
+        try
+        {
+            var result = await _http.GetFromJsonAsync<AccessResult>($"api/pois/{poiId}/check-access?deviceId={deviceId}");
+            return result?.Paid ?? false;
+        }
+        catch { return false; }
+    }
+
+    public Task<HttpResponseMessage> PayAsync(string poiId, string deviceId, string lang = "vi")
+        => _http.PostAsJsonAsync($"api/pois/{poiId}/pay", new { Device = deviceId, Language = lang });
+
+} // end of CmsApiService class
+
+// ── Access result model
+public class AccessResult
+{
+    [JsonPropertyName("paid")] public bool Paid { get; set; }
 }
 
 // ── Model kết quả dịch từ Gemini ─────────────────────────────────────
