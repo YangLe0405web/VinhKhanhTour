@@ -53,27 +53,8 @@ var app = builder.Build();
 
 app.UseForwardedHeaders();
 
-// CHIÊU CUỐI: CORS Middleware toàn diện
-app.Use(async (context, next) =>
-{
-    var origin = context.Request.Headers["Origin"].ToString();
-    if (!string.IsNullOrEmpty(origin))
-    {
-        context.Response.Headers.Append("Access-Control-Allow-Origin", origin);
-        context.Response.Headers.Append("Access-Control-Allow-Headers", "*");
-        context.Response.Headers.Append("Access-Control-Allow-Methods", "*");
-        context.Response.Headers.Append("Access-Control-Allow-Credentials", "true");
-    }
 
-    if (context.Request.Method == "OPTIONS")
-    {
-        context.Response.StatusCode = 200;
-        await context.Response.CompleteAsync();
-        return;
-    }
-
-    await next();
-});
+app.UseRouting();
 
 // Bật Swagger cho cả môi trường Production để tiện testing
 app.UseSwagger();
@@ -83,7 +64,6 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = "swagger"; // Truy cập tại /swagger
 });
 
-app.UseRouting();
 app.UseCors("AllowAll");
 app.UseAuthorization();
 

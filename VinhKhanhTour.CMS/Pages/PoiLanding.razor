@@ -173,6 +173,24 @@
                 }
             </div>
 
+            @* ── Diagnostic Info (Only for troubleshooting) ── *@
+            <MudExpansionPanels Class="mt-8" Style="background:transparent;">
+                <MudExpansionPanel Text="Thông tin kỹ thuật (Debug)" Style="background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.4)">
+                    <div class="pa-2 text-xs font-mono">
+                        <p>DeviceID: @_deviceId</p>
+                        <p>PoiID: @PoiId</p>
+                        <p>Name: @(_poi?.Name ?? "NULL")</p>
+                        <p>Pay Required: @(_poi?.RequirePayment.ToString() ?? "NULL")</p>
+                        <p>Access Status: @_hasAccess</p>
+                        <p>Audio Count: @(_poi?.AudioUrls?.Count ?? 0)</p>
+                        @if (!string.IsNullOrEmpty(_errorMessage))
+                        {
+                            <p class="text-red-400">Error: @_errorMessage</p>
+                        }
+                    </div>
+                </MudExpansionPanel>
+            </MudExpansionPanels>
+
             <div class="text-center mt-8 text-white/30">
                 <MudText Typo="Typo.caption">© 2026 Vinh Khanh Food Tour • Powered by Antigravity</MudText>
             </div>
@@ -189,30 +207,47 @@
     bool _processing = false;
     string _deviceId = "";
     string viContent = "";
+    string _errorMessage = "";
 
     protected override async Task OnInitializedAsync()
     {
-        // 1. Lấy deviceId từ localStorage (hoặc tạo mới)
-        _deviceId = await JS.InvokeAsync<string>("localStorage.getItem", "vinhkhanh_visitor_id");
-        if (string.IsNullOrEmpty(_deviceId))
+        try 
         {
-            _deviceId = Guid.NewGuid().ToString("N")[..12];
-            await JS.InvokeVoidAsync("localStorage.setItem", "vinhkhanh_visitor_id", _deviceId);
+            _loading = true;
+            // 1. Lấy deviceId từ localStorage (hoặc tạo mới)
+            _deviceId = await JS.InvokeAsync<string>("localStorage.getItem", "vinhkhanh_visitor_id");
+            if (string.IsNullOrEmpty(_deviceId))
+            {
+                _deviceId = "v_" + Guid.NewGuid().ToString("N")[..10];
+                await JS.InvokeVoidAsync("localStorage.setItem", "vinhkhanh_visitor_id", _deviceId);
+            }
+
+            // 2. Load POI
+            var pois = await Api.GetPoisAsync();
+            if (pois == null) 
+            {
+                 _errorMessage = "Khônng thể kết nối API.";
+            }
+            else 
+            {
+                _poi = pois.FirstOrDefault(p => p.Id == PoiId);
+                if (_poi != null)
+                {
+                    viContent = _poi.Content.TryGetValue("vi", out var c) ? c : "Không có dữ liệu.";
+                    
+                    // 3. Kiểm tra quyền truy cập
+                    _hasAccess = await Api.CheckAccessAsync(PoiId, _deviceId);
+                }
+            }
         }
-
-        // 2. Load POI
-        var pois = await Api.GetPoisAsync();
-        _poi = pois?.FirstOrDefault(p => p.Id == PoiId);
-
-        if (_poi != null)
+        catch (Exception ex)
         {
-            viContent = _poi.Content.TryGetValue("vi", out var c) ? c : "Không có dữ liệu.";
-            
-            // 3. Kiểm tra quyền truy cập
-            _hasAccess = await Api.CheckAccessAsync(PoiId, _deviceId);
+            _errorMessage = ex.Message;
         }
-
-        _loading = false;
+        finally 
+        {
+            _loading = false;
+        }
     }
 
     async Task HandlePayment()

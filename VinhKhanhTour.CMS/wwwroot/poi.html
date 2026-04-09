@@ -381,6 +381,45 @@
             letter-spacing: 2px;
         }
 
+        /* ── Payment Section ── */
+        .pay-card {
+            background: linear-gradient(135deg, #fdfaf5 0%, #f7f1e6 100%);
+            border: 2px solid var(--accent-gold);
+            padding: 24px;
+            border-radius: 20px;
+            margin-bottom: 24px;
+            text-align: center;
+            display: none;
+        }
+        .pay-btn {
+            background: #2c2121;
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 14px;
+            margin-top: 16px;
+            width: 100%;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .pay-btn:disabled { opacity: 0.5; }
+
+        .debug-section {
+            width: 100%;
+            max-width: 420px;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border: 1px dashed rgba(255,255,255,0.2);
+            border-radius: 12px;
+            font-family: monospace;
+            font-size: 10px;
+            color: #888;
+            display: none;
+        }
+
         /* ── Loading State ── */
         #loader {
             position: fixed;
@@ -445,6 +484,18 @@
                 </div>
             </div>
 
+            <!-- Payment Block -->
+            <div id="pay-block" class="pay-card">
+                <div style="font-size: 32px; margin-bottom: 12px;">🔒</div>
+                <h3 style="font-size: 18px; margin-bottom: 8px;">Nội dung cao cấp</h3>
+                <p style="font-size: 13px; color: #666; margin-bottom: 20px;">
+                    Để nghe thuyết minh chuyên nghiệp và xem chi tiết, vui lòng thanh toán một phần phí nhỏ (tương đương 1 ly trà đá).
+                </p>
+                <button class="pay-btn" id="pay-btn-trigger" onclick="handlePayment()">
+                    THANH TOÁN <span id="pay-amount">25.000</span> VNĐ
+                </button>
+            </div>
+
             <!-- PRO MP3 Player Card -->
             <div id="audio-section" class="section-pro">
                 <span class="mag-label">Audio Chuyên Nghiệp</span>
@@ -496,9 +547,14 @@
         © VinhKhanhTour • Audio Guide
     </div>
 
+    <div class="debug-section" id="debug-box" onclick="this.style.display='none'">
+        <div>Debug Information:</div>
+        <div id="debug-content"></div>
+    </div>
+
     <script>
         const API = 'https://vinhkhanh-api.onrender.com';
-        const pathParts = window.location.pathname.split('/');
+        const pathParts = window.location.pathname.split('/').filter(p => p);
         const poiId = pathParts[pathParts.length - 1];
 
         const LANGS = {
@@ -519,12 +575,80 @@
         let currentLang = 'vi';
         let isSpeaking = false;
         let isMP3Playing = false;
+        let hasAccess = false;
+        let deviceId = '';
 
         // ── Analytics & History ──
         let userLat = 0;
         let userLng = 0;
         let playStartedAt = null;
         let totalTimeHeard = 0;
+
+        function setCookie(name, value, days) {
+            let expires = "";
+            if (days) {
+                let date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = "; expires=" + date.toUTCString();
+            }
+            document.cookie = name + "=" + (value || "") + expires + "; path=/; SameSite=Lax";
+        }
+
+        function getCookie(name) {
+            let nameEQ = name + "=";
+            let ca = document.cookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+            }
+            return null;
+        }
+
+        async function fetchWithRetry(url, options = {}, retries = 3, backoff = 1000) {
+            showDebug(`Fetching: ${url.replace(API, '[API]')}`);
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (!response.ok && response.status >= 500) throw new Error(`Server Error ${response.status}`);
+                    return response;
+                } catch (err) {
+                    const isLast = i === retries - 1;
+                    const errorMsg = `Lần ${i+1} lỗi: ${err.message}`;
+                    console.warn(errorMsg);
+                    if (isLast) throw new Error(`Lỗi kết nối sau ${retries} lần thử: ${err.message}`);
+                    await new Promise(r => setTimeout(r, backoff * (i + 1)));
+                }
+            }
+        }
+
+        function getDeviceId() {
+            const cookieId = getCookie('vinhkhanh_visitor_id');
+            const storageId = localStorage.getItem('vinhkhanh_visitor_id');
+            
+            let id = cookieId || storageId;
+            let source = cookieId ? 'Cookie' : (storageId ? 'Storage' : 'New');
+
+            if (!id || id === 'null' || id === 'undefined' || id.length < 5) {
+                id = 'v6_' + Math.random().toString(36).substr(2, 9);
+                source = 'Generated';
+            }
+            
+            // Re-sync both
+            setCookie('vinhkhanh_visitor_id', id, 365);
+            localStorage.setItem('vinhkhanh_visitor_id', id);
+            
+            showDebug(`DeviceID: ${id} (from ${source})`);
+            return id;
+        }
+        deviceId = getDeviceId();
+
+        function showDebug(msg) {
+            const box = document.getElementById('debug-box');
+            const content = document.getElementById('debug-content');
+            box.style.display = 'block';
+            content.innerHTML += `<div>[${new Date().toLocaleTimeString()}] > ${msg}</div>`;
+        }
 
         const mp3Player = document.getElementById('audio-player');
 
@@ -590,11 +714,11 @@
             }
 
             try {
-                await fetch(url, {
+                await fetchWithRetry(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(body)
-                });
+                }).catch(() => {});
             } catch (e) { }
         }
 
@@ -642,40 +766,129 @@
             }
         });
 
-        // ── 1. Load Data ──
+        async function checkAccess() {
+            try {
+                const url = `${API}/api/pois/${poiId}/check-access?deviceId=${encodeURIComponent(deviceId)}`;
+                const res = await fetchWithRetry(url);
+                const data = await res.json();
+                hasAccess = data.paid;
+                showDebug(`Access check: ${hasAccess}`);
+            } catch (e) {
+                hasAccess = false;
+                showDebug(`Access check error: ${e.message}`);
+            }
+        }
+
+        async function handlePayment() {
+            const btn = document.getElementById('pay-btn-trigger');
+            btn.disabled = true;
+            btn.textContent = 'ĐANG XỬ LÝ...';
+            
+            try {
+                // Simulate delay for UX
+                await new Promise(r => setTimeout(r, 1000));
+                
+                const res = await fetchWithRetry(`${API}/api/pois/${poiId}/pay`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        device: deviceId, 
+                        language: currentLang,
+                        poiId: poiId 
+                    })
+                });
+                
+                if (res.ok) {
+                    hasAccess = true;
+                    alert('Thanh toán thành công! Bạn đã mở khóa nội dung thuyết minh.');
+                    refreshAccessUI();
+                } else {
+                    const errData = await res.json().catch(() => ({}));
+                    alert(`Lỗi khi xử lý thanh toán: ${errData.error || 'Vui lòng thử lại.'}`);
+                }
+            } catch (e) {
+                alert('Lỗi kết nối hoặc API không phản hồi. Vui lòng kiểm tra mạng và thử lại.');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = `THANH TOÁN ${poiData.price?.toLocaleString() || '25.000'} VNĐ`;
+            }
+        }
+
+        function refreshAccessUI() {
+            const payBlock = document.getElementById('pay-block');
+            const ttsBlock = document.getElementById('tts-section');
+            const audioBlock = document.getElementById('audio-section');
+            const contentBox = document.getElementById('script-box');
+
+            if (poiData.requirePayment && !hasAccess) {
+                payBlock.style.display = 'block';
+                ttsBlock.style.display = 'none';
+                audioBlock.style.display = 'none';
+                contentBox.style.filter = 'blur(4px)';
+                contentBox.style.pointerEvents = 'none';
+                document.getElementById('pay-amount').textContent = poiData.price?.toLocaleString() || '25.000';
+            } else {
+                payBlock.style.display = 'none';
+                ttsBlock.style.display = 'flex';
+                // audioBlock display handled by checkAudio()
+                contentBox.style.filter = 'none';
+                contentBox.style.pointerEvents = 'auto';
+                checkAudio();
+            }
+        }
+
         async function loadPoi() {
-            // Đợi lấy GPS tối đa 2s trước khi log scan
-            await requestLocation();
+            showDebug(`DeviceID: ${deviceId}`);
+            showDebug(`POI: ${poiId}`);
+            
+            // GPS capture
+            requestLocation().then(loc => {
+                if (loc) showDebug(`GPS: ${loc.lat.toFixed(4)}, ${loc.lng.toFixed(4)}`);
+                else showDebug(`GPS: Không lấy được (Hãy bật vị trí)`);
+            });
             
             try {
                 const res = await fetch(`${API}/api/pois`);
-                if (!res.ok) throw new Error();
+                if (!res.ok) throw new Error("API Connection Failed");
                 const pois = await res.json();
                 poiData = pois.find(p => p.id === poiId);
 
                 if (!poiData) {
+                    showDebug(`Lỗi: Không tìm thấy POI ${poiId}`);
                     document.getElementById('loader').innerHTML = '<div class="mag-header" style="color:red">Không tìm thấy POI</div>';
                     return;
                 }
+
+                showDebug(`POI Data: OK (${poiData.name})`);
 
                 // Detect Lang
                 const browserLang = (navigator.language || 'vi').split('-')[0];
                 if (poiData.content?.[browserLang]) currentLang = browserLang;
 
+                // Check Access
+                try {
+                    const accUrl = `${API}/api/pois/${poiId}/check-access?deviceId=${encodeURIComponent(deviceId)}`;
+                    const accRes = await fetchWithRetry(accUrl);
+                    const accData = await accRes.json();
+                    hasAccess = accData.paid;
+                    showDebug(`Access: ${hasAccess}`);
+                } catch (e) {
+                    showDebug(`Access check error: ${e.message}`);
+                }
+                
+                refreshAccessUI();
                 renderPoi();
-                checkAudio();
 
                 // Hide loader
                 document.getElementById('loader').style.display = 'none';
 
-                // Log scan (Đã có GPS nếu user cho phép)
+                // Log scan
                 logEvent('scan_qr');
-
-                // Tăng lượt quét counter
-                fetch(`${API}/api/pois/${poiId}/scan`, { method: 'POST' }).catch(() => { });
+                fetchWithRetry(`${API}/api/pois/${poiId}/scan`, { method: 'POST' }).catch(() => { });
 
             } catch (err) {
-                document.getElementById('loader').innerHTML = '<div class="mag-header" style="color:red">Lỗi kết nối...</div>';
+                showDebug(`Fatal Error: ${err.message}`);
+                document.getElementById('loader').innerHTML = `<div class="mag-header" style="color:red">Lỗi: ${err.message}</div>`;
             }
         }
 
