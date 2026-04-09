@@ -1,7 +1,10 @@
 @page "/audio"
-@attribute [Authorize(Roles = "admin")]
+@attribute [Authorize]
 @inject CmsApiService Api
 @inject ISnackbar Snackbar
+@inject AuthenticationStateProvider AuthStateProvider
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
 
 <MudText Typo="Typo.h4" Class="mb-4">🎵 Quản lý Audio</MudText>
 
@@ -28,13 +31,12 @@ else
                                         @lang.Value
                                     </MudText>
 
-                                    @if (poi.AudioUrls.ContainsKey(lang.Key))
+                                    @if (poi.AudioUrls != null && poi.AudioUrls.ContainsKey(lang.Key))
                                     {
                                         <MudText Typo="Typo.caption"
                                                  Color="Color.Success" Class="mb-2">
                                             ✅ Đã có audio
                                         </MudText>
-                                        @* Sửa lại thẻ audio như sau *@
                                         <audio controls style="width:100%" crossorigin="anonymous">
                                             <source src="@poi.AudioUrls[lang.Key]" type="audio/mpeg" />
                                         </audio>
@@ -52,19 +54,19 @@ else
                                         </MudText>
                                     }
 
-                                   <MudFileUpload T="IBrowserFile"
-               Accept=".mp3,.wav,.ogg"
-               FilesChanged="f => UploadAudio(f, poi, lang.Key)">
-    <ButtonTemplate>
-        <MudButton Variant="Variant.Outlined"
-                   Color="Color.Primary"
-                   Size="Size.Small"
-                   Class="mt-2"
-                   StartIcon="@Icons.Material.Filled.Upload">
-            Upload @lang.Value
-        </MudButton>
-    </ButtonTemplate>
-</MudFileUpload>
+                                    <MudFileUpload T="IBrowserFile"
+                                                 Accept=".mp3,.wav,.ogg"
+                                                 FilesChanged="f => UploadAudio(f, poi, lang.Key)">
+                                        <ActivatorContent>
+                                            <MudButton Variant="Variant.Outlined"
+                                                       Color="Color.Primary"
+                                                       Size="Size.Small"
+                                                       Class="mt-2"
+                                                       StartIcon="@Icons.Material.Filled.Upload">
+                                                Upload @lang.Value
+                                            </MudButton>
+                                        </ActivatorContent>
+                                    </MudFileUpload>
                                 </MudPaper>
                             </MudItem>
                         }
@@ -90,7 +92,23 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        _pois = await Api.GetPoisAsync() ?? new();
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        var role = user.FindFirst(ClaimTypes.Role)?.Value;
+
+        var allPois = await Api.GetPoisAsync() ?? new();
+
+        if (role == "admin")
+        {
+            _pois = allPois;
+        }
+        else
+        {
+            var managedIdsStr = user.FindFirst("ManagedPoiIds")?.Value ?? "";
+            var managedIds = managedIdsStr.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
+            _pois = allPois.Where(p => managedIds.Contains(p.Id)).ToList();
+        }
+
         _loading = false;
     }
 

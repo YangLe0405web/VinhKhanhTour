@@ -29,11 +29,19 @@ public class CmsApiService
         return _poisCache;
     }
 
-    public Task<HttpResponseMessage> SavePoiAsync(PoiModel poi)
-        => _http.PostAsJsonAsync("api/pois", poi);
+    public async Task<HttpResponseMessage> SavePoiAsync(PoiModel poi)
+    {
+        var resp = await _http.PostAsJsonAsync("api/pois", poi);
+        if (resp.IsSuccessStatusCode) _poisCache = null; // Clear cache on change
+        return resp;
+    }
 
-    public Task<HttpResponseMessage> DeletePoiAsync(string id)
-        => _http.DeleteAsync($"api/pois/{id}");
+    public async Task<HttpResponseMessage> DeletePoiAsync(string id)
+    {
+        var resp = await _http.DeleteAsync($"api/pois/{id}");
+        if (resp.IsSuccessStatusCode) _poisCache = null; // Clear cache on change
+        return resp;
+    }
 
     // ── Audio ─────────────────────────────────────────
     public async Task<string?> UploadAudioAsync(

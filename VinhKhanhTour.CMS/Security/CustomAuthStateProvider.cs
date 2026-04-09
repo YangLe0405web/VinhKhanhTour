@@ -50,7 +50,36 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
         var payload = jwt.Split('.')[1];
         var jsonBytes = ParseBase64WithoutPadding(payload);
         var keyValuePairs = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(jsonBytes);
-        return keyValuePairs!.Select(kvp => new Claim(kvp.Key, kvp.Value.ToString()!));
+        
+        var claims = new List<Claim>();
+        if (keyValuePairs != null)
+        {
+            foreach (var kvp in keyValuePairs)
+            {
+                var key = kvp.Key;
+                if (key == "role") key = ClaimTypes.Role;
+
+                if (kvp.Value is System.Text.Json.JsonElement element)
+                {
+                    if (element.ValueKind == System.Text.Json.JsonValueKind.Array)
+                    {
+                        foreach (var item in element.EnumerateArray())
+                        {
+                            claims.Add(new Claim(key, item.ToString()!));
+                        }
+                    }
+                    else
+                    {
+                        claims.Add(new Claim(key, element.ToString()!));
+                    }
+                }
+                else
+                {
+                    claims.Add(new Claim(key, kvp.Value.ToString()!));
+                }
+            }
+        }
+        return claims;
     }
 
     private byte[] ParseBase64WithoutPadding(string base64)

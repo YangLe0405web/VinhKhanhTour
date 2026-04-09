@@ -76,17 +76,21 @@ else
 
     async Task EditUser(AppUser user)
     {
-        // Copy to avoid direct mutation
         var model = new AppUser
         {
             Id = user.Id,
-            Username = user.Username,
-            FullName = user.FullName,
-            Role = user.Role,
-            ManagedPoiIds = new List<string>(user.ManagedPoiIds)
+            Username = string.IsNullOrEmpty(user.Username) ? "" : user.Username,
+            FullName = user.FullName ?? "",
+            Role = user.Role ?? "owner",
+            ManagedPoiIds = user.ManagedPoiIds != null ? new List<string>(user.ManagedPoiIds) : new List<string>()
         };
 
-        var parameters = new DialogParameters { ["User"] = model, ["AllPois"] = _pois };
+        var parameters = new DialogParameters 
+        { 
+            ["User"] = model, 
+            ["AllPois"] = _pois,
+            ["IsEdit"] = !string.IsNullOrEmpty(user.Username)
+        };
         var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
         
         var dialog = await DialogService.ShowAsync<UserDialog>(user.Id == null ? "Thêm người dùng" : "Sửa người dùng", parameters, options);

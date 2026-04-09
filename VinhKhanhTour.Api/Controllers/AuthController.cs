@@ -55,9 +55,9 @@ public class AuthController : ControllerBase
             new Claim("UserId", user.Id)
         };
 
-        foreach (var poiId in user.ManagedPoiIds)
+        if (user.ManagedPoiIds.Any())
         {
-            claims.Add(new Claim("ManagedPoiId", poiId));
+            claims.Add(new Claim("ManagedPoiIds", string.Join(",", user.ManagedPoiIds)));
         }
 
         var token = new JwtSecurityToken(

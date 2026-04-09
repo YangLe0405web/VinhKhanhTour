@@ -1,11 +1,14 @@
 @page "/pois"
-@attribute [Authorize(Roles = "admin")]
+@attribute [Authorize]
 @using VinhKhanhTour.Shared.Models
 @using QRCoder
 @inject CmsApiService Api
 @inject ISnackbar Snackbar
 @inject IDialogService DialogService
 @inject IJSRuntime JS
+@inject AuthenticationStateProvider AuthStateProvider
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
 
 <div class="mb-6">
     <MudText Typo="Typo.h5" Style="font-weight: 700; color: #ffffff; display: flex; align-items: center; gap: 8px;">
@@ -296,7 +299,22 @@ else
         StateHasChanged();
         try
         {
-            _pois = await Api.GetPoisAsync() ?? new();
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+            var role = user.FindFirst(ClaimTypes.Role)?.Value;
+
+            var allPois = await Api.GetPoisAsync() ?? new();
+
+            if (role == "admin")
+            {
+                _pois = allPois;
+            }
+            else
+            {
+                var managedIdsStr = user.FindFirst("ManagedPoiIds")?.Value ?? "";
+                var managedIds = managedIdsStr.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
+                _pois = allPois.Where(p => managedIds.Contains(p.Id)).ToList();
+            }
         }
         catch (Exception ex)
         {
