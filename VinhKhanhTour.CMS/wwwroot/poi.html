@@ -615,6 +615,7 @@
                 } catch (err) {
                     const isLast = i === retries - 1;
                     const errorMsg = `Lần ${i+1} lỗi: ${err.message}`;
+                    showDebug(errorMsg);
                     console.warn(errorMsg);
                     if (isLast) throw new Error(`Lỗi kết nối sau ${retries} lần thử: ${err.message}`);
                     await new Promise(r => setTimeout(r, backoff * (i + 1)));

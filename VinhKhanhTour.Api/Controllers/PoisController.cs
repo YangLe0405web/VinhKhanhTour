@@ -89,6 +89,7 @@ public class PoisController : ControllerBase
     [HttpGet("{id}/check-access")]
     public async Task<IActionResult> CheckAccess(string id, [FromQuery] string deviceId)
     {
+        Console.WriteLine($"🔍 [API] CheckAccess Start: poi={id}, device={deviceId}");
         if (string.IsNullOrEmpty(deviceId)) return BadRequest("DeviceId is required");
         var hasAccess = await _db.CheckPoiAccessAsync(deviceId, id);
         return Ok(new { paid = hasAccess });
@@ -98,6 +99,7 @@ public class PoisController : ControllerBase
     [HttpPost("{id}/pay")]
     public async Task<IActionResult> Pay(string id, [FromBody] AppHistory payInfo)
     {
+        Console.WriteLine($"💰 [API] Pay Start: poi={id}, device={payInfo?.Device}");
         if (string.IsNullOrEmpty(payInfo.Device)) return BadRequest("Device info is required");
         
         var pois = await _db.GetAllPoisAsync();

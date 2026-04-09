@@ -606,6 +606,7 @@
         }
 
         async function fetchWithRetry(url, options = {}, retries = 3, backoff = 1000) {
+            showDebug(`Fetching: ${url.replace(API, '[API]')}`);
             for (let i = 0; i < retries; i++) {
                 try {
                     const response = await fetch(url, options);
@@ -613,8 +614,9 @@
                     return response;
                 } catch (err) {
                     const isLast = i === retries - 1;
-                    console.warn(`Fetch Failed (Attempt ${i + 1}/${retries}): ${err.message}`);
-                    if (isLast) throw err;
+                    const errorMsg = `Lần ${i+1} lỗi: ${err.message}`;
+                    console.warn(errorMsg);
+                    if (isLast) throw new Error(`Lỗi kết nối sau ${retries} lần thử: ${err.message}`);
                     await new Promise(r => setTimeout(r, backoff * (i + 1)));
                 }
             }
