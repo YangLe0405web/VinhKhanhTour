@@ -92,12 +92,6 @@
                            T="bool"
                            Label="Kích hoạt" />
             </MudItem>
-            <MudItem xs="6">
-                <MudSwitch @bind-Checked="Poi.RequirePayment"
-                           Color="Color.Warning"
-                           T="bool"
-                           Label="Thu phí Audio" />
-            </MudItem>
 
             @if (Poi.RequirePayment)
             {
