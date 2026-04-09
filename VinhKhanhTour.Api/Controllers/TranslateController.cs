@@ -58,8 +58,8 @@ public class TranslateController : ControllerBase
             using var http = _httpFactory.CreateClient();
             http.Timeout = TimeSpan.FromSeconds(60); // Tăng timeout lên 1 phút do dịch đa ngôn ngữ có thể chậm
 
-            // Sử dụng endpoint v1 (Stable) thay vì v1beta
-            var url = $"https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key={geminiKey}";
+            // Đổi lại sang endpoint v1beta do v1 đang bị lỗi 503 (High Demand) tại Google
+            var url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={geminiKey}";
 
             var json = JsonSerializer.Serialize(requestBody);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
