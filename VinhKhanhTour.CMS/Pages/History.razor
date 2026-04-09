@@ -144,7 +144,8 @@ else
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
         var isAdmin = user.IsInRole("admin");
-        var managedPois = user.Claims.Where(c => c.Type == "ManagedPoiId").Select(c => c.Value).ToList();
+        var managedPoisStr = user.FindFirst("ManagedPoiIds")?.Value ?? "";
+        var managedPois = managedPoisStr.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
 
         _history = (await Api.GetHistoryAsync() ?? new())
             .Where(h => h.Action != "open_app")

@@ -237,7 +237,8 @@ else
             var authState = await AuthStateProvider.GetAuthenticationStateAsync();
             var user = authState.User;
             var isAdmin = user.IsInRole("admin");
-            var managedPois = user.Claims.Where(c => c.Type == "ManagedPoiId").Select(c => c.Value).ToList();
+            var managedPoisStr = user.FindFirst("ManagedPoiIds")?.Value ?? "";
+            var managedPois = managedPoisStr.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
 
             var t1 = Api.GetAnalyticsAsync(force);
             var t2 = Api.GetTracesAsync(force);
