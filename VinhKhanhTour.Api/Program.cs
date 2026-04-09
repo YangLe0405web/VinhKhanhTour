@@ -51,16 +51,35 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 
 var app = builder.Build();
 
-// THỨ TỰ MIDDLEWARE QUAN TRỌNG
 app.UseForwardedHeaders();
 
-// Đưa UseCors lên trước UseRouting để xử lý Preflight tốt nhất trên một số Hosting
-app.UseCors("AllowAll");
+// CHIÊU CUỐI: Middleware xử lý CORS thủ công để đảm bảo lỗi 500 vẫn có Header
+app.Use(async (context, next) =>
+{
+    var origin = context.Request.Headers["Origin"].ToString();
+    if (!string.IsNullOrEmpty(origin))
+    {
+        context.Response.Headers.Append("Access-Control-Allow-Origin", origin);
+        context.Response.Headers.Append("Access-Control-Allow-Headers", "*");
+        context.Response.Headers.Append("Access-Control-Allow-Methods", "*");
+        context.Response.Headers.Append("Access-Control-Allow-Credentials", "true");
+    }
+
+    if (context.Request.Method == "OPTIONS")
+    {
+        context.Response.StatusCode = 200;
+        await context.Response.CompleteAsync();
+        return;
+    }
+
+    await next();
+});
 
 app.UseRouting();
+app.UseCors("AllowAll");
 app.UseAuthorization();
 
-app.MapGet("/", () => "Vinh Khanh Tour API is running (CORS Standard)!");
+app.MapGet("/", () => "Vinh Khanh Tour API is running (CORS Unified Fix)!");
 app.MapControllers();
 
 app.Run();

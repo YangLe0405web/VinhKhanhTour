@@ -15,7 +15,6 @@ public class AppHistory
     [FirestoreProperty] public int Duration { get; set; } = 0;
     [FirestoreProperty] public double Lat { get; set; } = 0;
     [FirestoreProperty] public double Lng { get; set; } = 0;
-    [FirestoreProperty] public decimal Amount { get; set; } = 0;
     [FirestoreProperty] public string Currency { get; set; } = "VND";
     [FirestoreProperty] public DateTime Timestamp { get; set; } = DateTime.UtcNow;
 }

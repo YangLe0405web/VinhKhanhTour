@@ -148,7 +148,7 @@ else
         public string Device { get; set; } = "";
         public double Lat { get; set; }
         public double Lng { get; set; }
-        public decimal Amount { get; set; }
+        public double Amount { get; set; }
     }
 
     // Chart
@@ -166,7 +166,7 @@ else
     bool _loading = true;
 
     int _total, _totalQr, _avgDuration, _uniquePois;
-    decimal _totalRevenue;
+    double _totalRevenue;
     List<KeyValuePair<string, int>> _topPois = new();
     List<KeyValuePair<string, int>> _langStats = new();
 

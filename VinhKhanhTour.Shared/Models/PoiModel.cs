@@ -14,7 +14,6 @@ public class PoiModel
     [FirestoreProperty] public int Priority { get; set; } = 1;
     [FirestoreProperty] public bool IsActive { get; set; } = true;
 
-    [FirestoreProperty] public decimal Price { get; set; } = 25000;
     [FirestoreProperty] public bool RequirePayment { get; set; } = true;
 
     [FirestoreProperty] public Dictionary<string, string> Content { get; set; } = new();
