@@ -166,6 +166,29 @@ public class FirestoreService
         _cache.Remove($"{CACHE_HISTORY}_2000");
     }
 
+    public async Task<bool> CheckPoiAccessAsync(string deviceId, string poiId)
+    {
+        // 1. Kiểm tra nếu POI không yêu cầu thanh toán
+        var poiDoc = await _db.Collection("pois").Document(poiId).GetSnapshotAsync();
+        if (poiDoc.Exists)
+        {
+            var poi = poiDoc.ConvertTo<PoiModel>();
+            if (!poi.RequirePayment) return true;
+        }
+
+        // 2. Tìm lịch sử thanh toán trong 24h qua
+        var cutoff = DateTime.UtcNow.AddHours(-24);
+        var snap = await _db.Collection("history")
+            .WhereEqualTo("Action", "pay_audio")
+            .WhereEqualTo("Device", deviceId) 
+            .WhereEqualTo("PoiId", poiId)
+            .WhereGreaterThanOrEqualTo("Timestamp", cutoff)
+            .Limit(1)
+            .GetSnapshotAsync();
+
+        return snap.Documents.Count > 0;
+    }
+
     // ── Location Trace ────────────────────────────────
     public async Task LogTraceAsync(LocationTrace trace)
     {
@@ -213,12 +236,37 @@ public class FirestoreService
         => await _db.Collection("tours").Document(id).DeleteAsync();
 
     // ── QR Scan Counter ───────────────────────────────
-    public async Task IncrementQrScansAsync(string tourId)
+    public async Task IncrementQrScansAsync(string tourId, string device = "Mobile", string lang = "vi")
     {
         var docRef = _db.Collection("tours").Document(tourId);
+        var snap = await docRef.GetSnapshotAsync();
+        var tourName = snap.ContainsField("Name") ? snap.GetValue<string>("Name") : "Tour " + tourId;
+
         await docRef.UpdateAsync(new Dictionary<string, object>
         {
             { "QrScans", FieldValue.Increment(1) }
         });
+
+        // 1. Log to History (Visible in CMS History Page)
+        var history = new AppHistory
+        {
+            Action = "scan_qr",
+            PoiId = tourId,
+            PoiName = tourName,
+            Device = device,
+            Language = lang,
+            Timestamp = DateTime.UtcNow
+        };
+        await LogHistoryAsync(history);
+
+        // 2. Log to Analytics (Counted as 'Scan QR' in Dashboard)
+        var ev = new AnalyticsEvent
+        {
+            EventType = "scan_qr",
+            PoiId = tourId,
+            Language = lang,
+            Timestamp = DateTime.UtcNow
+        };
+        await LogEventAsync(ev);
     }
 }

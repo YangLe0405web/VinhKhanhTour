@@ -63,7 +63,7 @@ public class CmsApiService
 
     // ── History ───────────────────────────────────────
     public Task<List<AppHistory>?> GetHistoryAsync()
-        => _http.GetFromJsonAsync<List<AppHistory>>("api/history");
+        => _http.GetFromJsonAsync<List<AppHistory>>("api/history?limit=2000");
 
     // ── Tours ─────────────────────────────────────────
     public Task<List<TourModel>?> GetToursAsync()
@@ -80,11 +80,11 @@ public class CmsApiService
 
     // ── Analytics ─────────────────────────────────────
     public Task<List<AnalyticsEvent>?> GetAnalyticsAsync()
-        => _http.GetFromJsonAsync<List<AnalyticsEvent>>("api/analytics");
+        => _http.GetFromJsonAsync<List<AnalyticsEvent>>("api/analytics?limit=2000");
 
     // ── Location Trace ────────────────────────────────
     public Task<List<LocationTrace>?> GetTracesAsync()
-        => _http.GetFromJsonAsync<List<LocationTrace>>("api/trace");
+        => _http.GetFromJsonAsync<List<LocationTrace>>("api/trace?limit=2000");
 
     // ── Translate (Gemini AI) ─────────────────────────
     // Chỉ gọi khi user bấm nút, KHÔNG tự động

@@ -13,6 +13,7 @@
                 <MudSelectItem Value="@("scan_qr")">📷 Quét QR</MudSelectItem>
                 <MudSelectItem Value="@("route_start")">🗺️ Chỉ đường</MudSelectItem>
                 <MudSelectItem Value="@("language_change")">🌐 Đổi ngôn ngữ</MudSelectItem>
+                <MudSelectItem Value="@("pay_audio")">💰 Thanh toán</MudSelectItem>
             </MudSelect>
         </MudItem>
         <MudItem xs="12" sm="3">
@@ -54,6 +55,7 @@ else
             <MudTh Style="min-width:180px">POI</MudTh>
             <MudTh Style="min-width:100px">Ngôn ngữ</MudTh>
             <MudTh Style="min-width:140px">Thiết bị</MudTh>
+            <MudTh Style="min-width:100px">Số tiền</MudTh>
             <MudTh Style="min-width:100px">Thời lượng</MudTh>
             <MudTh Style="min-width:120px">Vị trí</MudTh>
         </HeaderContent>
@@ -70,6 +72,18 @@ else
             <MudTd>@context.PoiName</MudTd>
             <MudTd>@GetLangFlag(context.Language)</MudTd>
             <MudTd>@context.Device</MudTd>
+            <MudTd>
+                @if (context.Amount > 0)
+                {
+                    <MudText Typo="Typo.body2" Color="Color.Success" Style="font-weight:bold">
+                        @context.Amount.ToString("N0") @context.Currency
+                    </MudText>
+                }
+                else
+                {
+                    <MudText Typo="Typo.caption" Color="Color.Default">--</MudText>
+                }
+            </MudTd>
             <MudTd>
                 @if (context.Duration > 0)
                 {
@@ -137,6 +151,7 @@ else
         "scan_qr" => "📷 Quét QR",
         "route_start" => "🗺️ Chỉ đường",
         "language_change" => "🌐 Đổi ngôn ngữ",
+        "pay_audio" => "💰 Thanh toán",
         _ => action
     };
 
@@ -148,6 +163,7 @@ else
         "scan_qr" => Color.Warning,
         "route_start" => Color.Primary,
         "language_change" => Color.Secondary,
+        "pay_audio" => Color.Success,
         _ => Color.Default
     };
 

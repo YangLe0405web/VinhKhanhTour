@@ -1,4 +1,4 @@
-﻿@inject ISnackbar Snackbar
+@inject ISnackbar Snackbar
 @inject HttpClient Http
 
 <MudDialog>
@@ -12,8 +12,8 @@
         <MudGrid>
             <MudItem xs="12">
                 <MudTextField @bind-Value="Poi.Name"
-                              Label="Tên POI" Variant="Variant.Outlined"
-                              Required="true" />
+                               Label="Tên POI" Variant="Variant.Outlined"
+                               Required="true" />
             </MudItem>
             <MudItem xs="6">
                 <MudSelect @bind-Value="Poi.Category"
@@ -86,12 +86,28 @@
                 </MudItem>
             }
 
-            <MudItem xs="12">
+            <MudItem xs="6">
                 <MudSwitch @bind-Checked="Poi.IsActive"
                            Color="Color.Success"
                            T="bool"
                            Label="Kích hoạt" />
             </MudItem>
+            <MudItem xs="6">
+                <MudSwitch @bind-Checked="Poi.RequirePayment"
+                           Color="Color.Warning"
+                           T="bool"
+                           Label="Thu phí Audio" />
+            </MudItem>
+
+            @if (Poi.RequirePayment)
+            {
+                <MudItem xs="12">
+                    <MudNumericField @bind-Value="Poi.Price"
+                                     Label="Giá tiền (VNĐ)" Variant="Variant.Outlined"
+                                     Step="5000" Min="0" 
+                                     AdornmentText="VNĐ" Adornment="Adornment.End" />
+                </MudItem>
+            }
         </MudGrid>
     </DialogContent>
 
@@ -128,7 +144,6 @@
             Poi.Content[lang] = value;
     }
 
-    // ── Gọi API Render để dịch (Render gọi Gemini server-side) ───────
     async Task TranslateAll()
     {
         var viText = GetContent("vi");
@@ -142,7 +157,6 @@
 
         try
         {
-            // Http đã có BaseAddress là vinhkhanh-api.onrender.com
             var response = await Http.PostAsJsonAsync(
                 "api/translate",
                 new { text = viText }

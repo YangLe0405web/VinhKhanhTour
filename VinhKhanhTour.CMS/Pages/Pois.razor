@@ -91,6 +91,7 @@ else
             <MudTh>Tọa độ</MudTh>
             <MudTh Style="min-width:140px">Ngôn ngữ</MudTh>
             <MudTh Style="min-width:120px">Trạng thái</MudTh>
+            <MudTh Style="min-width:120px">Giá (VNĐ)</MudTh>
             <MudTh Style="min-width:150px">Thao tác</MudTh>
         </HeaderContent>
         <RowTemplate>
@@ -129,17 +130,29 @@ else
                     </div>
                 }
             </MudTd>
+            <MudTd DataLabel="Giá (VNĐ)">
+                @if (context.RequirePayment)
+                {
+                    <MudText Typo="Typo.body2" Color="Color.Warning" Style="font-weight:700">
+                        @context.Price.ToString("N0")
+                    </MudText>
+                }
+                else
+                {
+                    <MudChip T="string" Size="Size.Small" Color="Color.Success" Variant="Variant.Text">Free</MudChip>
+                }
+            </MudTd>
             <MudTd DataLabel="Thao tác">
                 <MudIconButton Icon="@Icons.Material.Filled.QrCode"
-                               Color="Color.Secondary" Size="Size.Small"
-                               Title="Xem QR thuyết minh"
-                               OnClick="() => ShowQr(context)" />
+                                Color="Color.Secondary" Size="Size.Small"
+                                Title="Xem QR thuyết minh"
+                                OnClick="() => ShowQr(context)" />
                 <MudIconButton Icon="@Icons.Material.Filled.Edit"
-                               Color="Color.Primary" Size="Size.Small"
-                               OnClick="() => OpenEditDialog(context)" />
+                                Color="Color.Primary" Size="Size.Small"
+                                OnClick="() => OpenEditDialog(context)" />
                 <MudIconButton Icon="@Icons.Material.Filled.Delete"
-                               Color="Color.Error" Size="Size.Small"
-                               OnClick="() => DeletePoi(context.Id)" />
+                                Color="Color.Error" Size="Size.Small"
+                                OnClick="() => DeletePoi(context.Id)" />
             </MudTd>
         </RowTemplate>
     </MudTable>
@@ -207,7 +220,7 @@ else
                 <MudPaper Outlined="true" Class="pa-2 px-3"
                           Style="width:100%;border-radius:8px">
                     <MudStack Row="true" AlignItems="AlignItems.Center"
-                              Justify="Justify.SpaceBetween">
+                               Justify="Justify.SpaceBetween">
                         <MudText Typo="Typo.caption" Color="Color.Secondary"
                                  Style="word-break:break-all;font-family:monospace">
                             @GetQrUrl(_qrPoi)

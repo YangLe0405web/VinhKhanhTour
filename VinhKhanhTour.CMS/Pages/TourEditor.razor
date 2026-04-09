@@ -10,24 +10,30 @@
 
 <PageTitle>@(IsEdit ? "Sửa Tour" : "Thêm Tour Mới") — VinhKhanhTour</PageTitle>
 
-<div class="d-flex align-items-center justify-content-between mb-6">
-    <div class="d-flex align-items-center gap-3">
-        <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" 
-                       OnClick='() => Nav.NavigateTo("/tours")'
-                       Style="background: rgba(255,255,255,0.05); color: #fb923c;" />
-        <MudText Typo="Typo.h5" Style="font-weight: 800; color: #fb923c;">
-            @(IsEdit ? "✏️ Sửa Tour" : "➕ Thêm Tour Mới")
+<div class="d-flex align-items-center justify-content-between mb-8">
+    <div class="d-flex align-items-center gap-4">
+        <MudText Typo="Typo.h3" Style="font-weight: 900; color: #fb923c; display: flex; align-items: center; gap: 12px;">
+            <MudIcon Icon="@(IsEdit ? Icons.Material.Filled.EditNote : Icons.Material.Filled.Add)" Size="Size.Large" />
+            @(IsEdit ? "Sửa Tour" : "Thêm Tour Mới")
         </MudText>
     </div>
 
-    <MudButton Variant="Variant.Filled" 
-               Color="Color.Success"
-               StartIcon="@Icons.Material.Filled.Save"
-               OnClick="SaveTour"
-               Disabled="_saving"
-               Style="border-radius: 12px; padding: 10px 24px; font-weight: 700;">
-        @(_saving ? "Đang lưu..." : "Lưu Tour")
-    </MudButton>
+    <div class="d-flex gap-3">
+        <MudButton Variant="Variant.Outlined" 
+                   StartIcon="@Icons.Material.Filled.ArrowBack"
+                   OnClick='() => Nav.NavigateTo("/tours")'
+                   Style="color: #6a7282; border-color: #334155; border-radius: 12px; font-weight: 600; padding: 10px 20px;">
+            Quay lại
+        </MudButton>
+        <MudButton Variant="Variant.Filled" 
+                   Color="Color.Success"
+                   StartIcon="@Icons.Material.Filled.Save"
+                   OnClick="SaveTour"
+                   Disabled="_saving"
+                   Style="background: #fb923c; border-radius: 12px; padding: 10px 32px; font-weight: 800; box-shadow: 0 8px 25px rgba(251, 146, 60, 0.3);">
+            @(_saving ? "ĐANG LƯU..." : "LƯU TOUR")
+        </MudButton>
+    </div>
 </div>
 
 <div class="vk-editor-container">
@@ -75,40 +81,67 @@
 
     @* --- Right Panel: Map & Route --- *@
     <div class="vk-editor-panel map-panel">
-        <div class="d-flex align-items-center justify-content-between mb-4">
-            <MudText Typo="Typo.subtitle2" Class="opacity-50">LỘ TRÌNH TRÊN BẢN ĐỒ</MudText>
-            @if (_distance > 0)
-            {
-                <MudChip T="string" Color="Color.Warning" Variant="Variant.Filled" Size="Size.Small">
-                    📏 Quãng đường: @_distance.ToString("N2") km
-                </MudChip>
-            }
-        </div>
+        <div id="tour-map" class="vk-map-container mb-4"></div>
 
-        <MudAlert Severity="Severity.Info" Dense="true" Class="mb-3 rounded-lg py-1 px-3" Style="font-size: 13px;">
-            Click lần 1 để đặt điểm <b>A (bắt đầu)</b>, click lần 2 để đặt điểm <b>B (kết thúc)</b>.
-        </MudAlert>
-
-        <div id="tour-map" class="vk-map-container"></div>
-
-        @if (_poisOnRoute.Any())
-        {
-            <div class="mt-6">
-                <MudText Typo="Typo.subtitle2" Class="mb-3 opacity-50">ĐIỂM DỪNG TRÊN LỘ TRÌNH (@_poisOnRoute.Count)</MudText>
-                <div class="vk-poi-list">
-                    @foreach (var poi in _poisOnRoute)
-                    {
-                        <div class="vk-poi-item">
-                            <div class="vk-poi-index">@(_poisOnRoute.IndexOf(poi) + 1)</div>
-                            <div class="vk-poi-info">
-                                <MudText Typo="Typo.body2" Style="font-weight: 600;">@poi.Name</MudText>
-                                <MudText Typo="Typo.caption" Class="opacity-50">@poi.Latitude, @poi.Longitude</MudText>
-                            </div>
-                        </div>
-                    }
+        <div class="d-flex gap-4 mb-4">
+            <div class="vk-coord-card start">
+                <MudIcon Icon="@Icons.Material.Filled.LocationOn" Color="Color.Success" Size="Size.Small" />
+                <div>
+                    <MudText Typo="Typo.caption">Điểm bắt đầu (A)</MudText>
+                    <MudText Typo="Typo.body2" Style="font-weight: 700; font-family: monospace">
+                        @(_pointA != null ? $"{_pointA[0]:F6}, {_pointA[1]:F6}" : "---")
+                    </MudText>
                 </div>
             </div>
+            <div class="vk-coord-card end">
+                <MudIcon Icon="@Icons.Material.Filled.LocationOn" Color="Color.Error" Size="Size.Small" />
+                <div>
+                    <MudText Typo="Typo.caption">Điểm kết thúc (B)</MudText>
+                    <MudText Typo="Typo.body2" Style="font-weight: 700; font-family: monospace">
+                        @(_pointB != null ? $"{_pointB[0]:F6}, {_pointB[1]:F6}" : "---")
+                    </MudText>
+                </div>
+            </div>
+        </div>
+
+        @if (_distance > 0)
+        {
+            <div class="vk-distance-bar mb-6">
+                <MudIcon Icon="@Icons.Material.Filled.SquareFoot" Size="Size.Small" />
+                <MudText Typo="Typo.body2" Style="font-weight: 700;">
+                    Quãng đường: @_distance.ToString("N2") km
+                </MudText>
+            </div>
         }
+
+        <div class="mt-4">
+            <MudText Typo="Typo.subtitle2" Class="mb-3 opacity-50" Style="display: flex; align-items: center; gap: 8px;">
+                <MudIcon Icon="@Icons.Material.Filled.PushPin" Size="Size.Small" />
+                ĐIỂM DỪNG TRÊN LỘ TRÌNH (@_poisOnRoute.Count điểm)
+            </MudText>
+            <div class="vk-poi-list">
+                @if (!_poisOnRoute.Any())
+                {
+                    <div class="pa-4 text-center opacity-30" style="border: 1px dashed rgba(255,255,255,0.1); border-radius: 12px;">
+                        Chưa có điểm dừng nào được chọn
+                    </div>
+                }
+                @foreach (var poi in _poisOnRoute)
+                {
+                    <div class="vk-poi-item">
+                        <div class="vk-poi-index">@(_poisOnRoute.IndexOf(poi) + 1)</div>
+                        <div class="vk-poi-info">
+                            <MudText Typo="Typo.body2" Style="font-weight: 600;">@poi.Name</MudText>
+                            <MudText Typo="Typo.caption" Class="opacity-50">@poi.Latitude:F6, @poi.Longitude:F6</MudText>
+                        </div>
+                        <MudIconButton Icon="@Icons.Material.Filled.Close" 
+                                       Size="Size.Small" 
+                                       OnClick="() => RemovePoi(poi.Id)"
+                                       Style="color: #ef4444; background: rgba(239, 68, 68, 0.1);" />
+                    </div>
+                }
+            </div>
+        </div>
     </div>
 </div>
 
@@ -121,32 +154,62 @@
     }
 
     .vk-editor-panel {
-        background: rgba(30, 41, 59, 0.4);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(255,255,255,0.05);
+        background: rgba(30, 41, 59, 0.45);
+        backdrop-filter: blur(28px);
+        border: 1px solid rgba(255,255,255,0.06);
         border-radius: 20px;
-        padding: 24px;
+        padding: 32px;
         overflow-y: auto;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.2);
     }
 
     .vk-map-container {
-        height: 500px;
+        height: 480px;
         border-radius: 16px;
         border: 1px solid rgba(255,255,255,0.1);
-        z-index: 1;
+        z-index: 10;
+        overflow: hidden;
+    }
+
+    .vk-coord-card {
+        flex: 1;
+        padding: 16px;
+        background: rgba(0,0,0,0.2);
+        border-radius: 16px;
+        border: 1px solid rgba(255,255,255,0.05);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .vk-coord-card.start { border-left: 4px solid #10b981; }
+    .vk-coord-card.end { border-left: 4px solid #ef4444; }
+
+    .vk-distance-bar {
+        background: rgba(251, 146, 60, 0.1);
+        color: #fb923c;
+        padding: 12px 20px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border: 1px solid rgba(251, 146, 60, 0.2);
     }
 
     .vk-upload-area {
-        height: 200px;
-        border-radius: 16px;
-        background: rgba(0,0,0,0.2);
-        border: 2px dashed rgba(255,255,255,0.1);
+        height: 240px;
+        border-radius: 20px;
+        background: rgba(0,0,0,0.3);
+        border: 2px dashed rgba(255,255,255,0.12);
         position: relative;
         overflow: hidden;
         display: flex;
         align-items: center;
         justify-content: center;
+        transition: all 0.3s;
     }
+
+    .vk-upload-area:hover { border-color: #fb923c; background: rgba(0,0,0,0.4); }
 
     .vk-upload-preview {
         width: 100%;
@@ -157,7 +220,7 @@
     .vk-upload-overlay {
         position: absolute;
         inset: 0;
-        background: rgba(0,0,0,0.4);
+        background: rgba(0,0,0,0.5);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -170,31 +233,41 @@
     .vk-poi-list {
         display: flex;
         flex-direction: column;
-        gap: 12px;
+        gap: 10px;
     }
 
     .vk-poi-item {
         display: flex;
         align-items: center;
         gap: 16px;
-        padding: 12px;
-        background: rgba(255,255,255,0.03);
-        border-radius: 12px;
-        border: 1px solid rgba(255,255,255,0.05);
+        padding: 12px 16px;
+        background: rgba(255,255,255,0.04);
+        border-radius: 14px;
+        border: 1px solid rgba(255,255,255,0.06);
+        transition: transform 0.2s;
     }
 
+    .vk-poi-item:hover { transform: scale(1.02); background: rgba(255,255,255,0.07); }
+
     .vk-poi-index {
-        width: 28px;
-        height: 28px;
+        width: 32px;
+        height: 32px;
         background: #fb923c;
         color: white;
-        border-radius: 50%;
+        border-radius: 10px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-weight: 800;
+        font-weight: 900;
         font-size: 14px;
+        box-shadow: 0 4px 10px rgba(251, 146, 60, 0.4);
     }
+
+    .vk-poi-info { flex-grow: 1; }
+
+    /* Override MudBlazor colors for dark/orange theme */
+    .mud-input.mud-input-outlined { background: rgba(0,0,0,0.25); border-radius: 12px; }
+    .mud-input-label { color: rgba(255,255,255,0.4) !important; }
 
     /* Override MudBlazor colors for dark/orange theme */
     .mud-input.mud-input-outlined { background: rgba(0,0,0,0.2); }
@@ -236,10 +309,16 @@
         }
     }
 
+    private double[]? _pointA;
+    private double[]? _pointB;
+
     [JSInvokable]
     public async Task OnRouteSelected(double lat1, double lng1, double lat2, double lng2)
     {
-        // Tính quãng đường bằng Haversine (không dùng API ngoài)
+        _pointA = new[] { lat1, lng1 };
+        _pointB = new[] { lat2, lng2 };
+
+        // Tính quãng đường bằng Haversine
         _distance = GetDistance(lat1, lng1, lat2, lng2);
 
         var coords = new[]
@@ -254,6 +333,11 @@
         // Tự động gợi ý POI dọc lộ trình
         FindPoisAround(lat1, lng1, lat2, lng2);
         StateHasChanged();
+    }
+
+    private void RemovePoi(string id)
+    {
+        _poisOnRoute.RemoveAll(p => p.Id == id);
     }
 
     private void FindPoisAround(double lat1, double lng1, double lat2, double lng2)

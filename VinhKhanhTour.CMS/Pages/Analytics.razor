@@ -36,12 +36,6 @@ else
                 <MudText Typo="Typo.subtitle1">Thời gian nghe TB</MudText>
             </MudPaper>
         </MudItem>
-        <MudItem xs="12" sm="6" md="3">
-            <MudPaper Class="pa-4" Elevation="2">
-                <MudText Typo="Typo.h3" Color="Color.Secondary">@_uniquePois</MudText>
-                <MudText Typo="Typo.subtitle1">POI được nghe</MudText>
-            </MudPaper>
-        </MudItem>
 
         <MudItem xs="12" md="6">
             <MudPaper Class="pa-4" Elevation="2">
@@ -154,6 +148,7 @@ else
         public string Device { get; set; } = "";
         public double Lat { get; set; }
         public double Lng { get; set; }
+        public decimal Amount { get; set; }
     }
 
     // Chart
@@ -171,6 +166,7 @@ else
     bool _loading = true;
 
     int _total, _totalQr, _avgDuration, _uniquePois;
+    decimal _totalRevenue;
     List<KeyValuePair<string, int>> _topPois = new();
     List<KeyValuePair<string, int>> _langStats = new();
 
@@ -228,7 +224,8 @@ else
                 Device = h.Device,
                 Duration = h.Duration,
                 Lat = h.Lat,
-                Lng = h.Lng
+                Lng = h.Lng,
+                Amount = h.Amount
             });
         }
 
@@ -279,6 +276,8 @@ else
             
         _uniquePois = _unified.Where(e => !string.IsNullOrEmpty(e.PoiId))
             .Select(e => e.PoiId).Distinct().Count();
+
+        _totalRevenue = _unified.Where(e => e.EventType == "pay_audio").Sum(e => e.Amount);
         
         _topPois = _unified.Where(e => !string.IsNullOrEmpty(e.PoiId) && IsPlayAction(e.EventType))
             .GroupBy(e => string.IsNullOrEmpty(e.PoiName) ? e.PoiId : e.PoiName)

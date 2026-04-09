@@ -27,7 +27,8 @@
     <MudButton Variant="Variant.Filled" 
                StartIcon="@Icons.Material.Filled.Add"
                OnClick='() => Nav.NavigateTo("/tours/new")'
-               Style="background: linear-gradient(90deg, #fb923c, #f97316); color: white; border-radius: 12px; padding: 10px 24px; font-weight: 700; box-shadow: 0 4px 15px rgba(249, 115, 22, 0.3);">
+               Class="rounded-xl px-6 py-3"
+               Style="background: #fb923c; color: white; font-weight: 800; box-shadow: 0 8px 25px rgba(251, 146, 60, 0.4);">
         Thêm Tour Mới
     </MudButton>
 </div>
@@ -78,18 +79,20 @@ else
                                        Class="rounded-lg"
                                        Title="Lấy QR quét test App"
                                        Style="background: rgba(14, 165, 233, 0.1); color: #0ea5e9; backdrop-filter: blur(5px);" />
+                    <div class="vk-tour-actions mt-4">
                         <MudButton Variant="Variant.Filled" 
                                    StartIcon="@Icons.Material.Filled.Edit"
                                    OnClick='() => Nav.NavigateTo($"/tours/edit/{tour.Id}")'
-                                   Class="flex-grow-1 rounded-lg"
-                                   Style="background: rgba(255,255,255,0.1); color: white; backdrop-filter: blur(5px);">
+                                   Class="flex-grow-1 rounded-lg py-2"
+                                   Style="background: rgba(255,255,255,0.1); color: #fb923c; font-weight: 600;">
                             Sửa
                         </MudButton>
                         <MudIconButton Icon="@Icons.Material.Filled.Delete"
                                        Variant="Variant.Outlined"
                                        OnClick="() => DeleteTour(tour.Id)"
                                        Class="rounded-lg"
-                                       Style="color: #ef4444; border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.05);" />
+                                       Style="color: #ef4444; border-color: rgba(239, 68, 68, 0.2); background: rgba(239, 68, 68, 0.05);" />
+                    </div>
                     </div>
                 </div>
             </div>

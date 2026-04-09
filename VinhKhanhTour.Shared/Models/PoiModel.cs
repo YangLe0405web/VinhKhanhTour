@@ -1,4 +1,4 @@
-﻿using Google.Cloud.Firestore;
+using Google.Cloud.Firestore;
 using static Google.Api.Distribution.Types;
 using static Google.Cloud.Firestore.V1.StructuredAggregationQuery.Types.Aggregation.Types;
 
@@ -14,9 +14,6 @@ public class PoiModel
     [FirestoreProperty] public double Longitude { get; set; }
     [FirestoreProperty] public double Radius { get; set; } = 30;
     [FirestoreProperty] public int Priority { get; set; } = 1;
-    [FirestoreProperty] public bool IsActive { get; set; } = true;
-
-    [FirestoreProperty] public Dictionary<string, string> Content { get; set; } = new();
     [FirestoreProperty] public Dictionary<string, string> AudioUrls { get; set; } = new();
 
     [FirestoreProperty] public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

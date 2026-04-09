@@ -53,7 +53,6 @@ public class PoisController : ControllerBase
             var path = await _storage.UploadAudioAsync(
                 stream, id, lang, file.ContentType);
 
-            // Dùng forwarded proto để luôn ra https khi chạy sau reverse proxy (Render/Nginx)
             var forwardedProto = Request.Headers["X-Forwarded-Proto"].FirstOrDefault();
             var scheme = string.IsNullOrWhiteSpace(forwardedProto) ? Request.Scheme : forwardedProto;
             var baseUrl = $"{scheme}://{Request.Host}";
@@ -84,5 +83,36 @@ public class PoisController : ControllerBase
         var (data, contentType) = await _storage.GetAudioAsync(id, lang);
         if (data == null) return NotFound("Audio not found");
         return File(data, contentType ?? "audio/mpeg");
+    }
+
+    // GET api/pois/{id}/check-access?deviceId=...
+    [HttpGet("{id}/check-access")]
+    public async Task<IActionResult> CheckAccess(string id, [FromQuery] string deviceId)
+    {
+        if (string.IsNullOrEmpty(deviceId)) return BadRequest("DeviceId is required");
+        var hasAccess = await _db.CheckPoiAccessAsync(deviceId, id);
+        return Ok(new { paid = hasAccess });
+    }
+
+    // POST api/pois/{id}/pay
+    [HttpPost("{id}/pay")]
+    public async Task<IActionResult> Pay(string id, [FromBody] AppHistory payInfo)
+    {
+        if (string.IsNullOrEmpty(payInfo.Device)) return BadRequest("Device info is required");
+        
+        var pois = await _db.GetAllPoisAsync();
+        var poi = pois.FirstOrDefault(p => p.Id == id);
+        if (poi == null) return NotFound("POI not found");
+
+        payInfo.Action = "pay_audio";
+        payInfo.PoiId = id;
+        payInfo.PoiName = poi.Name;
+        payInfo.Amount = poi.Price;
+        payInfo.Currency = "VND";
+        payInfo.Timestamp = DateTime.UtcNow;
+
+        await _db.LogHistoryAsync(payInfo);
+
+        return Ok(new { success = true, amount = poi.Price, currency = "VND" });
     }
 }
