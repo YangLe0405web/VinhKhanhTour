@@ -53,7 +53,7 @@ var app = builder.Build();
 
 app.UseForwardedHeaders();
 
-// CHIÊU CUỐI: Middleware xử lý CORS thủ công để đảm bảo lỗi 500 vẫn có Header
+// CHIÊU CUỐI: CORS Middleware toàn diện
 app.Use(async (context, next) =>
 {
     var origin = context.Request.Headers["Origin"].ToString();
@@ -75,11 +75,19 @@ app.Use(async (context, next) =>
     await next();
 });
 
+// Bật Swagger cho cả môi trường Production để tiện testing
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Vinh Khanh Tour API V1");
+    c.RoutePrefix = "swagger"; // Truy cập tại /swagger
+});
+
 app.UseRouting();
 app.UseCors("AllowAll");
 app.UseAuthorization();
 
-app.MapGet("/", () => "Vinh Khanh Tour API is running (CORS Unified Fix)!");
+app.MapGet("/", () => "Vinh Khanh Tour API is running (Swagger Enabled)!");
 app.MapControllers();
 
 app.Run();

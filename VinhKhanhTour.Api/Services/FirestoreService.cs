@@ -168,6 +168,9 @@ public class FirestoreService
 
     public async Task<bool> CheckPoiAccessAsync(string deviceId, string poiId)
     {
+        if (string.IsNullOrWhiteSpace(poiId) || poiId.Contains("{") || poiId.Contains("}")) 
+            return false;
+
         // 1. Kiểm tra nếu POI không yêu cầu thanh toán
         var poiDoc = await _db.Collection("pois").Document(poiId).GetSnapshotAsync();
         if (poiDoc.Exists)
