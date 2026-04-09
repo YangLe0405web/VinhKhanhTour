@@ -113,7 +113,7 @@
 </MudDialog>
 
 @code {
-    [CascadingParameter] IMudDialogInstance? MudDialog { get; set; }
+    [CascadingParameter] MudDialogInstance? MudDialog { get; set; }
     [Parameter] public PoiModel Poi { get; set; } = new();
     [Parameter] public bool IsEdit { get; set; } = false;
 

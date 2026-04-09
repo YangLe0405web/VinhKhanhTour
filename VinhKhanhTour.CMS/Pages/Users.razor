@@ -1,0 +1,120 @@
+@page "/users"
+@attribute [Authorize(Roles = "admin")]
+@inject CmsApiService Api
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+@using MudBlazor
+
+<MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
+    <MudText Typo="Typo.h4">👥 Quản lý tài khoản chủ quán</MudText>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" 
+               StartIcon="@Icons.Material.Filled.Add" 
+               OnClick="@(() => EditUser(new AppUser()))">Thêm chủ quán</MudButton>
+</MudStack>
+
+@if (_loading)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+}
+else
+{
+    <MudTable Items="_users" Hover="true" Bordered="true" Striped="true" Elevation="2">
+        <HeaderContent>
+            <MudTh>Tên đăng nhập</MudTh>
+            <MudTh>Họ tên</MudTh>
+            <MudTh>Vai trò</MudTh>
+            <MudTh>Số quán quản lý</MudTh>
+            <MudTh Style="width:120px">Thao tác</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd>@context.Username</MudTd>
+            <MudTd>@context.FullName</MudTd>
+            <MudTd>
+                <MudChip T="string" Color="@(context.Role == "admin" ? Color.Error : Color.Info)" Size="Size.Small">
+                    @context.Role.ToUpper()
+                </MudChip>
+            </MudTd>
+            <MudTd>
+                <MudTooltip Text="@string.Join(", ", context.ManagedPoiIds)">
+                    <MudChip T="string" Size="Size.Small">@context.ManagedPoiIds.Count quán</MudChip>
+                </MudTooltip>
+            </MudTd>
+            <MudTd>
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Size="Size.Small" OnClick="@(() => EditUser(context))" />
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Size="Size.Small" OnClick="@(() => DeleteUser(context))" />
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+}
+
+@code {
+    private List<AppUser> _users = new();
+    private List<PoiModel> _pois = new();
+    private bool _loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    async Task LoadData()
+    {
+        _loading = true;
+        try
+        {
+            var t1 = Api.GetUsersAsync();
+            var t2 = Api.GetPoisAsync();
+            await Task.WhenAll(t1, t2);
+            _users = t1.Result ?? new();
+            _pois = t2.Result ?? new();
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    async Task EditUser(AppUser user)
+    {
+        // Copy to avoid direct mutation
+        var model = new AppUser
+        {
+            Id = user.Id,
+            Username = user.Username,
+            FullName = user.FullName,
+            Role = user.Role,
+            ManagedPoiIds = new List<string>(user.ManagedPoiIds)
+        };
+
+        var parameters = new DialogParameters { ["User"] = model, ["AllPois"] = _pois };
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+        
+        var dialog = await DialogService.ShowAsync<UserDialog>(user.Id == null ? "Thêm người dùng" : "Sửa người dùng", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await LoadData();
+        }
+    }
+
+    async Task DeleteUser(AppUser user)
+    {
+        if (user.Username == "admin") 
+        {
+            Snackbar.Add("Không thể xóa tài khoản admin hệ thống!", Severity.Error);
+            return;
+        }
+
+        bool? result = await DialogService.ShowMessageBox(
+            "Xác nhận xóa", 
+            (MarkupString)$"Bạn có chắc muốn xóa tài khoản {user.Username}?", 
+            yesText: "Xóa", cancelText: "Hủy");
+        if (result == true)
+        {
+            await Api.DeleteUserAsync(user.Id);
+            Snackbar.Add("Đã xóa tài khoản", Severity.Success);
+            await LoadData();
+        }
+    }
+}

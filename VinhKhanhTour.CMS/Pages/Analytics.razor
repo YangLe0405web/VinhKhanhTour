@@ -2,13 +2,16 @@
 @inject HttpClient Http
 @inject CmsApiService Api
 @inject IJSRuntime JS
+@inject AuthenticationStateProvider AuthStateProvider
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
 
 <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
     <MudText Typo="Typo.h4">📊 Analytics v2.3 (Precision Stats)</MudText>
     <MudButton Variant="Variant.Filled" Color="Color.Primary" 
                StartIcon="@Icons.Material.Filled.Refresh" 
                Disabled="_loading"
-               OnClick="LoadAllData">Làm mới</MudButton>
+               OnClick="@(() => LoadAllData(true))">Làm mới</MudButton>
 </MudStack>
 
 @if (_loading)
@@ -20,14 +23,20 @@ else
     <MudGrid>
         <MudItem xs="12" sm="6" md="3">
             <MudPaper Class="pa-4" Elevation="2">
-                <MudText Typo="Typo.h3" Color="Color.Primary">@_total</MudText>
-                <MudText Typo="Typo.subtitle1">Tổng lượt nghe</MudText>
+                <MudText Typo="Typo.h3" Color="Color.Success">@_totalRevenue.ToString("N0")</MudText>
+                <MudText Typo="Typo.subtitle1">Tổng doanh thu (VND)</MudText>
             </MudPaper>
         </MudItem>
         <MudItem xs="12" sm="6" md="3">
             <MudPaper Class="pa-4" Elevation="2">
-                <MudText Typo="Typo.h3" Color="Color.Success">@_totalQr</MudText>
+                <MudText Typo="Typo.h3" Color="Color.Primary">@_totalQr</MudText>
                 <MudText Typo="Typo.subtitle1">Lượt quét QR</MudText>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="12" sm="6" md="3">
+            <MudPaper Class="pa-4" Elevation="2">
+                <MudText Typo="Typo.h3" Color="Color.Info">@_totalPlay</MudText>
+                <MudText Typo="Typo.subtitle1">Lượt nghe Audio</MudText>
             </MudPaper>
         </MudItem>
         <MudItem xs="12" sm="6" md="3">
@@ -76,41 +85,79 @@ else
 
         <MudItem xs="12">
             <MudPaper Class="pa-6" Elevation="2">
-                <MudText Typo="Typo.h6" Class="mb-4">📈 Thống kê tương tác (7 ngày gần nhất)</MudText>
+                <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
+                    <MudText Typo="Typo.h6">📈 Thống kê doanh thu (7 ngày gần nhất)</MudText>
+                    <MudButton Variant="Variant.Outlined" Color="Color.Success" 
+                               StartIcon="@Icons.Custom.FileFormats.FileExcel"
+                               OnClick="ExportToExcel">Xuất Excel (.csv)</MudButton>
+                </MudStack>
                 
                 @if (_chartSeries.Count > 0)
                 {
                     <MudChart ChartType="ChartType.Line" ChartSeries="@_chartSeries" 
-                              @bind-SelectedIndex="_chartIndex" ChartLabels="@_chartLabels" 
-                              Width="100%" Height="350px" ChartOptions="@_chartOptions" />
+                               @bind-SelectedIndex="_chartIndex" ChartLabels="@_chartLabels" 
+                               Width="100%" Height="350px" ChartOptions="@_chartOptions" />
                 }
                 else
                 {
-                    <MudAlert Severity="Severity.Info">Chưa đủ dữ liệu để vẽ biểu đồ</MudAlert>
+                    <MudAlert Severity="Severity.Info">Chưa đủ dữ liệu để vẽ biểu đồ doanh thu</MudAlert>
                 }
 
                 <MudStack Row="true" Justify="Justify.Center" Class="mt-4">
-                    <MudText Typo="Typo.caption" Color="Color.Secondary">Biểu đồ tổng tích lũy trong 7 ngày</MudText>
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">Số tiền thanh toán quét QR theo từng ngày</MudText>
                 </MudStack>
             </MudPaper>
         </MudItem>
 
-        <MudItem xs="12">
+        <MudItem xs="12" md="6">
             <MudPaper Class="pa-4" Elevation="2">
-                <MudText Typo="Typo.h6" Class="mb-3">🔥 Heatmap vị trí người dùng</MudText>
-                <div id="heatmap" style="height:400px; width:100%; border-radius:8px;"></div>
+                <MudText Typo="Typo.h6" Class="mb-3">📅 Doanh thu theo tháng</MudText>
+                <MudTable Items="_monthlyRevenue" Hover="true" Dense="true">
+                    <HeaderContent>
+                        <MudTh>Tháng/Năm</MudTh><MudTh>Doanh thu (VND)</MudTh><MudTh>Lượt thanh toán</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>@context.Month</MudTd>
+                        <MudTd>@context.Amount.ToString("N0")</MudTd>
+                        <MudTd>@context.Count</MudTd>
+                    </RowTemplate>
+                </MudTable>
             </MudPaper>
         </MudItem>
 
-        <MudItem xs="12">
+        <MudItem xs="12" md="6">
             <MudPaper Class="pa-4" Elevation="2">
-                <MudText Typo="Typo.h6" Class="mb-3">🗺️ Tuyến di chuyển người dùng</MudText>
-                <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mb-2">
-                    Tọa độ được làm tròn 3 chữ số (~111m) để bảo vệ quyền riêng tư
-                </MudText>
-                <div id="tracemap" style="height:400px; width:100%; border-radius:8px;"></div>
+                <MudText Typo="Typo.h6" Class="mb-3">📍 Doanh thu theo POI</MudText>
+                <MudTable Items="_poiRevenue" Hover="true" Dense="true">
+                    <HeaderContent>
+                        <MudTh>POI</MudTh><MudTh>Doanh thu (VND)</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>@context.Name</MudTd>
+                        <MudTd>@context.Amount.ToString("N0")</MudTd>
+                    </RowTemplate>
+                </MudTable>
             </MudPaper>
         </MudItem>
+
+        <AuthorizeView Roles="admin">
+            <MudItem xs="12">
+                <MudPaper Class="pa-4" Elevation="2">
+                    <MudText Typo="Typo.h6" Class="mb-3">🔥 Heatmap vị trí người dùng</MudText>
+                    <div id="heatmap" style="height:400px; width:100%; border-radius:8px;"></div>
+                </MudPaper>
+            </MudItem>
+
+            <MudItem xs="12">
+                <MudPaper Class="pa-4" Elevation="2">
+                    <MudText Typo="Typo.h6" Class="mb-3">🗺️ Tuyến di chuyển người dùng</MudText>
+                    <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mb-2">
+                        Tọa độ được làm tròn 3 chữ số (~111m) để bảo vệ quyền riêng tư
+                    </MudText>
+                    <div id="tracemap" style="height:400px; width:100%; border-radius:8px;"></div>
+                </MudPaper>
+            </MudItem>
+        </AuthorizeView>
 
         <MudItem xs="12">
             <MudPaper Class="pa-4" Elevation="2">
@@ -154,7 +201,7 @@ else
     // Chart
     private int _chartIndex = -1;
     private ChartOptions _chartOptions = new ChartOptions();
-    private List<ChartSeries<double>> _chartSeries = new();
+    private List<ChartSeries> _chartSeries = new();
     private string[] _chartLabels = Array.Empty<string>();
 
     bool _mapsInitialized = false;
@@ -165,33 +212,55 @@ else
     List<UnifiedEvent> _unified = new();
     bool _loading = true;
 
-    int _total, _totalQr, _avgDuration, _uniquePois;
+    int _totalPlay, _totalQr, _avgDuration, _uniquePois;
     double _totalRevenue;
     List<KeyValuePair<string, int>> _topPois = new();
     List<KeyValuePair<string, int>> _langStats = new();
+
+    class RevenueGroup { public string Month { get; set; } = ""; public double Amount { get; set; } public int Count { get; set; } }
+    class PoiRevenue { public string Name { get; set; } = ""; public double Amount { get; set; } }
+    List<RevenueGroup> _monthlyRevenue = new();
+    List<PoiRevenue> _poiRevenue = new();
 
     protected override async Task OnInitializedAsync()
     {
         await LoadAllData();
     }
 
-    async Task LoadAllData()
+    async Task LoadAllData(bool force = false)
     {
         _loading = true;
         StateHasChanged();
         try 
         {
-            var t1 = Api.GetAnalyticsAsync();
-            var t2 = Api.GetTracesAsync();
-            var t3 = Api.GetHistoryAsync();
-            var t4 = Api.GetPoisAsync();
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+            var isAdmin = user.IsInRole("admin");
+            var managedPois = user.Claims.Where(c => c.Type == "ManagedPoiId").Select(c => c.Value).ToList();
+
+            var t1 = Api.GetAnalyticsAsync(force);
+            var t2 = Api.GetTracesAsync(force);
+            var t3 = Api.GetHistoryAsync(force);
+            var t4 = Api.GetPoisAsync(force);
             
             await Task.WhenAll(t1, t2, t3, t4);
             
-            _events = (t1.Result ?? new()).Where(e => e.EventType != "open_app").ToList();
-            _traces = t2.Result ?? new();
-            _history = (t3.Result ?? new()).Where(h => h.Action != "open_app").ToList();
             _pois = t4.Result ?? new();
+
+            // Filter data based on Role
+            if (isAdmin)
+            {
+                _events = (t1.Result ?? new()).Where(e => e.EventType != "open_app").ToList();
+                _traces = t2.Result ?? new();
+                _history = (t3.Result ?? new()).Where(h => h.Action != "open_app").ToList();
+            }
+            else
+            {
+                _events = (t1.Result ?? new()).Where(e => e.EventType != "open_app" && managedPois.Contains(e.PoiId)).ToList();
+                _traces = new(); // Owners don't see traces for now
+                _history = (t3.Result ?? new()).Where(h => h.Action != "open_app" && managedPois.Contains(h.PoiId)).ToList();
+                _pois = _pois.Where(p => managedPois.Contains(p.Id)).ToList();
+            }
             
             BuildUnified();
             ComputeStats();
@@ -268,7 +337,7 @@ else
 
     void ComputeStats()
     {
-        _total = _unified.Count(e => IsPlayAction(e.EventType));
+        _totalPlay = _unified.Count(e => IsPlayAction(e.EventType));
         _totalQr = _unified.Count(h => IsScanAction(h.EventType));
         
         _avgDuration = _unified.Any(e => e.Duration > 0)
@@ -277,7 +346,16 @@ else
         _uniquePois = _unified.Where(e => !string.IsNullOrEmpty(e.PoiId))
             .Select(e => e.PoiId).Distinct().Count();
 
-        _totalRevenue = _unified.Where(e => e.EventType == "pay_audio").Sum(e => e.Amount);
+        var payEvents = _unified.Where(e => e.EventType == "pay_audio").ToList();
+        _totalRevenue = payEvents.Sum(e => e.Amount);
+
+        _monthlyRevenue = payEvents.GroupBy(e => e.Timestamp.ToLocalTime().ToString("MM/yyyy"))
+            .Select(g => new RevenueGroup { Month = g.Key, Amount = g.Sum(e => e.Amount), Count = g.Count() })
+            .OrderByDescending(x => x.Month).ToList();
+
+        _poiRevenue = payEvents.GroupBy(e => string.IsNullOrEmpty(e.PoiName) ? e.PoiId : e.PoiName)
+            .Select(g => new PoiRevenue { Name = g.Key, Amount = g.Sum(e => e.Amount) })
+            .OrderByDescending(x => x.Amount).ToList();
         
         _topPois = _unified.Where(e => !string.IsNullOrEmpty(e.PoiId) && IsPlayAction(e.EventType))
             .GroupBy(e => string.IsNullOrEmpty(e.PoiName) ? e.PoiId : e.PoiName)
@@ -314,36 +392,45 @@ else
         var localNow = DateTime.Now.Date;
         var startDate = localNow.AddDays(-6);
         var labels = new List<string>();
-        var scanData = new List<double>();
-        var playData = new List<double>();
+        var revenueData = new List<double>();
+        var countData = new List<double>();
 
-        // Start with absolute total before the 7-day window
-        double cumulativeScan = _unified.Count(e => e.Timestamp.ToLocalTime().Date < startDate && e.EventType == "scan_qr");
-        double cumulativePlay = _unified.Count(e => e.Timestamp.ToLocalTime().Date < startDate && (e.EventType == "poi_play" || e.EventType == "play_poi" || e.EventType == "listen_poi"));
-
-        // Calculate cumulative sums for each of the last 7 days
         for (int i = 6; i >= 0; i--)
         {
             var date = localNow.AddDays(-i);
             labels.Add(date.ToString("dd/MM"));
 
-            var dayEvents = _unified.Where(e => e.Timestamp.ToLocalTime().Date == date);
+            var dayPays = _unified.Where(e => e.Timestamp.ToLocalTime().Date == date && e.EventType == "pay_audio");
             
-            cumulativeScan += dayEvents.Count(e => IsScanAction(e.EventType));
-            cumulativePlay += dayEvents.Count(e => IsPlayAction(e.EventType));
-            
-            scanData.Add(cumulativeScan);
-            playData.Add(cumulativePlay);
+            revenueData.Add(dayPays.Sum(e => e.Amount));
+            countData.Add(dayPays.Count());
         }
 
         _chartLabels = labels.ToArray();
-        _chartSeries = new List<ChartSeries<double>>()
+        _chartSeries = new List<ChartSeries>()
         {
-            new ChartSeries<double>() { Name = "Quét QR", Data = scanData.ToArray() },
-            new ChartSeries<double>() { Name = "Nghe Audio", Data = playData.ToArray() }
+            new ChartSeries() { Name = "Doanh thu (VND)", Data = revenueData.ToArray() },
+            new ChartSeries() { Name = "Lượt thanh toán", Data = countData.ToArray() }
         };
         
-        _chartOptions.ShowLegend = false;
+        _chartOptions.ShowLegend = true;
+    }
+
+    async Task ExportToExcel()
+    {
+        var sb = new System.Text.StringBuilder();
+        sb.AppendLine("Thoi gian,Hanh dong,POI,So tien (VND),Thiet bi,Ngon ngu");
+        
+        foreach (var e in _unified.Where(e => e.EventType == "pay_audio").OrderByDescending(x => x.Timestamp))
+        {
+            sb.AppendLine($"{e.Timestamp.ToLocalTime():dd/MM/yyyy HH:mm},{e.EventType},{e.PoiName},{e.Amount},{e.Device},{e.Language}");
+        }
+
+        var csv = sb.ToString();
+        var fileName = $"DoanhThu_VinhKhanh_{DateTime.Now:ddMMyyyy}.csv";
+        
+        // Use the existing utility or add a new one
+        await JS.InvokeVoidAsync("downloadFileFromBlob", fileName, csv, "text/csv;charset=utf-8;");
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

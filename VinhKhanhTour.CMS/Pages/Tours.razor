@@ -1,4 +1,5 @@
 @page "/tours"
+@attribute [Authorize(Roles = "admin")]
 @using VinhKhanhTour.Shared.Models
 @using QRCoder
 @inject CmsApiService Api
@@ -331,11 +332,11 @@ else
 
     async Task DeleteTour(string id)
     {
-        bool? confirm = await DialogService.ShowMessageBoxAsync(
-            "Xác nhận xoá",
-            "Bạn có chắc muốn xoá tour này không?",
-            yesText: "Xoá", cancelText: "Huỷ");
-        if (confirm != true) return;
+        var tour = _tours.FirstOrDefault(t => t.Id == id);
+        if (tour == null) return;
+
+        bool? result = await DialogService.ShowMessageBox("Xác nhận xóa", (MarkupString)$"Bạn có chắc muốn xóa tour {tour.Name}?", yesText: "Xóa", cancelText: "Hủy");
+        if (result != true) return;
 
         await Api.DeleteTourAsync(id);
         _tours.RemoveAll(t => t.Id == id);

@@ -1,4 +1,4 @@
-﻿@inject ISnackbar Snackbar
+@inject ISnackbar Snackbar
 
 <MudDialog>
     <TitleContent>
@@ -60,7 +60,7 @@
 </MudDialog>
 
 @code {
-    [CascadingParameter] IMudDialogInstance? MudDialog { get; set; }
+    [CascadingParameter] MudDialogInstance? MudDialog { get; set; }
     [Parameter] public TourModel Tour { get; set; } = new();
     [Parameter] public bool IsEdit { get; set; } = false;
     [Parameter] public List<PoiModel> AllPois { get; set; } = new();

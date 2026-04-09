@@ -83,3 +83,12 @@ D:\Projects\VinhKhanhTour\VinhKhanhTour.Api\obj\Debug\net8.0\refint\VinhKhanhTou
 D:\Projects\VinhKhanhTour\VinhKhanhTour.Api\obj\Debug\net8.0\VinhKhanhTour.Api.pdb
 D:\Projects\VinhKhanhTour\VinhKhanhTour.Api\obj\Debug\net8.0\VinhKhanhTour.Api.genruntimeconfig.cache
 D:\Projects\VinhKhanhTour\VinhKhanhTour.Api\obj\Debug\net8.0\ref\VinhKhanhTour.Api.dll
+D:\Projects\VinhKhanhTour\VinhKhanhTour.Api\bin\Debug\net8.0\BCrypt.Net-Next.dll
+D:\Projects\VinhKhanhTour\VinhKhanhTour.Api\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+D:\Projects\VinhKhanhTour\VinhKhanhTour.Api\bin\Debug\net8.0\Microsoft.IdentityModel.Abstractions.dll
+D:\Projects\VinhKhanhTour\VinhKhanhTour.Api\bin\Debug\net8.0\Microsoft.IdentityModel.JsonWebTokens.dll
+D:\Projects\VinhKhanhTour\VinhKhanhTour.Api\bin\Debug\net8.0\Microsoft.IdentityModel.Logging.dll
+D:\Projects\VinhKhanhTour\VinhKhanhTour.Api\bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.dll
+D:\Projects\VinhKhanhTour\VinhKhanhTour.Api\bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+D:\Projects\VinhKhanhTour\VinhKhanhTour.Api\bin\Debug\net8.0\Microsoft.IdentityModel.Tokens.dll
+D:\Projects\VinhKhanhTour\VinhKhanhTour.Api\bin\Debug\net8.0\System.IdentityModel.Tokens.Jwt.dll

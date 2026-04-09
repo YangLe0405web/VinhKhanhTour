@@ -1,0 +1,16 @@
+@inherits LayoutComponentBase
+
+<MudThemeProvider IsDarkMode="true" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<div class="vk-bg">
+    <div class="vk-orb vk-orb-1"></div>
+    <div class="vk-orb vk-orb-2"></div>
+    <div class="vk-orb vk-orb-3"></div>
+</div>
+
+<div class="d-flex align-center justify-center" style="min-height: 100vh; width: 100%;">
+    @Body
+</div>

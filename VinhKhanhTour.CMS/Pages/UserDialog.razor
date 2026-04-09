@@ -1,0 +1,109 @@
+@using VinhKhanhTour.Shared.Models
+@inject CmsApiService Api
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">@Title</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudStack Spacing="3">
+            <MudTextField @bind-Value="User.Username" Label="Tên đăng nhập" Variant="Variant.Outlined" 
+                          Disabled="@(User.Id != null)" />
+            
+            <MudTextField @bind-Value="_password" Label="@(User.Id == null ? "Mật khẩu" : "Mật khẩu mới (để trống nếu không đổi)")" 
+                          InputType="InputType.Password" Variant="Variant.Outlined" />
+
+            <MudTextField @bind-Value="User.FullName" Label="Họ tên" Variant="Variant.Outlined" />
+
+            <MudSelect @bind-Value="User.Role" Label="Vai trò" Variant="Variant.Outlined">
+                <MudSelectItem Value="@("admin")">ADMIN (Toàn quyền)</MudSelectItem>
+                <MudSelectItem Value="@("owner")">OWNER (Chủ quán)</MudSelectItem>
+            </MudSelect>
+
+            @if (User.Role == "owner")
+            {
+                <MudText Typo="Typo.subtitle2" Class="mt-2">Chọn quán quản lý:</MudText>
+                <div style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px;" class="pa-2">
+                    @foreach (var poi in AllPois.OrderBy(p => p.Name))
+                    {
+                        <MudCheckBox T="bool" Value="@IsPoiSelected(poi.Id)" 
+                                     ValueChanged="@((v) => TogglePoi(poi.Id, v))" 
+                                     Label="@poi.Name" Dense="true" Color="Color.Primary" />
+                    }
+                </div>
+                <MudText Typo="Typo.caption" Color="Color.Secondary">Đã chọn: @User.ManagedPoiIds.Count quán</MudText>
+            }
+        </MudStack>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Hủy</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit" Disabled="_loading">Lưu thay đổi</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance? MudDialog { get; set; }
+    [Parameter] public AppUser User { get; set; } = new();
+    [Parameter] public List<PoiModel> AllPois { get; set; } = new();
+
+    private string _password = "";
+    private bool _loading = false;
+    private string Title => string.IsNullOrEmpty(User.Id) ? "Thêm tài khoản" : "Cập nhật tài khoản";
+
+    private bool IsPoiSelected(string? id) => id != null && User.ManagedPoiIds.Contains(id);
+
+    private void TogglePoi(string? id, bool selected)
+    {
+        if (id == null) return;
+        if (selected && !User.ManagedPoiIds.Contains(id))
+            User.ManagedPoiIds.Add(id);
+        else if (!selected)
+            User.ManagedPoiIds.Remove(id);
+    }
+
+    void Cancel() => MudDialog.Cancel();
+
+    async Task Submit()
+    {
+        if (string.IsNullOrWhiteSpace(User.Username))
+        {
+            Snackbar.Add("Vui lòng nhập Username", Severity.Warning);
+            return;
+        }
+
+        if (string.IsNullOrEmpty(User.Id) && string.IsNullOrWhiteSpace(_password))
+        {
+            Snackbar.Add("Vui lòng nhập mật khẩu cho tài khoản mới", Severity.Warning);
+            return;
+        }
+
+        _loading = true;
+        try
+        {
+            // Set password to PasswordHash field for transport (will be hashed on server)
+            if (!string.IsNullOrWhiteSpace(_password))
+                User.PasswordHash = _password;
+
+            var resp = await Api.SaveUserAsync(User);
+            if (resp.IsSuccessStatusCode)
+            {
+                Snackbar.Add("Lưu tài khoản thành công", Severity.Success);
+                MudDialog.Close(DialogResult.Ok(true));
+            }
+            else
+            {
+                var err = await resp.Content.ReadAsStringAsync();
+                Snackbar.Add("Lỗi: " + err, Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("Lỗi hệ thống: " + ex.Message, Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+}

@@ -1,5 +1,8 @@
 @page "/history"
 @inject CmsApiService Api
+@inject AuthenticationStateProvider AuthStateProvider
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
 
 <MudText Typo="Typo.h4" Class="mb-4">📋 Lịch sử ứng dụng</MudText>
 
@@ -137,9 +140,20 @@ else
     async Task LoadData()
     {
         _loading = true;
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        var isAdmin = user.IsInRole("admin");
+        var managedPois = user.Claims.Where(c => c.Type == "ManagedPoiId").Select(c => c.Value).ToList();
+
         _history = (await Api.GetHistoryAsync() ?? new())
             .Where(h => h.Action != "open_app")
             .ToList();
+
+        if (!isAdmin)
+        {
+            _history = _history.Where(h => managedPois.Contains(h.PoiId)).ToList();
+        }
+
         _loading = false;
     }
 

@@ -55,9 +55,17 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "Blazored.LocalStorage": {
+              "target": "Package",
+              "version": "[4.5.0, )"
+            },
             "Google.Cloud.Storage.V1": {
               "target": "Package",
               "version": "[4.14.0, )"
+            },
+            "Microsoft.AspNetCore.Components.Authorization": {
+              "target": "Package",
+              "version": "[8.0.0, )"
             },
             "Microsoft.AspNetCore.Components.WebAssembly": {
               "target": "Package",
@@ -82,7 +90,7 @@
             },
             "MudBlazor": {
               "target": "Package",
-              "version": "[9.1.0, )"
+              "version": "[7.0.0, )"
             },
             "QRCoder": {
               "target": "Package",

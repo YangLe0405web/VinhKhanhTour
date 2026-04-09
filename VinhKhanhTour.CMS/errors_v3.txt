@@ -1,0 +1,22 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  VinhKhanhTour.Shared -> D:\Projects\VinhKhanhTour\VinhKhanhTour.Shared\bin\Debug\net8.0\VinhKhanhTour.Shared.dll
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\App.razor(8,25): warning RZ10012: Found markup element with unexpected name 'RedirectToLogin'. If this is intended to be a component, add a @using directive for its namespace. [D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\VinhKhanhTour.CMS.csproj]
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\Pages\Audio.razor(58,5): warning RZ10012: Found markup element with unexpected name 'ButtonTemplate'. If this is intended to be a component, add a @using directive for its namespace. [D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\VinhKhanhTour.CMS.csproj]
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\Pages\Analytics.razor(204,18): error CS0308: The non-generic type 'ChartSeries' cannot be used with type arguments [D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\VinhKhanhTour.CMS.csproj]
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\Pages\PoiDialog.razor(116,26): error CS0246: The type or namespace name 'IMudDialogInstance' could not be found (are you missing a using directive or an assembly reference?) [D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\VinhKhanhTour.CMS.csproj]
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\Pages\TourDialog.razor(63,26): error CS0246: The type or namespace name 'IMudDialogInstance' could not be found (are you missing a using directive or an assembly reference?) [D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\VinhKhanhTour.CMS.csproj]
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\Pages\UserDialog.razor(46,26): error CS0246: The type or namespace name 'IMudDialogInstance' could not be found (are you missing a using directive or an assembly reference?) [D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\VinhKhanhTour.CMS.csproj]
+
+Build FAILED.
+
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\App.razor(8,25): warning RZ10012: Found markup element with unexpected name 'RedirectToLogin'. If this is intended to be a component, add a @using directive for its namespace. [D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\VinhKhanhTour.CMS.csproj]
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\Pages\Audio.razor(58,5): warning RZ10012: Found markup element with unexpected name 'ButtonTemplate'. If this is intended to be a component, add a @using directive for its namespace. [D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\VinhKhanhTour.CMS.csproj]
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\Pages\Analytics.razor(204,18): error CS0308: The non-generic type 'ChartSeries' cannot be used with type arguments [D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\VinhKhanhTour.CMS.csproj]
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\Pages\PoiDialog.razor(116,26): error CS0246: The type or namespace name 'IMudDialogInstance' could not be found (are you missing a using directive or an assembly reference?) [D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\VinhKhanhTour.CMS.csproj]
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\Pages\TourDialog.razor(63,26): error CS0246: The type or namespace name 'IMudDialogInstance' could not be found (are you missing a using directive or an assembly reference?) [D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\VinhKhanhTour.CMS.csproj]
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\Pages\UserDialog.razor(46,26): error CS0246: The type or namespace name 'IMudDialogInstance' could not be found (are you missing a using directive or an assembly reference?) [D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\VinhKhanhTour.CMS.csproj]
+    2 Warning(s)
+    4 Error(s)
+
+Time Elapsed 00:00:01.93

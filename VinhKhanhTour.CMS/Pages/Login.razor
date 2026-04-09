@@ -1,0 +1,101 @@
+@page "/login"
+@layout EmptyLayout
+@inject AuthService AuthService
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="d-flex align-center justify-center" Style="height: 100vh;">
+    <MudPaper Elevation="25" Class="pa-8 pb-10" Style="width: 100%; max-width: 400px; border-radius: 16px; background: rgba(255,255,255,0.85); backdrop-filter: blur(10px);">
+        <MudStack Spacing="4">
+            <MudStack AlignItems="AlignItems.Center">
+                <MudIcon Icon="@Icons.Material.Filled.Lock" Color="Color.Primary" Style="font-size: 4rem;" />
+                <MudText Typo="Typo.h4" Align="Align.Center"><b>Đăng nhập</b></MudText>
+                <MudText Typo="Typo.subtitle1" Color="Color.Secondary">VinhKhanhTour CMS Admin</MudText>
+            </MudStack>
+
+            <MudTextField @bind-Value="_username" Label="Tên đăng nhập" 
+                          Variant="Variant.Outlined" FullWidth="true" 
+                          Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Person" />
+            
+            <MudTextField @bind-Value="_password" Label="Mật khẩu" 
+                          InputType="_passwordInput" Variant="Variant.Outlined" FullWidth="true"
+                          Adornment="Adornment.End" AdornmentIcon="@_passwordInputIcon" 
+                          OnAdornmentClick="TogglePasswordVisibility" />
+
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" 
+                       Size="Size.Large" Class="mt-4" OnClick="ProcessLogin" 
+                       Disabled="_loading">
+                @if (_loading)
+                {
+                    <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                    <MudText Class="ms-2">Đang xử lý...</MudText>
+                }
+                else
+                {
+                    <MudText>Đăng nhập</MudText>
+                }
+            </MudButton>
+
+            @if (!string.IsNullOrEmpty(_error))
+            {
+                <MudAlert Severity="Severity.Error" Dense="true" Class="mt-2">@_error</MudAlert>
+            }
+        </MudStack>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    private string _username = "";
+    private string _password = "";
+    private string? _error;
+    private bool _loading = false;
+    private InputType _passwordInput = InputType.Password;
+    private string _passwordInputIcon = Icons.Material.Filled.VisibilityOff;
+
+    void TogglePasswordVisibility()
+    {
+        if (_passwordInput == InputType.Password)
+        {
+            _passwordInput = InputType.Text;
+            _passwordInputIcon = Icons.Material.Filled.Visibility;
+        }
+        else
+        {
+            _passwordInput = InputType.Password;
+            _passwordInputIcon = Icons.Material.Filled.VisibilityOff;
+        }
+    }
+
+    async Task ProcessLogin()
+    {
+        if (string.IsNullOrWhiteSpace(_username) || string.IsNullOrWhiteSpace(_password))
+        {
+            _error = "Vui lòng nhập đầy đủ thông tin";
+            return;
+        }
+
+        _loading = true;
+        _error = null;
+        try
+        {
+            var result = await AuthService.Login(_username, _password);
+            if (result == null)
+            {
+                Snackbar.Add("Đăng nhập thành công!", Severity.Success);
+                Navigation.NavigateTo("/");
+            }
+            else
+            {
+                _error = result;
+            }
+        }
+        catch (Exception ex)
+        {
+            _error = "Lỗi kết nối: " + ex.Message;
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+}

@@ -5,7 +5,7 @@ build_property.EnableTrimAnalyzer = false
 build_property.IncludeAllContentForSelfExtract = 
 build_property.MudDebugAnalyzer = 
 build_property.MudAllowedAttributePattern = 
-build_property.MudAllowedAttributeList = 
+build_property.MudIllegalParameters = 
 build_property.TargetFramework = net8.0
 build_property.TargetFrameworkIdentifier = .NETCoreApp
 build_property.TargetFrameworkVersion = v8.0
@@ -33,6 +33,10 @@ build_property.EnableCodeStyleSeverity =
 build_metadata.AdditionalFiles.TargetPath = QXBwLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
+[D:/Projects/VinhKhanhTour/VinhKhanhTour.CMS/Layout/EmptyLayout.razor]
+build_metadata.AdditionalFiles.TargetPath = TGF5b3V0XEVtcHR5TGF5b3V0LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
 [D:/Projects/VinhKhanhTour/VinhKhanhTour.CMS/Pages/Analytics.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQW5hbHl0aWNzLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
@@ -43,6 +47,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [D:/Projects/VinhKhanhTour/VinhKhanhTour.CMS/Pages/History.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSGlzdG9yeS5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/Projects/VinhKhanhTour/VinhKhanhTour.CMS/Pages/Login.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcTG9naW4ucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
 [D:/Projects/VinhKhanhTour/VinhKhanhTour.CMS/Pages/PoiDialog.razor]
@@ -71,6 +79,18 @@ build_metadata.AdditionalFiles.CssScope =
 
 [D:/Projects/VinhKhanhTour/VinhKhanhTour.CMS/Pages/Translations.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVHJhbnNsYXRpb25zLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/Projects/VinhKhanhTour/VinhKhanhTour.CMS/Pages/UserDialog.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVXNlckRpYWxvZy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/Projects/VinhKhanhTour/VinhKhanhTour.CMS/Pages/Users.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVXNlcnMucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/Projects/VinhKhanhTour/VinhKhanhTour.CMS/Shared/RedirectToLogin.razor]
+build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXFJlZGlyZWN0VG9Mb2dpbi5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
 [D:/Projects/VinhKhanhTour/VinhKhanhTour.CMS/_Imports.razor]

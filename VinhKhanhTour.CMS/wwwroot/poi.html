@@ -407,17 +407,7 @@
         .pay-btn:disabled { opacity: 0.5; }
 
         .debug-section {
-            width: 100%;
-            max-width: 420px;
-            margin-top: 20px;
-            padding: 15px;
-            background: rgba(255,255,255,0.05);
-            border: 1px dashed rgba(255,255,255,0.2);
-            border-radius: 12px;
-            font-family: monospace;
-            font-size: 10px;
-            color: #888;
-            display: none;
+            display: none !important;
         }
 
         /* ── Loading State ── */
@@ -694,7 +684,7 @@
                 poiId: poiData.id,
                 poiName: poiData.name,
                 language: currentLang,
-                device: 'Web',
+                device: deviceId,
                 lat: logLat,
                 lng: logLng,
                 duration: extra.duration || 0,

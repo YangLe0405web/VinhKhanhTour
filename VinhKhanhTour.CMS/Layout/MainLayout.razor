@@ -1,5 +1,9 @@
 @inherits LayoutComponentBase
 @inject NavigationManager Nav
+@inject AuthService AuthService
+@inject IDialogService DialogService
+@using MudBlazor
+@using Microsoft.AspNetCore.Components.Authorization
 
 <MudThemeProvider IsDarkMode="true" />
 <MudPopoverProvider />
@@ -24,10 +28,33 @@
             <span class="vk-brand-badge">CMS</span>
         </div>
         <div class="vk-topbar-right">
-            <span class="vk-topbar-hint">Admin Workspace</span>
-            <div class="vk-avatar">VK</div>
+            <AuthorizeView>
+                <Authorized>
+                    <span class="vk-topbar-hint">@context.User.Identity?.Name (@context.User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value)</span>
+                    <MudIconButton Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit" Size="Size.Small" OnClick="Logout" />
+                </Authorized>
+                <NotAuthorized>
+                    <span class="vk-topbar-hint">Khách</span>
+                </NotAuthorized>
+            </AuthorizeView>
         </div>
     </header>
+
+@code {
+    async Task Logout()
+    {
+        bool? result = await DialogService.ShowMessageBox(
+            "Đăng xuất", 
+            (MarkupString)"Bạn có chắc chắn muốn đăng xuất không?", 
+            yesText: "Đăng xuất", cancelText: "Hủy");
+            
+        if (result == true)
+        {
+            await AuthService.Logout();
+            Nav.NavigateTo("/login");
+        }
+    }
+}
 
     <div class="vk-body">
 
@@ -63,6 +90,14 @@
                 <span class="vk-nav-icon">📊</span>
                 <span>Analytics</span>
             </NavLink>
+
+            <AuthorizeView Roles="admin">
+                <div class="vk-nav-section">System</div>
+                <NavLink class="vk-nav-item" href="/users">
+                    <span class="vk-nav-icon">👥</span>
+                    <span>Tài khoản</span>
+                </NavLink>
+            </AuthorizeView>
 
             <div class="vk-sidebar-footer">
                 <div class="vk-nav-section" style="margin-top:0;">v1.0 · VinhKhanhTour</div>
