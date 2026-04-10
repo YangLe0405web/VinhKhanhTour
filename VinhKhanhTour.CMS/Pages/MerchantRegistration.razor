@@ -17,18 +17,22 @@
 
         <MudForm @ref="_form" @bind-IsValid="_isValid">
             <MudTextField @bind-Value="_model.FullName" Label="Họ và Tên" 
-                          Required="true" RequiredError="Họ tên là bắt buộc"
+                          Required="true" RequiredError="Vui lòng nhập họ và tên"
                           Variant="Variant.Outlined" Class="mb-4" />
             
             <MudTextField @bind-Value="_model.PhoneNumber" Label="Số điện thoại" 
                           Required="true" RequiredError="Số điện thoại dùng làm tên đăng nhập"
+                          Validation="@(new Func<string, string?>(v => v?.Length != 10 ? "SĐT phải đủ 10 chữ số" : null))"
                           Variant="Variant.Outlined" Class="mb-4" />
             
             <MudTextField @bind-Value="_model.Gmail" Label="Gmail" 
+                          Required="true" RequiredError="Vui lòng nhập Gmail để nhận thông báo"
                           InputType="InputType.Email"
+                          Validation="@(new Func<string, string?>(v => !v.Contains("@") ? "Email không đúng định dạng" : null))"
                           Variant="Variant.Outlined" Class="mb-4" />
             
-            <MudTextField @bind-Value="_model.Address" Label="Địa chỉ quán" 
+            <MudTextField @bind-Value="_model.Address" Label="Địa chỉ quán / Cơ sở kinh doanh" 
+                          Required="true" RequiredError="Vui lòng nhập địa chỉ"
                           Variant="Variant.Outlined" Class="mb-6" />
 
             <MudAlert Severity="Severity.Info" Class="mb-6">

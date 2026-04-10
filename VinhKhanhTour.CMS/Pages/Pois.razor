@@ -311,8 +311,9 @@ else
             }
             else
             {
-                var managedIdsStr = user.FindFirst("ManagedPoiIds")?.Value ?? "";
-                var managedIds = managedIdsStr.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
+                // Gọi API lấy profile tươi để đảm bảo thấy POI vừa tạo mà không cần login lại
+                var profile = await Api.GetProfileAsync();
+                var managedIds = profile?.ManagedPoiIds ?? new();
                 _pois = allPois.Where(p => managedIds.Contains(p.Id)).ToList();
             }
         }

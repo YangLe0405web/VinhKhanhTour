@@ -148,8 +148,13 @@ else
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
         _isAdmin = user.IsInRole("admin");
-        var managedPoisStr = user.FindFirst("ManagedPoiIds")?.Value ?? "";
-        var managedPois = managedPoisStr.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
+        
+        List<string> managedPois = new();
+        if (!_isAdmin)
+        {
+            var profile = await Api.GetProfileAsync();
+            managedPois = profile?.ManagedPoiIds ?? new();
+        }
 
         _history = (await Api.GetHistoryAsync() ?? new())
             .Where(h => h.Action != "open_app")

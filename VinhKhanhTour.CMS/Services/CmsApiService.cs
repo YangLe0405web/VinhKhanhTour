@@ -165,6 +165,9 @@ public class CmsApiService
     public Task<HttpResponseMessage> RegisterMerchantAsync(MerchantRegisterRequest req)
         => _http.PostAsJsonAsync("api/users/register-merchant", req);
 
+    public Task<AppUser?> GetProfileAsync()
+        => _http.GetFromJsonAsync<AppUser>("api/users/profile");
+
 } // end of CmsApiService class
 
 // ── Access result model
