@@ -29,11 +29,16 @@ public class CmsApiService
         return _poisCache;
     }
 
-    public async Task<HttpResponseMessage> SavePoiAsync(PoiModel poi)
+    public async Task<string?> SavePoiAsync(PoiModel poi)
     {
         var resp = await _http.PostAsJsonAsync("api/pois", poi);
-        if (resp.IsSuccessStatusCode) _poisCache = null; // Clear cache on change
-        return resp;
+        if (resp.IsSuccessStatusCode) 
+        {
+            _poisCache = null; 
+            var result = await resp.Content.ReadFromJsonAsync<Dictionary<string, string>>();
+            return result?["id"];
+        }
+        return null;
     }
 
     public async Task<HttpResponseMessage> DeletePoiAsync(string id)
@@ -156,6 +161,9 @@ public class CmsApiService
 
     public Task<HttpResponseMessage> DeleteUserAsync(string id)
         => _http.DeleteAsync($"api/users/{id}");
+
+    public Task<HttpResponseMessage> RegisterMerchantAsync(MerchantRegisterRequest req)
+        => _http.PostAsJsonAsync("api/users/register-merchant", req);
 
 } // end of CmsApiService class
 

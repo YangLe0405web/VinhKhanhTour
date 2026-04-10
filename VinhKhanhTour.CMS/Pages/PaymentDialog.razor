@@ -1,0 +1,62 @@
+@using VinhKhanhTour.Shared.Models
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">💳 Thanh toán kích hoạt</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudStack AlignItems="AlignItems.Center" Spacing="4">
+            <MudText Typo="Typo.body2" Align="Align.Center">
+                Quét mã bên dưới bằng ứng dụng Ngân hàng để hoàn tất đăng ký cho chủ quán <b>@Model.FullName</b>
+            </MudText>
+            
+            <div class="pa-4" style="background: white; border-radius: 12px; border: 1px solid #eee;">
+                <img src="/images/vietqr_mock.png" style="width: 100%; max-width: 250px; display: block;" />
+            </div>
+
+            <MudAlert Severity="Severity.Warning" Dense="true" Style="width: 100%;">
+                <MudText Typo="Typo.caption">Ghi chú: Nội dung chuyển khoản nên là SĐT của bạn (<b>@Model.PhoneNumber</b>)</MudText>
+            </MudAlert>
+
+            @if (_isSimulated)
+            {
+                <MudAlert Severity="Severity.Success" Dense="true" Style="width: 100%;">
+                    ✅ Đã nhận được thanh toán!
+                </MudAlert>
+            }
+            else 
+            {
+                <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-4" />
+                <MudText Typo="Typo.caption" Color="Color.Secondary">Đang chờ hệ thống xác nhận giao dịch...</MudText>
+            }
+
+            <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="SimulateSuccess" 
+                       Class="mt-2" Style="text-transform: none; font-size: 11px;">
+                [ Giả lập quét QR thành công ]
+            </MudButton>
+        </MudStack>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Hủy</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Submit" Disabled="!_isSimulated">
+            HOÀN TẤT ĐĂNG KÝ
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
+    [Parameter] public MerchantRegisterRequest Model { get; set; } = new();
+
+    bool _isSimulated = false;
+
+    void SimulateSuccess()
+    {
+        _isSimulated = true;
+        Snackbar.Add("Xác nhận thanh toán thành công (Giả lập)", Severity.Success);
+    }
+
+    void Submit() => MudDialog.Close(DialogResult.Ok(true));
+    void Cancel() => MudDialog.Cancel();
+}

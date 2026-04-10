@@ -22,18 +22,40 @@
 else
 {
     <MudGrid>
-        <MudItem xs="12" sm="6" md="3">
-            <MudPaper Class="pa-4" Elevation="2">
-                <MudText Typo="Typo.h3" Color="Color.Success">@_totalRevenue.ToString("N0")</MudText>
-                <MudText Typo="Typo.subtitle1">Tổng doanh thu (VND)</MudText>
-            </MudPaper>
-        </MudItem>
-        <MudItem xs="12" sm="6" md="3">
-            <MudPaper Class="pa-4" Elevation="2">
-                <MudText Typo="Typo.h3" Color="Color.Primary">@_totalQr</MudText>
-                <MudText Typo="Typo.subtitle1">Lượt quét QR</MudText>
-            </MudPaper>
-        </MudItem>
+        @if (_isAdmin)
+        {
+            <MudItem xs="12" sm="6" md="3">
+                <MudPaper Class="pa-4" Elevation="2">
+                    <MudText Typo="Typo.h3" Color="Color.Success">@(_totalRevenue + _totalMerchantRevenue).ToString("N0")</MudText>
+                    <MudText Typo="Typo.subtitle1">Tổng doanh thu (VND)</MudText>
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="12" sm="6" md="3">
+                <MudPaper Class="pa-4" Elevation="2">
+                    <MudText Typo="Typo.h3" Color="Color.Secondary">@_totalMerchantRevenue.ToString("N0")</MudText>
+                    <MudText Typo="Typo.subtitle1">Doanh thu Đăng ký (VND)</MudText>
+                </MudPaper>
+            </MudItem>
+        }
+        else
+        {
+            <MudItem xs="12" sm="6" md="3">
+                <MudPaper Class="pa-4" Elevation="2">
+                    <MudText Typo="Typo.h3" Color="Color.Primary">@_totalQr</MudText>
+                    <MudText Typo="Typo.subtitle1">Lượt quét QR</MudText>
+                </MudPaper>
+            </MudItem>
+        }
+
+        @if (_isAdmin)
+        {
+            <MudItem xs="12" sm="6" md="3">
+                <MudPaper Class="pa-4" Elevation="2">
+                    <MudText Typo="Typo.h3" Color="Color.Primary">@_totalQr</MudText>
+                    <MudText Typo="Typo.subtitle1">Lượt quét QR</MudText>
+                </MudPaper>
+            </MudItem>
+        }
         <MudItem xs="12" sm="6" md="3">
             <MudPaper Class="pa-4" Elevation="2">
                 <MudText Typo="Typo.h3" Color="Color.Info">@_totalPlay</MudText>
@@ -84,62 +106,65 @@ else
             </MudPaper>
         </MudItem>
 
-        <MudItem xs="12">
-            <MudPaper Class="pa-6" Elevation="2">
-                <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
-                    <MudText Typo="Typo.h6">📈 Thống kê doanh thu (7 ngày gần nhất)</MudText>
-                    <MudButton Variant="Variant.Outlined" Color="Color.Success" 
-                               StartIcon="@Icons.Custom.FileFormats.FileExcel"
-                               OnClick="ExportToExcel">Xuất Excel (.csv)</MudButton>
-                </MudStack>
-                
-                @if (_chartSeries.Count > 0)
-                {
-                    <MudChart ChartType="ChartType.Line" ChartSeries="@_chartSeries" 
-                               @bind-SelectedIndex="_chartIndex" ChartLabels="@_chartLabels" 
-                               Width="100%" Height="350px" ChartOptions="@_chartOptions" />
-                }
-                else
-                {
-                    <MudAlert Severity="Severity.Info">Chưa đủ dữ liệu để vẽ biểu đồ doanh thu</MudAlert>
-                }
+        @if (_isAdmin)
+        {
+            <MudItem xs="12">
+                <MudPaper Class="pa-6" Elevation="2">
+                    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
+                        <MudText Typo="Typo.h6">📈 Thống kê doanh thu (7 ngày gần nhất)</MudText>
+                        <MudButton Variant="Variant.Outlined" Color="Color.Success" 
+                                   StartIcon="@Icons.Custom.FileFormats.FileExcel"
+                                   OnClick="ExportToExcel">Xuất Excel (.csv)</MudButton>
+                    </MudStack>
+                    
+                    @if (_chartSeries.Count > 0)
+                    {
+                        <MudChart ChartType="ChartType.Line" ChartSeries="@_chartSeries" 
+                                   @bind-SelectedIndex="_chartIndex" ChartLabels="@_chartLabels" 
+                                   Width="100%" Height="350px" ChartOptions="@_chartOptions" />
+                    }
+                    else
+                    {
+                        <MudAlert Severity="Severity.Info">Chưa đủ dữ liệu để vẽ biểu đồ doanh thu</MudAlert>
+                    }
 
-                <MudStack Row="true" Justify="Justify.Center" Class="mt-4">
-                    <MudText Typo="Typo.caption" Color="Color.Secondary">Số tiền thanh toán quét QR theo từng ngày</MudText>
-                </MudStack>
-            </MudPaper>
-        </MudItem>
+                    <MudStack Row="true" Justify="Justify.Center" Class="mt-4">
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">Số tiền thanh toán quét QR theo từng ngày</MudText>
+                    </MudStack>
+                </MudPaper>
+            </MudItem>
 
-        <MudItem xs="12" md="6">
-            <MudPaper Class="pa-4" Elevation="2">
-                <MudText Typo="Typo.h6" Class="mb-3">📅 Doanh thu theo tháng</MudText>
-                <MudTable Items="_monthlyRevenue" Hover="true" Dense="true">
-                    <HeaderContent>
-                        <MudTh>Tháng/Năm</MudTh><MudTh>Doanh thu (VND)</MudTh><MudTh>Lượt thanh toán</MudTh>
-                    </HeaderContent>
-                    <RowTemplate>
-                        <MudTd>@context.Month</MudTd>
-                        <MudTd>@context.Amount.ToString("N0")</MudTd>
-                        <MudTd>@context.Count</MudTd>
-                    </RowTemplate>
-                </MudTable>
-            </MudPaper>
-        </MudItem>
+            <MudItem xs="12" md="6">
+                <MudPaper Class="pa-4" Elevation="2">
+                    <MudText Typo="Typo.h6" Class="mb-3">📅 Doanh thu theo tháng</MudText>
+                    <MudTable Items="_monthlyRevenue" Hover="true" Dense="true">
+                        <HeaderContent>
+                            <MudTh>Tháng/Năm</MudTh><MudTh>Doanh thu (VND)</MudTh><MudTh>Lượt thanh toán</MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd>@context.Month</MudTd>
+                            <MudTd>@context.Amount.ToString("N0")</MudTd>
+                            <MudTd>@context.Count</MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                </MudPaper>
+            </MudItem>
 
-        <MudItem xs="12" md="6">
-            <MudPaper Class="pa-4" Elevation="2">
-                <MudText Typo="Typo.h6" Class="mb-3">📍 Doanh thu theo POI</MudText>
-                <MudTable Items="_poiRevenue" Hover="true" Dense="true">
-                    <HeaderContent>
-                        <MudTh>POI</MudTh><MudTh>Doanh thu (VND)</MudTh>
-                    </HeaderContent>
-                    <RowTemplate>
-                        <MudTd>@context.Name</MudTd>
-                        <MudTd>@context.Amount.ToString("N0")</MudTd>
-                    </RowTemplate>
-                </MudTable>
-            </MudPaper>
-        </MudItem>
+            <MudItem xs="12" md="6">
+                <MudPaper Class="pa-4" Elevation="2">
+                    <MudText Typo="Typo.h6" Class="mb-3">📍 Doanh thu theo POI</MudText>
+                    <MudTable Items="_poiRevenue" Hover="true" Dense="true">
+                        <HeaderContent>
+                            <MudTh>POI</MudTh><MudTh>Doanh thu (VND)</MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd>@context.Name</MudTd>
+                            <MudTd>@context.Amount.ToString("N0")</MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                </MudPaper>
+            </MudItem>
+        }
 
         <AuthorizeView Roles="admin">
             <MudItem xs="12">
@@ -212,9 +237,11 @@ else
     List<PoiModel> _pois = new();
     List<UnifiedEvent> _unified = new();
     bool _loading = true;
+    bool _isAdmin = false;
 
     int _totalPlay, _totalQr, _avgDuration, _uniquePois;
     double _totalRevenue;
+    double _totalMerchantRevenue;
     List<KeyValuePair<string, int>> _topPois = new();
     List<KeyValuePair<string, int>> _langStats = new();
 
@@ -236,7 +263,7 @@ else
         {
             var authState = await AuthStateProvider.GetAuthenticationStateAsync();
             var user = authState.User;
-            var isAdmin = user.IsInRole("admin");
+            _isAdmin = user.IsInRole("admin");
             var managedPoisStr = user.FindFirst("ManagedPoiIds")?.Value ?? "";
             var managedPois = managedPoisStr.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
 
@@ -250,7 +277,7 @@ else
             _pois = t4.Result ?? new();
 
             // Filter data based on Role
-            if (isAdmin)
+            if (_isAdmin)
             {
                 _events = (t1.Result ?? new()).Where(e => e.EventType != "open_app").ToList();
                 _traces = t2.Result ?? new();
@@ -285,6 +312,8 @@ else
         // 1. Nạp History trước
         foreach (var h in _history)
         {
+            if (!_isAdmin && h.Action == "pay_audio") continue;
+
             list.Add(new UnifiedEvent
             {
                 Timestamp = h.Timestamp,
@@ -349,9 +378,12 @@ else
             .Select(e => e.PoiId).Distinct().Count();
 
         var payEvents = _unified.Where(e => e.EventType == "pay_audio").ToList();
-        _totalRevenue = payEvents.Sum(e => e.Amount);
+        var regEvents = _unified.Where(e => e.EventType == "register_poi").ToList();
 
-        _monthlyRevenue = payEvents.GroupBy(e => e.Timestamp.ToLocalTime().ToString("MM/yyyy"))
+        _totalRevenue = payEvents.Sum(e => e.Amount);
+        _totalMerchantRevenue = regEvents.Sum(e => e.Amount);
+
+        _monthlyRevenue = payEvents.Concat(regEvents).GroupBy(e => e.Timestamp.ToLocalTime().ToString("MM/yyyy"))
             .Select(g => new RevenueGroup { Month = g.Key, Amount = g.Sum(e => e.Amount), Count = g.Count() })
             .OrderByDescending(x => x.Month).ToList();
 

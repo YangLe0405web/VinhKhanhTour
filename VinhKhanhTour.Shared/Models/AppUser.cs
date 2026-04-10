@@ -11,6 +11,10 @@ public class AppUser
     [FirestoreProperty] public string FullName { get; set; } = "";
     [FirestoreProperty] public string Role { get; set; } = "owner"; // admin or owner
     
+    [FirestoreProperty] public string PhoneNumber { get; set; } = "";
+    [FirestoreProperty] public string Email { get; set; } = "";
+    [FirestoreProperty] public string Address { get; set; } = "";
+    
     // For owner: list of POIs they are allowed to manage
     [FirestoreProperty] public List<string> ManagedPoiIds { get; set; } = new();
     

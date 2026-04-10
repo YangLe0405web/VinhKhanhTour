@@ -20,15 +20,19 @@ else
 {
     <MudTable Items="_users" Hover="true" Bordered="true" Striped="true" Elevation="2">
         <HeaderContent>
-            <MudTh>Tên đăng nhập</MudTh>
+            <MudTh>Tên đăng nhập / SĐT</MudTh>
             <MudTh>Họ tên</MudTh>
+            <MudTh>Gmail</MudTh>
+            <MudTh>Địa chỉ quán</MudTh>
             <MudTh>Vai trò</MudTh>
-            <MudTh>Số quán quản lý</MudTh>
+            <MudTh>Số quán</MudTh>
             <MudTh Style="width:120px">Thao tác</MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd>@context.Username</MudTd>
             <MudTd>@context.FullName</MudTd>
+            <MudTd>@context.Email</MudTd>
+            <MudTd>@context.Address</MudTd>
             <MudTd>
                 <MudChip T="string" Color="@(context.Role == "admin" ? Color.Error : Color.Info)" Size="Size.Small">
                     @context.Role.ToUpper()
@@ -81,6 +85,9 @@ else
             Id = user.Id,
             Username = string.IsNullOrEmpty(user.Username) ? "" : user.Username,
             FullName = user.FullName ?? "",
+            PhoneNumber = user.PhoneNumber ?? "",
+            Email = user.Email ?? "",
+            Address = user.Address ?? "",
             Role = user.Role ?? "owner",
             ManagedPoiIds = user.ManagedPoiIds != null ? new List<string>(user.ManagedPoiIds) : new List<string>()
         };

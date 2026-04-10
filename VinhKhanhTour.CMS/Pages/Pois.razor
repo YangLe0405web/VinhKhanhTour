@@ -423,8 +423,30 @@ else
         if (!result.Canceled)
         {
             var poi = (PoiModel)result.Data!;
-            await Api.SavePoiAsync(poi);
-            _pois = await Api.GetPoisAsync() ?? new();
+            var newId = await Api.SavePoiAsync(poi);
+            
+            if (!string.IsNullOrEmpty(newId))
+            {
+                // Tự động gán quyền nếu là owner
+                var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+                var userClaim = authState.User;
+                if (userClaim.IsInRole("owner"))
+                {
+                    var username = userClaim.Identity?.Name;
+                    var users = await Api.GetUsersAsync();
+                    var currentUser = users?.FirstOrDefault(u => u.Username == username);
+                    if (currentUser != null)
+                    {
+                        if (!currentUser.ManagedPoiIds.Contains(newId))
+                        {
+                            currentUser.ManagedPoiIds.Add(newId);
+                            await Api.SaveUserAsync(currentUser);
+                        }
+                    }
+                }
+            }
+
+            _pois = await Api.GetPoisAsync(true) ?? new();
             Snackbar.Add("Đã thêm POI!", Severity.Success);
         }
     }
@@ -442,7 +464,7 @@ else
         {
             var updated = (PoiModel)result.Data!;
             await Api.SavePoiAsync(updated);
-            _pois = await Api.GetPoisAsync() ?? new();
+            _pois = await Api.GetPoisAsync(true) ?? new();
             Snackbar.Add("Đã cập nhật POI!", Severity.Success);
         }
     }

@@ -17,7 +17,10 @@
                 <MudSelectItem Value="@("scan_qr")">📷 Quét QR</MudSelectItem>
                 <MudSelectItem Value="@("route_start")">🗺️ Chỉ đường</MudSelectItem>
                 <MudSelectItem Value="@("language_change")">🌐 Đổi ngôn ngữ</MudSelectItem>
-                <MudSelectItem Value="@("pay_audio")">💰 Thanh toán</MudSelectItem>
+                @if (_isAdmin)
+                {
+                    <MudSelectItem Value="@("pay_audio")">💰 Thanh toán</MudSelectItem>
+                }
             </MudSelect>
         </MudItem>
         <MudItem xs="12" sm="3">
@@ -130,6 +133,7 @@ else
     string _filterAction = "";
     string _filterLang = "";
     DateTime? _filterDate;
+    bool _isAdmin = false;
  
     IEnumerable<AppHistory> FilteredHistory => _history
         .Where(h => string.IsNullOrEmpty(_filterAction) || h.Action == _filterAction)
@@ -143,7 +147,7 @@ else
         _loading = true;
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
-        var isAdmin = user.IsInRole("admin");
+        _isAdmin = user.IsInRole("admin");
         var managedPoisStr = user.FindFirst("ManagedPoiIds")?.Value ?? "";
         var managedPois = managedPoisStr.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
 
@@ -151,9 +155,9 @@ else
             .Where(h => h.Action != "open_app")
             .ToList();
 
-        if (!isAdmin)
+        if (!_isAdmin)
         {
-            _history = _history.Where(h => managedPois.Contains(h.PoiId)).ToList();
+            _history = _history.Where(h => h.Action != "pay_audio" && managedPois.Contains(h.PoiId)).ToList();
         }
 
         _loading = false;

@@ -7,7 +7,6 @@ namespace VinhKhanhTour.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = "admin")]
 public class UsersController : ControllerBase
 {
     private readonly FirestoreService _db;
@@ -15,6 +14,7 @@ public class UsersController : ControllerBase
     public UsersController(FirestoreService db) => _db = db;
 
     [HttpGet]
+    [Authorize(Roles = "admin")]
     public async Task<IActionResult> GetAll()
     {
         var users = await _db.GetAllUsersAsync();
@@ -24,6 +24,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "admin")]
     public async Task<IActionResult> Save([FromBody] AppUser user)
     {
         if (string.IsNullOrEmpty(user.Username)) return BadRequest("Username is required");
@@ -49,9 +50,48 @@ public class UsersController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize(Roles = "admin")]
     public async Task<IActionResult> Delete(string id)
     {
         await _db.DeleteUserAsync(id);
         return Ok();
+    }
+
+    [HttpPost("register-merchant")]
+    [AllowAnonymous]
+    public async Task<IActionResult> RegisterMerchant([FromBody] MerchantRegisterRequest req)
+    {
+        if (string.IsNullOrEmpty(req.PhoneNumber)) return BadRequest("SĐT là bắt buộc");
+
+        var existing = await _db.GetUserByUsernameAsync(req.PhoneNumber);
+        if (existing != null) return BadRequest("SĐT này đã được đăng ký tài khoản.");
+
+        var newUser = new AppUser
+        {
+            Username = req.PhoneNumber,
+            PhoneNumber = req.PhoneNumber,
+            FullName = req.FullName,
+            Email = req.Gmail,
+            Address = req.Address,
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword("123"),
+            Role = "owner",
+            ManagedPoiIds = new List<string>()
+        };
+
+        await _db.SaveUserAsync(newUser);
+
+        // Ghi lại lịch sử thanh toán đăng ký (500,000 VND mặc định)
+        var history = new AppHistory
+        {
+            Action = "register_poi",
+            PoiName = "Đăng ký Chủ quán mới: " + req.FullName,
+            Device = "CMS Registration",
+            Amount = 500000,
+            Currency = "VND",
+            Timestamp = DateTime.UtcNow
+        };
+        await _db.LogHistoryAsync(history);
+
+        return Ok(new { success = true, username = newUser.Username, password = "123" });
     }
 }

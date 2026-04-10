@@ -1,0 +1,123 @@
+@page "/register-merchant"
+@layout LoginLayout
+@using VinhKhanhTour.Shared.Models
+@inject CmsApiService Api
+@inject ISnackbar Snackbar
+@inject NavigationManager Nav
+@inject IDialogService DialogService
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="mt-8">
+    <MudPaper Class="pa-8 bg-glass" Elevation="4">
+        <div class="text-center mb-6">
+            <div style="font-size: 48px; margin-bottom: 8px;">🤝</div>
+            <MudText Typo="Typo.h5" Style="font-weight: 800; color: #ffffff;">Đăng ký đối tác Chủ quán</MudText>
+            <MudText Typo="Typo.body2" Style="color: rgba(255,255,255,0.6);">Sở hữu trang thuyết minh đa ngôn ngữ riêng cho quán của bạn</MudText>
+        </div>
+
+        <MudForm @ref="_form" @bind-IsValid="_isValid">
+            <MudTextField @bind-Value="_model.FullName" Label="Họ và Tên" 
+                          Required="true" RequiredError="Họ tên là bắt buộc"
+                          Variant="Variant.Outlined" Class="mb-4" />
+            
+            <MudTextField @bind-Value="_model.PhoneNumber" Label="Số điện thoại" 
+                          Required="true" RequiredError="Số điện thoại dùng làm tên đăng nhập"
+                          Variant="Variant.Outlined" Class="mb-4" />
+            
+            <MudTextField @bind-Value="_model.Gmail" Label="Gmail" 
+                          InputType="InputType.Email"
+                          Variant="Variant.Outlined" Class="mb-4" />
+            
+            <MudTextField @bind-Value="_model.Address" Label="Địa chỉ quán" 
+                          Variant="Variant.Outlined" Class="mb-6" />
+
+            <MudAlert Severity="Severity.Info" Class="mb-6">
+                <MudText Typo="Typo.body2">Phí kích hoạt tài khoản: <b>500.000 VNĐ</b> (Trọn đời)</MudText>
+                <MudText Typo="Typo.caption">Sau khi thanh toán, tài khoản sẽ được kích hoạt tự động.</MudText>
+            </MudAlert>
+
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" 
+                       Size="Size.Large" OnClick="OpenPaymentDialog"
+                       Disabled="!_isValid || _loading" Style="border-radius: 99px; height: 50px; font-weight: 700;">
+                @if (_loading)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2"/>
+                    <span>ĐANG XỬ LÝ...</span>
+                }
+                else
+                {
+                    <span>TIẾP TỤC THANH TOÁN</span>
+                }
+            </MudButton>
+
+            <div class="text-center mt-6">
+                <MudLink href="/login" Underline="Underline.None" Color="Color.Secondary">Bạn đã có tài khoản? Đăng nhập</MudLink>
+            </div>
+        </MudForm>
+    </MudPaper>
+</MudContainer>
+
+<style>
+    .bg-glass {
+        background: rgba(255, 255, 255, 0.05) !important;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+    }
+</style>
+
+@code {
+    MudForm _form = null!;
+    bool _isValid;
+    bool _loading;
+    MerchantRegisterRequest _model = new();
+
+    async Task OpenPaymentDialog()
+    {
+        var parameters = new DialogParameters { ["Model"] = _model };
+        var options = new DialogOptions { MaxWidth = MaxWidth.ExtraSmall, FullWidth = true };
+        
+        var dialog = await DialogService.ShowAsync<PaymentDialog>("Thanh toán kích hoạt", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await HandleRegister();
+        }
+    }
+
+    async Task HandleRegister()
+    {
+        _loading = true;
+        try 
+        {
+            var resp = await Api.RegisterMerchantAsync(_model);
+            if (resp.IsSuccessStatusCode)
+            {
+                var options = new DialogOptions { CloseOnEscapeKey = true };
+                var result = await DialogService.ShowMessageBox(
+                    "Đăng ký thành công!", 
+                    (MarkupString)"Tài khoản của bạn đã được kích hoạt.<br/><br/>" +
+                    $"Tên đăng nhập: <b>{_model.PhoneNumber}</b><br/>" +
+                    "Mật khẩu: <b>123</b><br/><br/>" +
+                    "Vui lòng đăng nhập và bắt đầu tạo điểm POI của bạn.",
+                    yesText: "ĐĂNG NHẬP NGAY");
+                
+                Nav.NavigateTo("/login");
+            }
+            else 
+            {
+                var msg = await resp.Content.ReadAsStringAsync();
+                Snackbar.Add("Lỗi: " + msg, Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("Lỗi kết nối API: " + ex.Message, Severity.Error);
+        }
+        finally 
+        {
+            _loading = false;
+        }
+    }
+}

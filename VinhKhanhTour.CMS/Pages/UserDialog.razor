@@ -16,6 +16,12 @@
 
             <MudTextField @bind-Value="User.FullName" Label="Họ tên" Variant="Variant.Outlined" />
 
+            <MudTextField @bind-Value="User.PhoneNumber" Label="Số điện thoại" Variant="Variant.Outlined" />
+            
+            <MudTextField @bind-Value="User.Email" Label="Gmail" Variant="Variant.Outlined" />
+            
+            <MudTextField @bind-Value="User.Address" Label="Địa chỉ quán" Variant="Variant.Outlined" />
+
             <MudSelect @bind-Value="User.Role" Label="Vai trò" Variant="Variant.Outlined">
                 <MudSelectItem Value="@("admin")">ADMIN (Toàn quyền)</MudSelectItem>
                 <MudSelectItem Value="@("owner")">OWNER (Chủ quán)</MudSelectItem>
