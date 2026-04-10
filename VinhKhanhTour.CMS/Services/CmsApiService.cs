@@ -169,7 +169,7 @@ public class CmsApiService
     {
         try
         {
-            return await _http.GetFromJsonAsync<AppUser>("api/users/profile");
+            return await _http.GetFromJsonAsync<AppUser>("api/users/me");
         }
         catch (Exception ex)
         {

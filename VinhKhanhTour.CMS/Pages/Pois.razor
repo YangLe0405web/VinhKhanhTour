@@ -443,26 +443,12 @@ else
             
             if (!string.IsNullOrEmpty(newId))
             {
-                // Tự động gán quyền nếu là owner
-                var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-                var userClaim = authState.User;
-                if (userClaim.IsInRole("owner"))
-                {
-                    var username = userClaim.Identity?.Name;
-                    var users = await Api.GetUsersAsync();
-                    var currentUser = users?.FirstOrDefault(u => u.Username == username);
-                    if (currentUser != null)
-                    {
-                        if (!currentUser.ManagedPoiIds.Contains(newId))
-                        {
-                            currentUser.ManagedPoiIds.Add(newId);
-                            await Api.SaveUserAsync(currentUser);
-                        }
-                    }
-                }
+                // Sau khi lưu thành công, server đã tự gán quyền cho owner.
+                // Chúng ta chỉ cần load lại danh sách.
             }
 
             _pois = await Api.GetPoisAsync(true) ?? new();
+            await LoadData(); // Load lại để cập nhật danh sách managedIds mới nhất
             Snackbar.Add("Đã thêm POI!", Severity.Success);
         }
     }
