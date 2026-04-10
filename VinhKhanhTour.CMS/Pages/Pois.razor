@@ -311,6 +311,8 @@ else
             {
                 _pois = allPois;
             }
+            else
+            {
                 // Dùng thẳng Username từ Token để lọc POI — Tuyệt đối không gọi API Profile bị lỗi
                 var username = user.Identity?.Name ?? "";
                 _pois = allPois.Where(p => p.OwnerId == username).ToList();
