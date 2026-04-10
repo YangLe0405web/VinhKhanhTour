@@ -37,7 +37,7 @@ else if (_error)
         <MudText Typo="Typo.caption" Class="mb-6 px-6 text-center" Style="color: rgba(255,255,255,0.4); max-width: 400px;">
             Vui lòng thử lại sau 30-60 giây nếu server Render đang khởi động.
         </MudText>
-        <MudButton Variant="Variant.Filled" Color="Color.Error" StartIcon="@Icons.Material.Filled.Refresh" OnClick="LoadData" Style="border-radius: 99px; text-transform: none; font-weight: 600;"> Thử lại ngay </MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Error" StartIcon="@Icons.Material.Filled.Refresh" OnClick="@(() => LoadData(true))" Style="border-radius: 99px; text-transform: none; font-weight: 600;"> Thử lại ngay </MudButton>
     </div>
 }
 else

@@ -1283,9 +1283,8 @@ D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\bin\Debug\net8.0\publish\firebase.js
 D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\bin\Debug\net8.0\publish\VinhKhanhTour.CMS.staticwebassets.endpoints.json
 D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\bin\Debug\net8.0\publish\wwwroot\sample-data\weather.json
 D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\bin\Debug\net8.0\publish\wwwroot\_framework\blazor.boot.json
-D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\compressed\y9nkrrfk5s-{0}-ghxc4fv1um-ghxc4fv1um.gz
-D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\compressed\8ps1r8qx05-{0}-29im9is455-29im9is455.gz
-D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\compressed\l79v5z028x-{0}-dviqtc005n-dviqtc005n.gz
-D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\compressed\vae8dy7az7-{0}-8vr11bpsnr-8vr11bpsnr.gz
-D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\compressed\2krq0yhw91-{0}-kn2712b75a-kn2712b75a.gz
-D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\compressed\y9nkrrfk5s-{0}-hwqzr1jlx0-hwqzr1jlx0.gz
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\compressed\8ps1r8qx05-{0}-f17xdmr1k0-f17xdmr1k0.gz
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\compressed\l79v5z028x-{0}-xjeimbvhth-xjeimbvhth.gz
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\compressed\vae8dy7az7-{0}-3gkfbcj55b-3gkfbcj55b.gz
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\compressed\2krq0yhw91-{0}-1lcix7y8jb-1lcix7y8jb.gz
