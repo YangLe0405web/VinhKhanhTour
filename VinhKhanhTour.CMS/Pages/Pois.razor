@@ -294,7 +294,7 @@ else
         await LoadData();
     }
 
-    async Task LoadData()
+    async Task LoadData(bool force = false)
     {
         _loading = true;
         _error = false;
@@ -314,7 +314,7 @@ else
             else
             {
                 // Gọi API lấy profile tươi để đảm bảo thấy POI vừa tạo
-                var profile = await Api.GetProfileAsync();
+                var profile = await Api.GetProfileAsync(force);
                 List<string> managedIds;
 
                 if (profile != null)
@@ -448,7 +448,7 @@ else
             }
 
             _pois = await Api.GetPoisAsync(true) ?? new();
-            await LoadData(); // Load lại để cập nhật danh sách managedIds mới nhất
+            await LoadData(force: true); // Load lại và phá cache
             Snackbar.Add("Đã thêm POI!", Severity.Success);
         }
     }
@@ -467,6 +467,7 @@ else
             var updated = (PoiModel)result.Data!;
             await Api.SavePoiAsync(updated);
             _pois = await Api.GetPoisAsync(true) ?? new();
+            await LoadData(force: true);
             Snackbar.Add("Đã cập nhật POI!", Severity.Success);
         }
     }

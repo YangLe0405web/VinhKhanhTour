@@ -165,11 +165,14 @@ public class CmsApiService
     public Task<HttpResponseMessage> RegisterMerchantAsync(MerchantRegisterRequest req)
         => _http.PostAsJsonAsync("api/users/register-merchant", req);
 
-    public async Task<AppUser?> GetProfileAsync()
+    public async Task<AppUser?> GetProfileAsync(bool force = false)
     {
         try
         {
-            return await _http.GetFromJsonAsync<AppUser>("api/users/me");
+            var url = "api/users/me";
+            if (force) url += $"?t={DateTime.UtcNow.Ticks}";
+            
+            return await _http.GetFromJsonAsync<AppUser>(url);
         }
         catch (Exception ex)
         {
