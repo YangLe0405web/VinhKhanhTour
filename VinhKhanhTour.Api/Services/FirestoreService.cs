@@ -286,6 +286,16 @@ public class FirestoreService
         return snap.Documents.FirstOrDefault()?.ConvertTo<AppUser>();
     }
 
+    public async Task<AppUser?> GetUserByEmailAsync(string email)
+    {
+        var snap = await _db.Collection("users")
+            .WhereEqualTo("Email", email)
+            .Limit(1)
+            .GetSnapshotAsync();
+
+        return snap.Documents.FirstOrDefault()?.ConvertTo<AppUser>();
+    }
+
     public async Task<List<AppUser>> GetAllUsersAsync()
     {
         var snap = await _db.Collection("users").GetSnapshotAsync();

@@ -29,8 +29,48 @@ public class PoisController : ControllerBase
 
     // POST api/pois
     [HttpPost]
+    [Authorize]
     public async Task<IActionResult> Save([FromBody] PoiModel poi)
-        => Ok(new { id = await _db.SavePoiAsync(poi) });
+    {
+        var isNew = string.IsNullOrEmpty(poi.Id);
+        var id = await _db.SavePoiAsync(poi);
+        
+        var username = User.Identity?.Name;
+        Console.WriteLine($"💾 [API] Save POI: id={id}, isNew={isNew}, user={username}");
+        
+        foreach (var claim in User.Claims)
+        {
+            Console.WriteLine($"🔍 [API] Claim: {claim.Type} = {claim.Value}");
+        }
+
+        // Nếu KHÔNG phải admin (là owner), tự động gán quyền quản lý
+        bool isAdmin = User.IsInRole("admin");
+        if (isNew && !isAdmin)
+        {
+            Console.WriteLine($"🔗 [API] Non-admin detected. Attempting to link POI {id} to {username}");
+            if (!string.IsNullOrEmpty(username))
+            {
+                var user = await _db.GetUserByUsernameAsync(username);
+                if (user != null)
+                {
+                    if (user.ManagedPoiIds == null) user.ManagedPoiIds = new List<string>();
+                    
+                    if (!user.ManagedPoiIds.Contains(id))
+                    {
+                        user.ManagedPoiIds.Add(id);
+                        await _db.SaveUserAsync(user);
+                        Console.WriteLine($"✅ [API] Auto-linked POI SUCCESS for {username}");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"❌ [API] Auto-link FAILED: User account '{username}' not found in database.");
+                }
+            }
+        }
+
+        return Ok(new { id });
+    }
 
     // DELETE api/pois/{id}
     [HttpDelete("{id}")]

@@ -23,6 +23,7 @@ public class UsersController : ControllerBase
         return Ok(users);
     }
 
+
     [HttpPost]
     [Authorize(Roles = "admin")]
     public async Task<IActionResult> Save([FromBody] AppUser user)
@@ -61,10 +62,19 @@ public class UsersController : ControllerBase
     [AllowAnonymous]
     public async Task<IActionResult> RegisterMerchant([FromBody] MerchantRegisterRequest req)
     {
-        if (string.IsNullOrEmpty(req.PhoneNumber)) return BadRequest("SĐT là bắt buộc");
+        if (string.IsNullOrWhiteSpace(req.PhoneNumber)) return BadRequest("Số điện thoại là bắt buộc");
+        if (string.IsNullOrWhiteSpace(req.FullName)) return BadRequest("Họ và Tên là bắt buộc");
+        
+        // Kiểm tra trùng SĐT (Username)
+        var existingPhone = await _db.GetUserByUsernameAsync(req.PhoneNumber);
+        if (existingPhone != null) return BadRequest("Số điện thoại này đã được sử dụng");
 
-        var existing = await _db.GetUserByUsernameAsync(req.PhoneNumber);
-        if (existing != null) return BadRequest("SĐT này đã được đăng ký tài khoản.");
+        // Kiểm tra trùng Email
+        if (!string.IsNullOrWhiteSpace(req.Gmail))
+        {
+            var existingEmail = await _db.GetUserByEmailAsync(req.Gmail);
+            if (existingEmail != null) return BadRequest("Email này đã được sử dụng");
+        }
 
         var newUser = new AppUser
         {
