@@ -37,6 +37,12 @@
                 }
             </MudButton>
 
+            <div class="d-flex justify-center mt-4">
+                <MudLink href="/register-merchant" Underline="Underline.None" Color="Color.Primary">
+                    Bạn chưa có tài khoản? <b>Đăng ký đối tác</b>
+                </MudLink>
+            </div>
+
             @if (!string.IsNullOrEmpty(_error))
             {
                 <MudAlert Severity="Severity.Error" Dense="true" Class="mt-2">@_error</MudAlert>
