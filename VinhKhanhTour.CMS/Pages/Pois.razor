@@ -31,12 +31,13 @@ else if (_error)
     <div class="d-flex flex-column align-items-center justify-center mt-12 py-12" style="background: rgba(244, 67, 54, 0.05); border: 1px dashed rgba(244, 67, 54, 0.3); border-radius: 16px;">
         <MudIcon Icon="@Icons.Material.Filled.WifiOff" Color="Color.Error" Style="font-size: 48px;" />
         <MudText Typo="Typo.h6" Class="mt-4" Style="color: #f44336; font-weight: 700;">Lỗi kết nối tới API Backend</MudText>
-        <MudText Typo="Typo.body2" Class="mb-6 px-6 text-center" Style="color: rgba(255,255,255,0.6); max-width: 400px;">
-            Server Render có thể đang ngủ hoặc gặp sự cố. Vui lòng đợi 30-60 giây để server khởi động lại rồi nhấn thử lại.
+        <MudText Typo="Typo.body2" Class="mb-2 px-6 text-center" Style="color: rgba(255,255,255,0.8); max-width: 500px;">
+            @_errorDetail
         </MudText>
-        <MudButton Variant="Variant.Filled" Color="Color.Error" StartIcon="@Icons.Material.Filled.Refresh" OnClick="LoadData" Style="border-radius: 99px; text-transform: none; font-weight: 600;">
-            Thử lại ngay
-        </MudButton>
+        <MudText Typo="Typo.caption" Class="mb-6 px-6 text-center" Style="color: rgba(255,255,255,0.4); max-width: 400px;">
+            Vui lòng thử lại sau 30-60 giây nếu server Render đang khởi động.
+        </MudText>
+        <MudButton Variant="Variant.Filled" Color="Color.Error" StartIcon="@Icons.Material.Filled.Refresh" OnClick="LoadData" Style="border-radius: 99px; text-transform: none; font-weight: 600;"> Thử lại ngay </MudButton>
     </div>
 }
 else
@@ -257,6 +258,7 @@ else
 @code {
     bool _loading = true;
     bool _error = false;
+    string _errorDetail = "";
     List<PoiModel> _pois = new();
 
     string _currentFilter = "Tất cả";
@@ -311,16 +313,29 @@ else
             }
             else
             {
-                // Gọi API lấy profile tươi để đảm bảo thấy POI vừa tạo mà không cần login lại
+                // Gọi API lấy profile tươi để đảm bảo thấy POI vừa tạo
                 var profile = await Api.GetProfileAsync();
-                var managedIds = profile?.ManagedPoiIds ?? new();
+                List<string> managedIds;
+
+                if (profile != null)
+                {
+                    managedIds = profile.ManagedPoiIds;
+                }
+                else
+                {
+                    // Cơ chế dự phòng: lấy từ Claims nếu API Profile lỗi
+                    var managedPoisStr = user.FindFirst("ManagedPoiIds")?.Value ?? "";
+                    managedIds = managedPoisStr.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
+                }
+
                 _pois = allPois.Where(p => managedIds.Contains(p.Id)).ToList();
             }
         }
         catch (Exception ex)
         {
             _error = true;
-            Snackbar.Add("❌ Lỗi kết nối API. Vui lòng thử lại sau.", Severity.Error);
+            _errorDetail = ex.Message;
+            Snackbar.Add($"❌ Lỗi: {ex.Message}", Severity.Error);
             Console.WriteLine($"🔥 API ERROR: {ex}");
         }
         finally

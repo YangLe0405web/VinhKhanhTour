@@ -165,8 +165,18 @@ public class CmsApiService
     public Task<HttpResponseMessage> RegisterMerchantAsync(MerchantRegisterRequest req)
         => _http.PostAsJsonAsync("api/users/register-merchant", req);
 
-    public Task<AppUser?> GetProfileAsync()
-        => _http.GetFromJsonAsync<AppUser>("api/users/profile");
+    public async Task<AppUser?> GetProfileAsync()
+    {
+        try
+        {
+            return await _http.GetFromJsonAsync<AppUser>("api/users/profile");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"🔥 GetProfile Error: {ex.Message}");
+            return null;
+        }
+    }
 
 } // end of CmsApiService class
 
