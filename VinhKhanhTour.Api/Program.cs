@@ -6,30 +6,31 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
-var builder = WebApplication.CreateBuilder(args);
+// Dùng CreateEmptyBuilder để tránh lỗi inotify (status 134) trên Render Linux
+var builder = WebApplication.CreateEmptyBuilder(new WebApplicationOptions
+{
+    Args = args
+});
 
-// Fix inotify limit error on Render/Linux
-builder.Configuration.Sources.Clear();
+// 1. Cấu hình Kestrel (Bắt buộc khi dùng EmptyBuilder)
+builder.WebHost.UseKestrel();
+
+// 2. Cấu hình nguồn App Settings (Tắt reloadOnChange để tránh lỗi inotify)
 builder.Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: false);
-builder.Configuration.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: false);
 builder.Configuration.AddEnvironmentVariables();
 
-// ── 1. Firebase Configuration ──
-var keyPath = "/etc/secrets/firebase-key.json";
-if (!File.Exists(keyPath))
-    keyPath = Path.Combine(AppContext.BaseDirectory, "firebase-key.json");
+// 3. Thêm các dịch vụ cơ bản
+builder.Services.AddRouting();
+builder.Services.AddLogging(logging => logging.AddConsole());
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+builder.Services.AddMemoryCache();
+builder.Services.AddHttpClient();
 
-if (File.Exists(keyPath))
-{
-    Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", keyPath);
-    if (FirebaseApp.DefaultInstance == null)
-    {
-        FirebaseApp.Create(new AppOptions
-        {
-            Credential = GoogleCredential.GetApplicationDefault()
-        });
-    }
-}
+// ── 1. Services Configuration ──
+builder.Services.AddSingleton<FirestoreService>();
+builder.Services.AddSingleton<StorageService>();
 
 // ── 2. CORS Policy ──
 builder.Services.AddCors(options =>
@@ -41,14 +42,6 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod();
     });
 });
-
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.AddMemoryCache();
-builder.Services.AddSingleton<FirestoreService>();
-builder.Services.AddSingleton<StorageService>();
-builder.Services.AddHttpClient();
 
 // ── 3. JWT Authentication ──
 var jwtKey = builder.Configuration["Jwt:Secret"] ?? "vinhkhanhtour_super_secret_key_2026_!@#";
@@ -67,6 +60,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+builder.Services.AddAuthorization();
+
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
@@ -78,14 +73,12 @@ var app = builder.Build();
 
 app.UseForwardedHeaders();
 
-app.UseRouting();
-
-// Bật Swagger cho cả môi trường Production để tiện testing
+// Bật Swagger cho cả môi trường Production
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Vinh Khanh Tour API V1");
-    c.RoutePrefix = "swagger"; // Truy cập tại /swagger
+    c.RoutePrefix = "swagger";
 });
 
 app.UseCors("AllowAll");
@@ -93,13 +86,15 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 // ── 4. Initialize Admin Account ──
+// FirebaseApp.DefaultInstance sẽ được kiểm tra bên trong FirestoreService nếu cần,
+// nhưng ta cần đảm bảo InitializeAdminAsync chạy khi startup.
 using (var scope = app.Services.CreateScope())
 {
     var firestore = scope.ServiceProvider.GetRequiredService<FirestoreService>();
     await firestore.InitializeAdminAsync();
 }
 
-app.MapGet("/", () => "Vinh Khanh Tour API is running (Swagger Enabled)!");
+app.MapGet("/", () => "Vinh Khanh Tour API is running (Fix Render Inotify v2)!");
 app.MapControllers();
 
 app.Run();
