@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
-var builder = WebApplication.CreateBuilder(args);
 
 // ── 1. Firebase Configuration ──
 var keyPath = "/etc/secrets/firebase-key.json";
