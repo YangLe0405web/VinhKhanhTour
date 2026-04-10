@@ -6,6 +6,15 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
+var builder = WebApplication.CreateBuilder(args);
+
+// Fix inotify limit error on Render/Linux
+builder.Configuration.Sources.Clear();
+builder.Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: false);
+builder.Configuration.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: false);
+builder.Configuration.AddEnvironmentVariables();
+
+// ── 1. Firebase Configuration ──
 var keyPath = "/etc/secrets/firebase-key.json";
 if (!File.Exists(keyPath))
     keyPath = Path.Combine(AppContext.BaseDirectory, "firebase-key.json");
@@ -66,7 +75,6 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 var app = builder.Build();
 
 app.UseForwardedHeaders();
-
 
 app.UseRouting();
 
