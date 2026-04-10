@@ -34,17 +34,35 @@ public class PoisController : ControllerBase
     public async Task<IActionResult> Save([FromBody] PoiModel poi)
     {
         var isNew = string.IsNullOrEmpty(poi.Id);
-        var username = User.Identity?.Name;
-        Console.WriteLine($"💾 [API] Save POI: isNew={isNew}, user={username}");
+        var username = User.Identity?.Name ?? "";
+        bool isAdmin = User.IsInRole("admin");
+        Console.WriteLine($"💾 [API] Save POI: isNew={isNew}, user={username}, isAdmin={isAdmin}");
 
-        // Nếu là owner tạo mới, đánh dấu OwnerId vào POI
-        if (isNew && !User.IsInRole("admin") && !string.IsNullOrEmpty(username))
+        if (isNew)
         {
-            poi.OwnerId = username;
-            Console.WriteLine($"🔗 [API] Set OwnerId={username} for new POI");
+            if (!isAdmin) 
+            {
+                poi.OwnerId = username;
+                Console.WriteLine($"🔗 [API] New POI: Set OwnerId={username}");
+            }
+        }
+        else
+        {
+            // Bảo vệ OwnerId khi sửa: Không cho phép thay đổi chủ sở hữu trừ khi là Admin
+            var existingPoi = (await _db.GetAllPoisAsync()).FirstOrDefault(p => p.Id == poi.Id);
+            if (existingPoi != null && !isAdmin)
+            {
+                poi.OwnerId = existingPoi.OwnerId; // Giữ nguyên chủ sở hữu cũ
+                if (existingPoi.OwnerId != username)
+                {
+                    Console.WriteLine($"⚠️ [API] Unauthorized Edit Attempt: {username} tries to edit POI of {existingPoi.OwnerId}");
+                    return Forbid();
+                }
+            }
         }
 
         var id = await _db.SavePoiAsync(poi);
+        Console.WriteLine($"✅ [API] Save SUCCESS: id={id}, OwnerId={poi.OwnerId}");
         return Ok(new { id });
     }
 

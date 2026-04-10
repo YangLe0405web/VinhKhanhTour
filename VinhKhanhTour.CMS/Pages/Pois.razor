@@ -313,10 +313,10 @@ else
             }
             else
             {
-                // Lọc POI theo OwnerId — không cần gọi Profile API
+                // Dùng thẳng Username từ Token để lọc POI — Tuyệt đối không gọi API Profile bị lỗi
                 var username = user.Identity?.Name ?? "";
-                Console.WriteLine($"🔍 [CMS] Filtering POIs for owner: {username}");
                 _pois = allPois.Where(p => p.OwnerId == username).ToList();
+                Console.WriteLine($"🔍 [UI] Filtered {_pois.Count} POIs for owner '{username}'");
             }
         }
         catch (Exception ex)
