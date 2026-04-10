@@ -53,6 +53,14 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcTG9naW4ucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
+[D:/Projects/VinhKhanhTour/VinhKhanhTour.CMS/Pages/MerchantRegistration.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcTWVyY2hhbnRSZWdpc3RyYXRpb24ucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/Projects/VinhKhanhTour/VinhKhanhTour.CMS/Pages/PaymentDialog.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUGF5bWVudERpYWxvZy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
 [D:/Projects/VinhKhanhTour/VinhKhanhTour.CMS/Pages/PoiDialog.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUG9pRGlhbG9nLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 

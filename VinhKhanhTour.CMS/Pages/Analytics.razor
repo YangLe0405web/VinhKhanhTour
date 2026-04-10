@@ -265,13 +265,6 @@ else
             var user = authState.User;
             _isAdmin = user.IsInRole("admin");
             
-            List<string> managedPois = new();
-            if (!_isAdmin)
-            {
-                var profile = await Api.GetProfileAsync();
-                managedPois = profile?.ManagedPoiIds ?? new();
-            }
-
             var t1 = Api.GetAnalyticsAsync(force);
             var t2 = Api.GetTracesAsync(force);
             var t3 = Api.GetHistoryAsync(force);
@@ -279,21 +272,26 @@ else
             
             await Task.WhenAll(t1, t2, t3, t4);
             
-            _pois = t4.Result ?? new();
+            var allPois = t4.Result ?? new();
 
-            // Filter data based on Role
+            // Filter data based on Role và OwnerId
             if (_isAdmin)
             {
+                _pois = allPois;
                 _events = (t1.Result ?? new()).Where(e => e.EventType != "open_app").ToList();
                 _traces = t2.Result ?? new();
                 _history = (t3.Result ?? new()).Where(h => h.Action != "open_app").ToList();
             }
             else
             {
-                _events = (t1.Result ?? new()).Where(e => e.EventType != "open_app" && managedPois.Contains(e.PoiId)).ToList();
+                var username = user.Identity?.Name ?? "";
+                // Chỉ lấy POI thuộc về mình
+                _pois = allPois.Where(p => p.OwnerId == username).ToList();
+                var managedIds = _pois.Select(p => p.Id).ToList();
+
+                _events = (t1.Result ?? new()).Where(e => e.EventType != "open_app" && managedIds.Contains(e.PoiId)).ToList();
                 _traces = new(); // Owners don't see traces for now
-                _history = (t3.Result ?? new()).Where(h => h.Action != "open_app" && managedPois.Contains(h.PoiId)).ToList();
-                _pois = _pois.Where(p => managedPois.Contains(p.Id)).ToList();
+                _history = (t3.Result ?? new()).Where(h => h.Action != "open_app" && managedIds.Contains(h.PoiId)).ToList();
             }
             
             BuildUnified();

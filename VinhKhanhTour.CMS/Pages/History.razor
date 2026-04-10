@@ -149,12 +149,9 @@ else
         var user = authState.User;
         _isAdmin = user.IsInRole("admin");
         
-        List<string> managedPois = new();
-        if (!_isAdmin)
-        {
-            var profile = await Api.GetProfileAsync();
-            managedPois = profile?.ManagedPoiIds ?? new();
-        }
+        var username = user.Identity?.Name ?? "";
+        var allPois = await Api.GetPoisAsync() ?? new();
+        var myPoiIds = _isAdmin ? new List<string>() : allPois.Where(p => p.OwnerId == username).Select(p => p.Id).ToList();
 
         _history = (await Api.GetHistoryAsync() ?? new())
             .Where(h => h.Action != "open_app")
@@ -162,7 +159,7 @@ else
 
         if (!_isAdmin)
         {
-            _history = _history.Where(h => h.Action != "pay_audio" && managedPois.Contains(h.PoiId)).ToList();
+            _history = _history.Where(h => h.Action != "pay_audio" && myPoiIds.Contains(h.PoiId)).ToList();
         }
 
         _loading = false;
