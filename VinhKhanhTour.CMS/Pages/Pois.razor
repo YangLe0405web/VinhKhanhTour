@@ -313,22 +313,10 @@ else
             }
             else
             {
-                // Gọi API lấy profile tươi để đảm bảo thấy POI vừa tạo
-                var profile = await Api.GetProfileAsync(force);
-                List<string> managedIds;
-
-                if (profile != null)
-                {
-                    managedIds = profile.ManagedPoiIds;
-                }
-                else
-                {
-                    // Cơ chế dự phòng: lấy từ Claims nếu API Profile lỗi
-                    var managedPoisStr = user.FindFirst("ManagedPoiIds")?.Value ?? "";
-                    managedIds = managedPoisStr.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
-                }
-
-                _pois = allPois.Where(p => managedIds.Contains(p.Id)).ToList();
+                // Lọc POI theo OwnerId — không cần gọi Profile API
+                var username = user.Identity?.Name ?? "";
+                Console.WriteLine($"🔍 [CMS] Filtering POIs for owner: {username}");
+                _pois = allPois.Where(p => p.OwnerId == username).ToList();
             }
         }
         catch (Exception ex)

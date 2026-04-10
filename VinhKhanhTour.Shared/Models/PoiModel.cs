@@ -14,6 +14,8 @@ public class PoiModel
     [FirestoreProperty] public int Priority { get; set; } = 1;
     [FirestoreProperty] public bool IsActive { get; set; } = true;
 
+    [FirestoreProperty] public string OwnerId { get; set; } = ""; // Username của chủ quán
+
     [FirestoreProperty] public double Price { get; set; } = 25000;
     [FirestoreProperty] public bool RequirePayment { get; set; } = true;
 
