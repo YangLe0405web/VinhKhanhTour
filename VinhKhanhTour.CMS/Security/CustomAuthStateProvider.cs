@@ -57,7 +57,8 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
             foreach (var kvp in keyValuePairs)
             {
                 var key = kvp.Key;
-                if (key == "role") key = ClaimTypes.Role;
+                if (key == "role" || key == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role") key = ClaimTypes.Role;
+                if (key == "unique_name" || key == "name" || key == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name") key = ClaimTypes.Name;
 
                 if (kvp.Value is System.Text.Json.JsonElement element)
                 {

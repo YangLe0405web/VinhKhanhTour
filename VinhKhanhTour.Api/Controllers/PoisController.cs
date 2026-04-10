@@ -36,7 +36,9 @@ public class PoisController : ControllerBase
         var isNew = string.IsNullOrEmpty(poi.Id);
         var username = User.Identity?.Name ?? "";
         bool isAdmin = User.IsInRole("admin");
-        Console.WriteLine($"💾 [API] Save POI: isNew={isNew}, user={username}, isAdmin={isAdmin}");
+        
+        Console.WriteLine($"💾 [API] Save POI: isNew={isNew}, user='{username}', isAdmin={isAdmin}");
+        foreach(var c in User.Claims) Console.WriteLine($"   Claim: {c.Type} = {c.Value}");
 
         if (isNew)
         {

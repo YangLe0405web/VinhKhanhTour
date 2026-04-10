@@ -311,12 +311,14 @@ else
             {
                 _pois = allPois;
             }
-            else
-            {
                 // Dùng thẳng Username từ Token để lọc POI — Tuyệt đối không gọi API Profile bị lỗi
                 var username = user.Identity?.Name ?? "";
                 _pois = allPois.Where(p => p.OwnerId == username).ToList();
-                Console.WriteLine($"🔍 [UI] Filtered {_pois.Count} POIs for owner '{username}'");
+                Console.WriteLine($"🔍 [UI] Filtered {_pois.Count}/{allPois.Count} POIs for owner '{username}'");
+                if (_pois.Count == 0 && allPois.Any())
+                {
+                    Console.WriteLine($"⚠️ [UI] No POIs matched. Sample POI OwnerId from server: '{allPois.First().OwnerId}'");
+                }
             }
         }
         catch (Exception ex)
