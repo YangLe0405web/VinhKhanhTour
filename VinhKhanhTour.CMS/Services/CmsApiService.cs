@@ -169,7 +169,7 @@ public class CmsApiService
     {
         try
         {
-            var url = "api/users/me";
+            var url = "api/me";
             if (force) url += $"?t={DateTime.UtcNow.Ticks}";
             
             return await _http.GetFromJsonAsync<AppUser>(url);
