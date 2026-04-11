@@ -1283,8 +1283,8 @@ D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\bin\Debug\net8.0\publish\firebase.js
 D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\bin\Debug\net8.0\publish\VinhKhanhTour.CMS.staticwebassets.endpoints.json
 D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\bin\Debug\net8.0\publish\wwwroot\sample-data\weather.json
 D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\bin\Debug\net8.0\publish\wwwroot\_framework\blazor.boot.json
-D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\compressed\y9nkrrfk5s-{0}-hwqzr1jlx0-hwqzr1jlx0.gz
-D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\compressed\8ps1r8qx05-{0}-f17xdmr1k0-f17xdmr1k0.gz
-D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\compressed\l79v5z028x-{0}-xjeimbvhth-xjeimbvhth.gz
-D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\compressed\vae8dy7az7-{0}-3gkfbcj55b-3gkfbcj55b.gz
-D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\compressed\2krq0yhw91-{0}-1lcix7y8jb-1lcix7y8jb.gz
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\compressed\y9nkrrfk5s-{0}-5cwagskwtl-5cwagskwtl.gz
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\compressed\8ps1r8qx05-{0}-lywzbu3top-lywzbu3top.gz
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\compressed\l79v5z028x-{0}-i6vnk34cca-i6vnk34cca.gz
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\compressed\vae8dy7az7-{0}-7id9xdohrj-7id9xdohrj.gz
+D:\Projects\VinhKhanhTour\VinhKhanhTour.CMS\obj\Debug\net8.0\compressed\2krq0yhw91-{0}-4mj7ywa7da-4mj7ywa7da.gz

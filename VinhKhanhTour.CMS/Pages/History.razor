@@ -11,7 +11,7 @@
     <MudGrid>
         <MudItem xs="12" sm="3">
             <MudSelect @bind-Value="_filterAction" Label="Hành động"
-                       Clearable="true" Variant="Variant.Outlined">
+                       Clearable="true" Variant="Variant.Outlined" Margin="Margin.Dense">
                 <MudSelectItem Value="@("")">Tất cả</MudSelectItem>
                 <MudSelectItem Value="@("play_poi")">🔊 Nghe POI</MudSelectItem>
                 <MudSelectItem Value="@("scan_qr")">📷 Quét QR</MudSelectItem>
@@ -25,7 +25,7 @@
         </MudItem>
         <MudItem xs="12" sm="3">
             <MudSelect @bind-Value="_filterLang" Label="Ngôn ngữ"
-                       Clearable="true" Variant="Variant.Outlined">
+                       Clearable="true" Variant="Variant.Outlined" Margin="Margin.Dense">
                 <MudSelectItem Value="@("")">Tất cả</MudSelectItem>
                 <MudSelectItem Value="@("vi")">🇻🇳 Tiếng Việt</MudSelectItem>
                 <MudSelectItem Value="@("en")">🇬🇧 English</MudSelectItem>
@@ -35,13 +35,13 @@
             </MudSelect>
         </MudItem>
         <MudItem xs="12" sm="3">
-            <MudDatePicker Label="Lọc theo ngày" @bind-Date="_filterDate" 
-                           Editable="true" Clearable="true" Variant="Variant.Outlined" 
+            <MudDatePicker Label="Lọc ngày" @bind-Date="_filterDate" 
+                           Editable="true" Clearable="true" Variant="Variant.Outlined" Margin="Margin.Dense"
                            DateFormat="dd/MM/yyyy" Placeholder="Chọn ngày..." />
         </MudItem>
         <MudItem xs="12" sm="3" Class="d-flex align-center">
             <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true"
-                       OnClick="LoadData" StartIcon="@Icons.Material.Filled.Refresh">
+                       OnClick="@(() => LoadData())" StartIcon="@Icons.Material.Filled.Refresh" Style="height:40px;">
                 Tải lại
             </MudButton>
         </MudItem>

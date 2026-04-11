@@ -104,9 +104,8 @@ else
         }
         else
         {
-            var managedIdsStr = user.FindFirst("ManagedPoiIds")?.Value ?? "";
-            var managedIds = managedIdsStr.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
-            _pois = allPois.Where(p => managedIds.Contains(p.Id)).ToList();
+            var username = user.Identity?.Name ?? "";
+            _pois = allPois.Where(p => p.OwnerId == username).ToList();
         }
 
         _loading = false;

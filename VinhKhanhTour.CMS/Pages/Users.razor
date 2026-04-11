@@ -39,8 +39,8 @@ else
                 </MudChip>
             </MudTd>
             <MudTd>
-                <MudTooltip Text="@string.Join(", ", context.ManagedPoiIds)">
-                    <MudChip T="string" Size="Size.Small">@context.ManagedPoiIds.Count quán</MudChip>
+                <MudTooltip Text="@string.Join(", ", _pois.Where(p => p.OwnerId == context.Username).Select(p => p.Name))">
+                    <MudChip T="string" Size="Size.Small">@(_pois.Count(p => p.OwnerId == context.Username)) quán</MudChip>
                 </MudTooltip>
             </MudTd>
             <MudTd>
