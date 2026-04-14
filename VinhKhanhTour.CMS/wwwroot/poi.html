@@ -428,7 +428,7 @@
         <div class="mag-header">⌛ Đang tải câu chuyện...</div>
     </div>
 
-    <div class="mag-header">Phố Vĩnh Khánh</div>
+    <div class="mag-header" id="header-title">Phố Vĩnh Khánh</div>
 
     <div class="mag-card">
         <!-- Banner Visual -->
@@ -447,7 +447,7 @@
             <div class="mag-divider"></div>
 
             <!-- Lang Switcher -->
-            <span class="mag-label">Chọn ngôn ngữ</span>
+            <span class="mag-label" id="label-select-lang">Chọn ngôn ngữ</span>
             <div class="lang-grid" id="lang-selector"></div>
 
             <!-- AI Player Card -->
@@ -457,7 +457,7 @@
                     <svg id="svg-stop" viewBox="0 0 24 24" style="display:none"><path d="M6 6h12v12H6z"/></svg>
                 </button>
                 <div class="ai-info">
-                    <div class="ai-info-title">Giọng đọc AI</div>
+                    <div class="ai-info-title" id="label-ai-voice">Giọng đọc AI</div>
                     <div class="ai-info-status" id="status">Bấm để nghe thuyết minh</div>
                     <div class="waveform" id="waveform">
                         <div class="wf-bar" style="animation-delay: 0.1s"></div>
@@ -477,12 +477,12 @@
             <!-- Payment Block -->
             <div id="pay-block" class="pay-card">
                 <div style="font-size: 32px; margin-bottom: 12px;">🔒</div>
-                <h3 style="font-size: 18px; margin-bottom: 8px;">Nội dung cao cấp</h3>
-                <p style="font-size: 13px; color: #666; margin-bottom: 20px;">
+                <h3 id="pay-title" style="font-size: 18px; margin-bottom: 8px;">Nội dung cao cấp</h3>
+                <p id="pay-desc" style="font-size: 13px; color: #666; margin-bottom: 20px;">
                     Để nghe thuyết minh chuyên nghiệp và xem chi tiết, vui lòng thanh toán một phần phí nhỏ (tương đương 1 ly trà đá).
                 </p>
                 <button class="pay-btn" id="pay-btn-trigger" onclick="handlePayment()">
-                    THANH TOÁN <span id="pay-amount">25.000</span> VNĐ
+                    <span id="pay-btn-text">THANH TOÁN</span> <span id="pay-amount">25.000</span> VNĐ
                 </button>
             </div>
 
@@ -526,7 +526,7 @@
             </div>
 
             <!-- Content Text Section -->
-            <div class="mag-label">Nội dung câu chuyện</div>
+            <div class="mag-label" id="label-story-content">Nội dung câu chuyện</div>
             <div class="content-card">
                 <div class="content-box" id="script-box">...</div>
             </div>
@@ -548,17 +548,85 @@
         const poiId = pathParts[pathParts.length - 1];
 
         const LANGS = {
-            vi: { label: 'VN', text: 'Việt', tts: 'vi-VN' },
-            en: { label: 'GB', text: 'EN', tts: 'en-US' },
-            zh: { label: 'CN', text: '中文', tts: 'zh-CN' },
-            ja: { label: 'JP', text: '日本語', tts: 'ja-JP' },
-            ko: { label: 'KR', text: '한국어', tts: 'ko-KR' },
+            vi: { 
+                label: 'VN', text: 'Việt', tts: 'vi-VN',
+                header: "Phố Vĩnh Khánh", select: "Chọn ngôn ngữ", ai: "Giọng đọc AI", 
+                status: "Bấm để nghe thuyết minh", status_playing: "🔊 Đang đọc thuyết minh...", 
+                story: "Nội dung câu chuyện", pro: "Audio Chuyên Nghiệp"
+            },
+            en: { 
+                label: 'GB', text: 'EN', tts: 'en-US',
+                header: "Vinh Khanh Street", select: "Select Language", ai: "AI Voice", 
+                status: "Click to listen to narration", status_playing: "🔊 Reading narration...", 
+                story: "The Story Content", pro: "Professional Audio"
+            },
+            zh: { 
+                label: 'CN', text: '中文', tts: 'zh-CN',
+                header: "永庆街", select: "选择语言", ai: "人工智能语音", 
+                status: "点击收听解说", status_playing: "🔊 正在朗读解说...", 
+                story: "故事内容", pro: "专业音频"
+            },
+            ja: { 
+                label: 'JP', text: '日本語', tts: 'ja-JP',
+                header: "ヴィン・カイン通り", select: "言語を選択", ai: "AI音声", 
+                status: "クリックして解説を聞く", status_playing: "🔊 解説を読み上げています...", 
+                story: "物語の内容", pro: "プロフェッショナルオーディオ"
+            },
+            ko: { 
+                label: 'KR', text: '한국어', tts: 'ko-KR',
+                header: "빈칸 거리", select: "언어 선택", ai: "AI 음성", 
+                status: "나레이션을 들으려면 클릭하세요", status_playing: "🔊 나레이션을 읽는 중...", 
+                story: "이야기 내용", pro: "전문 오디오"
+            },
         };
 
         const CAT_DATA = {
             food: { icon: '🍜', label: 'Ẩm thực' },
             drink: { icon: '🥤', label: 'Đồ uống' },
             landmark: { icon: '🏛️', label: 'Di tích' }
+        };
+
+        const PAYMENT_LANGS = {
+            vi: {
+                title: "Nội dung cao cấp",
+                desc: "Để nghe thuyết minh chuyên nghiệp và xem chi tiết, vui lòng thanh toán một phần phí nhỏ (tương đương 1 ly trà đá).",
+                btn: "THANH TOÁN",
+                processing: "ĐANG XỬ LÝ...",
+                success: "Thanh toán thành công! Bạn đã mở khóa nội dung thuyết minh.",
+                error: "Lỗi khi xử lý thanh toán. Vui lòng thử lại."
+            },
+            en: {
+                title: "Premium Content",
+                desc: "To listen to professional narration and view story details, please make a small payment (approx. $1).",
+                btn: "PAY NOW",
+                processing: "PROCESSING...",
+                success: "Payment successful! Audio content unlocked.",
+                error: "Payment error. Please try again."
+            },
+            zh: {
+                title: "高级内容",
+                desc: "要收听专业旁白并查看故事详情，请支付少量费用。",
+                btn: "立即支付",
+                processing: "正在处理...",
+                success: "支付成功！已解锁音频内容。",
+                error: "支付错误。请再试一次。"
+            },
+            ja: {
+                title: "プレミアムコンテンツ",
+                desc: "プロのナレーションを聞いてストーリーの詳細を確認するには、少額の支払いが必要です。",
+                btn: "今すぐ支払う",
+                processing: "処理中...",
+                success: "お支払いが完了しました！コンテンツが解除されました。",
+                error: "支払いエラー。もう一度やり直してください。"
+            },
+            ko: {
+                title: "프리미엄 콘텐츠",
+                desc: "전문 내레이션을 듣고 자세한 이야기를 확인하려면 소액 결제가 필요합니다.",
+                btn: "지금 결제",
+                processing: "처리 중...",
+                success: "결제가 완료되었습니다! 오디오 콘텐츠가 잠금 해제되었습니다.",
+                error: "결제 오류. 다시 시도해 주세요."
+            }
         };
 
         let poiData = null;
@@ -773,7 +841,7 @@
         async function handlePayment() {
             const btn = document.getElementById('pay-btn-trigger');
             btn.disabled = true;
-            btn.textContent = 'ĐANG XỬ LÝ...';
+            btn.textContent = PAYMENT_LANGS[currentLang]?.processing || 'PROCESSING...';
             
             try {
                 // Simulate delay for UX
@@ -791,18 +859,26 @@
                 
                 if (res.ok) {
                     hasAccess = true;
-                    alert('Thanh toán thành công! Bạn đã mở khóa nội dung thuyết minh.');
+                    alert(PAYMENT_LANGS[currentLang]?.success || 'Thanh toán thành công!');
                     refreshAccessUI();
                 } else {
                     const errData = await res.json().catch(() => ({}));
-                    alert(`Lỗi khi xử lý thanh toán: ${errData.error || 'Vui lòng thử lại.'}`);
+                    alert(`${PAYMENT_LANGS[currentLang]?.error || 'Lỗi'}: ${errData.error || ''}`);
                 }
             } catch (e) {
-                alert('Lỗi kết nối hoặc API không phản hồi. Vui lòng kiểm tra mạng và thử lại.');
+                alert(PAYMENT_LANGS[currentLang]?.error || 'Lỗi kết nối hoặc API không phản hồi. Vui lòng thử lại.');
             } finally {
                 btn.disabled = false;
-                btn.textContent = `THANH TOÁN ${poiData.price?.toLocaleString() || '25.000'} VNĐ`;
+                translatePaymentUI();
+                document.getElementById('pay-amount').textContent = poiData.price?.toLocaleString() || '25.000';
             }
+        }
+
+        function translatePaymentUI() {
+            const langData = PAYMENT_LANGS[currentLang] || PAYMENT_LANGS['vi'];
+            document.getElementById('pay-title').textContent = langData.title;
+            document.getElementById('pay-desc').textContent = langData.desc;
+            document.getElementById('pay-btn-text').textContent = langData.btn;
         }
 
         function refreshAccessUI() {
@@ -817,6 +893,8 @@
                 audioBlock.style.display = 'none';
                 contentBox.style.filter = 'blur(4px)';
                 contentBox.style.pointerEvents = 'none';
+                
+                translatePaymentUI();
                 document.getElementById('pay-amount').textContent = poiData.price?.toLocaleString() || '25.000';
             } else {
                 payBlock.style.display = 'none';
@@ -903,6 +981,17 @@
             });
 
             updateContent();
+            translatePaymentUI();
+            
+            // Update other labels
+            const l = LANGS[currentLang] || LANGS['vi'];
+            document.getElementById('header-title').textContent = l.header;
+            document.getElementById('label-select-lang').textContent = l.select;
+            document.getElementById('label-ai-voice').textContent = l.ai;
+            document.getElementById('label-story-content').textContent = l.story;
+            document.getElementById('status').textContent = isSpeaking ? l.status_playing : l.status;
+            const proLabel = document.querySelector('#audio-section .mag-label');
+            if (proLabel) proLabel.textContent = l.pro;
         }
 
         function updateContent() {
@@ -983,16 +1072,17 @@
             const svgStop = document.getElementById('svg-stop');
             const status = document.getElementById('status');
             const wf = document.getElementById('waveform');
+            const l = LANGS[currentLang] || LANGS['vi'];
 
             if (isSpeaking) {
                 svgPlay.style.display = 'none';
                 svgStop.style.display = 'block';
-                status.textContent = '🔊 Đang đọc thuyết minh...';
+                status.textContent = l.status_playing;
                 wf.classList.add('active');
             } else {
                 svgPlay.style.display = 'block';
                 svgStop.style.display = 'none';
-                status.textContent = 'Bấm để nghe thuyết minh';
+                status.textContent = l.status;
                 wf.classList.remove('active');
             }
         }

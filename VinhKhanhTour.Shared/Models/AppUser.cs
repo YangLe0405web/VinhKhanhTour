@@ -19,4 +19,5 @@ public class AppUser
     [FirestoreProperty] public List<string> ManagedPoiIds { get; set; } = new();
     
     [FirestoreProperty] public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    [FirestoreProperty] public DateTime ExpiryDate { get; set; } = DateTime.UtcNow.AddDays(30);
 }

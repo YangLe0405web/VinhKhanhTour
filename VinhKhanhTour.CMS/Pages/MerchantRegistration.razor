@@ -102,10 +102,10 @@
                 var options = new DialogOptions { CloseOnEscapeKey = true };
                 var result = await DialogService.ShowMessageBox(
                     "Đăng ký thành công!", 
-                    (MarkupString)"Tài khoản của bạn đã được kích hoạt.<br/><br/>" +
+                    (MarkupString)("Tài khoản của bạn đã được kích hoạt.<br/><br/>" +
                     $"Tên đăng nhập: <b>{_model.PhoneNumber}</b><br/>" +
                     "Mật khẩu: <b>123</b><br/><br/>" +
-                    "Vui lòng đăng nhập và bắt đầu tạo điểm POI của bạn.",
+                    "Vui lòng đăng nhập và bắt đầu tạo điểm POI của bạn."),
                     yesText: "ĐĂNG NHẬP NGAY");
                 
                 Nav.NavigateTo("/login");

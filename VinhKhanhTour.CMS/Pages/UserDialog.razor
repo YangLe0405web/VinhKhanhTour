@@ -29,6 +29,13 @@
 
             @if (User.Role == "owner")
             {
+                <MudDatePicker Label="Ngày hết hạn dịch vụ" @bind-Date="_expiryDate" 
+                               Variant="Variant.Outlined" Color="Color.Primary" 
+                               Placeholder="Chọn ngày hết hạn" />
+            }
+
+            @if (User.Role == "owner")
+            {
                 <MudText Typo="Typo.subtitle2" Class="mt-2">Chọn quán quản lý:</MudText>
                 <div style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px;" class="pa-2">
                     @foreach (var poi in AllPois.OrderBy(p => p.Name))
@@ -56,6 +63,12 @@
 
     private string _password = "";
     private bool _loading = false;
+    private DateTime? _expiryDate;
+
+    protected override void OnInitialized()
+    {
+        _expiryDate = User.ExpiryDate;
+    }
     private string Title => string.IsNullOrEmpty(User.Id) ? "Thêm tài khoản" : "Cập nhật tài khoản";
 
     private bool IsPoiSelected(string? id) => id != null && User.ManagedPoiIds.Contains(id);
@@ -91,6 +104,9 @@
             // Set password to PasswordHash field for transport (will be hashed on server)
             if (!string.IsNullOrWhiteSpace(_password))
                 User.PasswordHash = _password;
+
+            if (_expiryDate.HasValue)
+                User.ExpiryDate = _expiryDate.Value;
 
             var resp = await Api.SaveUserAsync(User);
             if (resp.IsSuccessStatusCode)

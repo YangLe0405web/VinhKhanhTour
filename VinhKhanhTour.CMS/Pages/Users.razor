@@ -20,10 +20,11 @@ else
 {
     <MudTable Items="_users" Hover="true" Bordered="true" Striped="true" Elevation="2">
         <HeaderContent>
-            <MudTh>Tên đăng nhập / SĐT</MudTh>
+            <MudTh>Tài khoản / SĐT</MudTh>
             <MudTh>Họ tên</MudTh>
             <MudTh>Gmail</MudTh>
-            <MudTh>Địa chỉ quán</MudTh>
+            <MudTh>Hạn dùng</MudTh>
+            <MudTh>Tình trạng</MudTh>
             <MudTh>Vai trò</MudTh>
             <MudTh>Số quán</MudTh>
             <MudTh Style="width:120px">Thao tác</MudTh>
@@ -31,8 +32,41 @@ else
         <RowTemplate>
             <MudTd>@context.Username</MudTd>
             <MudTd>@context.FullName</MudTd>
-            <MudTd>@context.Email</MudTd>
-            <MudTd>@context.Address</MudTd>
+            <MudTd>
+                @{
+                    var parts = context.Email.Split('@');
+                    var displayEmail = parts.Length == 2 ? (parts[0].Length > 3 ? parts[0].Substring(0, 3) + "..." : parts[0]) + "@" + parts[1] : context.Email;
+                }
+                @displayEmail
+            </MudTd>
+            <MudTd>
+                @if (context.Role != "admin")
+                {
+                    <MudText Typo="Typo.body2">@context.ExpiryDate.ToLocalTime().ToString("dd/MM/yyyy")</MudText>
+                }
+                else
+                {
+                    <MudText Typo="Typo.body2" Color="Color.Default">Vô thời hạn</MudText>
+                }
+            </MudTd>
+            <MudTd>
+                @if (context.Role != "admin")
+                {
+                    var daysLeft = (context.ExpiryDate - DateTime.UtcNow).TotalDays;
+                    @if (daysLeft < 0)
+                    {
+                        <MudChip T="string" Size="Size.Small" Color="Color.Error">Hết hạn</MudChip>
+                    }
+                    else if (daysLeft < 5)
+                    {
+                        <MudChip T="string" Size="Size.Small" Color="Color.Warning">Sắp hết (@((int)daysLeft) ngày)</MudChip>
+                    }
+                    else
+                    {
+                        <MudChip T="string" Size="Size.Small" Color="Color.Success">Còn @((int)daysLeft) ngày</MudChip>
+                    }
+                }
+            </MudTd>
             <MudTd>
                 <MudChip T="string" Color="@(context.Role == "admin" ? Color.Error : Color.Info)" Size="Size.Small">
                     @context.Role.ToUpper()
@@ -89,6 +123,7 @@ else
             Email = user.Email ?? "",
             Address = user.Address ?? "",
             Role = user.Role ?? "owner",
+            ExpiryDate = user.ExpiryDate,
             ManagedPoiIds = user.ManagedPoiIds != null ? new List<string>(user.ManagedPoiIds) : new List<string>()
         };
 

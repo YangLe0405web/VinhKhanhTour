@@ -84,6 +84,10 @@ else
         <ToolBarContent>
             <MudText Typo="Typo.subtitle1" Style="font-weight: 600;">Danh sách POI</MudText>
             <MudSpacer />
+            <MudTextField @bind-Value="_searchString" Placeholder="Tìm tên POI / Danh mục..." Adornment="Adornment.Start" 
+                          AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small" Class="mt-0 mr-4"
+                          Style="background: rgba(255,255,255,0.05); border-radius: 99px; padding: 0 16px; min-width: 250px;"
+                          Variant="Variant.Text" Clearable="true" Immediate="true" Margin="Margin.Dense" />
             <MudButton Variant="Variant.Filled" Color="Color.Primary"
                        StartIcon="@Icons.Material.Filled.Add"
                        OnClick="OpenAddDialog" Size="Size.Small" Style="border-radius: 99px; font-weight: 600; text-transform: none;">
@@ -260,6 +264,7 @@ else
     bool _error = false;
     string _errorDetail = "";
     List<PoiModel> _pois = new();
+    string _searchString = "";
 
     string _currentFilter = "Tất cả";
 
@@ -270,6 +275,15 @@ else
 
     private bool FilterPoi(PoiModel poi)
     {
+        // 1. Filter by Search String
+        if (!string.IsNullOrWhiteSpace(_searchString))
+        {
+            var matchName = poi.Name?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) == true;
+            var matchCat = poi.Category?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) == true;
+            if (!matchName && !matchCat) return false;
+        }
+
+        // 2. Filter by Category Chip
         if (_currentFilter == "Tất cả") return true;
         if (_currentFilter == "Ẩm thực" && (poi.Category?.ToLower().Contains("food") == true || poi.Category?.ToLower().Contains("ẩm thực") == true)) return true;
         if (_currentFilter == "Đồ uống" && (poi.Category?.ToLower().Contains("drink") == true || poi.Category?.ToLower().Contains("đồ uống") == true)) return true;

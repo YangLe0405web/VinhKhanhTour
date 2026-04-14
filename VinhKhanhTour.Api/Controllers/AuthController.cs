@@ -31,6 +31,12 @@ public class AuthController : ControllerBase
             return Unauthorized("Tài khoản hoặc mật khẩu không chính xác");
         }
 
+        // Chặn đăng nhập nếu hết hạn (chỉ áp dụng cho chủ quán)
+        if (user.Role == "owner" && user.ExpiryDate < DateTime.UtcNow)
+        {
+            return StatusCode(403, "Tài khoản của bạn đã hết hạn sử dụng. Vui lòng liên hệ Admin để gia hạn phí dịch vụ.");
+        }
+
         var token = GenerateJwtToken(user);
         return Ok(new
         {
@@ -38,6 +44,7 @@ public class AuthController : ControllerBase
             username = user.Username,
             role = user.Role,
             fullName = user.FullName,
+            expiryDate = user.ExpiryDate,
             managedPoiIds = user.ManagedPoiIds
         });
     }
@@ -52,7 +59,8 @@ public class AuthController : ControllerBase
         {
             new Claim(ClaimTypes.Name, user.Username),
             new Claim(ClaimTypes.Role, user.Role),
-            new Claim("UserId", user.Id)
+            new Claim("UserId", user.Id),
+            new Claim("ExpiryDate", user.ExpiryDate.ToString("O")) // ISO 8601 format
         };
 
         if (user.ManagedPoiIds.Any())

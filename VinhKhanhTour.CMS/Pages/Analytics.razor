@@ -24,55 +24,71 @@ else
     <MudGrid>
         @if (_isAdmin)
         {
-            <MudItem xs="12" sm="6" md="3">
-                <MudPaper Class="pa-4" Elevation="2">
+            <MudItem xs="12" sm="6" md="4">
+                <MudPaper Class="pa-4" Elevation="2" Style="height: 100%;">
                     <MudText Typo="Typo.h3" Color="Color.Success">@((_totalRevenue + _totalMerchantRevenue).ToString("N0"))</MudText>
                     <MudText Typo="Typo.subtitle1">Tổng doanh thu (VND)</MudText>
+                    <MudText Typo="Typo.caption">Gồm cả phí đăng ký đối tác</MudText>
                 </MudPaper>
             </MudItem>
-            <MudItem xs="12" sm="6" md="3">
-                <MudPaper Class="pa-4" Elevation="2">
+            <MudItem xs="12" sm="6" md="4">
+                <MudPaper Class="pa-4" Elevation="2" Style="height: 100%;">
                     <MudText Typo="Typo.h3" Color="Color.Secondary">@(_totalMerchantRevenue.ToString("N0"))</MudText>
                     <MudText Typo="Typo.subtitle1">Doanh thu Đăng ký (VND)</MudText>
+                    <MudText Typo="Typo.caption">Phí kích hoạt từ Merchant</MudText>
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="12" sm="6" md="4">
+                <MudPaper Class="pa-4" Elevation="2" Style="height: 100%;">
+                    <MudText Typo="Typo.h3" Color="Color.Primary">@_totalQr</MudText>
+                    <MudText Typo="Typo.subtitle1">Lượt quét QR</MudText>
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="12" sm="6" md="4">
+                <MudPaper Class="pa-4" Elevation="2" Style="height: 100%;">
+                    <MudText Typo="Typo.h3" Color="Color.Info">@_totalPlay</MudText>
+                    <MudText Typo="Typo.subtitle1">Lượt nghe Audio</MudText>
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="12" sm="6" md="4">
+                <MudPaper Class="pa-4" Elevation="2" Style="height: 100%;">
+                    <MudText Typo="Typo.h3" Color="Color.Warning">@_avgDuration s</MudText>
+                    <MudText Typo="Typo.subtitle1">Thời gian nghe TB</MudText>
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="12" sm="6" md="4">
+                <MudPaper Class="pa-4" Elevation="2" Style="height: 100%; border: 2px dashed rgba(255,255,255,0.1); background: transparent;">
+                    <MudText Typo="Typo.h3" Color="Color.Default">@_pois.Count</MudText>
+                    <MudText Typo="Typo.subtitle1">Tổng POI hệ thống</MudText>
                 </MudPaper>
             </MudItem>
         }
         else
         {
-            <MudItem xs="12" sm="6" md="3">
-                <MudPaper Class="pa-4" Elevation="2">
+            <MudItem xs="12" sm="4">
+                <MudPaper Class="pa-4" Elevation="2" Style="height: 100%;">
                     <MudText Typo="Typo.h3" Color="Color.Primary">@_totalQr</MudText>
                     <MudText Typo="Typo.subtitle1">Lượt quét QR</MudText>
                 </MudPaper>
             </MudItem>
-        }
-
-        @if (_isAdmin)
-        {
-            <MudItem xs="12" sm="6" md="3">
-                <MudPaper Class="pa-4" Elevation="2">
-                    <MudText Typo="Typo.h3" Color="Color.Primary">@_totalQr</MudText>
-                    <MudText Typo="Typo.subtitle1">Lượt quét QR</MudText>
+            <MudItem xs="12" sm="4">
+                <MudPaper Class="pa-4" Elevation="2" Style="height: 100%;">
+                    <MudText Typo="Typo.h3" Color="Color.Info">@_totalPlay</MudText>
+                    <MudText Typo="Typo.subtitle1">Lượt nghe Audio</MudText>
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="12" sm="4">
+                <MudPaper Class="pa-4" Elevation="2" Style="height: 100%;">
+                    <MudText Typo="Typo.h3" Color="Color.Warning">@_avgDuration s</MudText>
+                    <MudText Typo="Typo.subtitle1">Thời gian nghe TB</MudText>
                 </MudPaper>
             </MudItem>
         }
-        <MudItem xs="12" sm="6" md="3">
-            <MudPaper Class="pa-4" Elevation="2">
-                <MudText Typo="Typo.h3" Color="Color.Info">@_totalPlay</MudText>
-                <MudText Typo="Typo.subtitle1">Lượt nghe Audio</MudText>
-            </MudPaper>
-        </MudItem>
-        <MudItem xs="12" sm="6" md="3">
-            <MudPaper Class="pa-4" Elevation="2">
-                <MudText Typo="Typo.h3" Color="Color.Warning">@_avgDuration s</MudText>
-                <MudText Typo="Typo.subtitle1">Thời gian nghe TB</MudText>
-            </MudPaper>
-        </MudItem>
 
         <MudItem xs="12" md="6">
-            <MudPaper Class="pa-4" Elevation="2">
+            <MudPaper Class="pa-4" Elevation="2" Style="height: 100%;">
                 <MudText Typo="Typo.h6" Class="mb-3">🏆 Top POI được nghe nhiều nhất</MudText>
-                <MudTable Items="_topPois" Hover="true" Dense="true">
+                <MudTable Items="_topPois" Hover="true" Dense="true" Elevation="0">
                     <HeaderContent>
                         <MudTh>#</MudTh><MudTh>POI</MudTh><MudTh>Lượt</MudTh>
                     </HeaderContent>
@@ -86,9 +102,9 @@ else
         </MudItem>
 
         <MudItem xs="12" md="6">
-            <MudPaper Class="pa-4" Elevation="2">
+            <MudPaper Class="pa-4" Elevation="2" Style="height: 100%;">
                 <MudText Typo="Typo.h6" Class="mb-3">🌐 Phân bố ngôn ngữ</MudText>
-                <MudTable Items="_langStats" Hover="true" Dense="true">
+                <MudTable Items="_langStats" Hover="true" Dense="true" Elevation="0">
                     <HeaderContent>
                         <MudTh>Ngôn ngữ</MudTh><MudTh>Lượt</MudTh><MudTh>Tỉ lệ</MudTh>
                     </HeaderContent>

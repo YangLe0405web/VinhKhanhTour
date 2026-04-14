@@ -85,7 +85,8 @@ public class UsersController : ControllerBase
             Address = req.Address,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword("123"),
             Role = "owner",
-            ManagedPoiIds = new List<string>()
+            ManagedPoiIds = new List<string>(),
+            ExpiryDate = DateTime.UtcNow.AddDays(30)
         };
 
         await _db.SaveUserAsync(newUser);

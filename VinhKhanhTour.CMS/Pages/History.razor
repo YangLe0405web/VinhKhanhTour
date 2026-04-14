@@ -10,7 +10,8 @@
 <MudPaper Class="pa-3 mb-4" Elevation="1">
     <MudGrid>
         <MudItem xs="12" sm="3">
-            <MudSelect @bind-Value="_filterAction" Label="Hành động"
+            <MudText Typo="Typo.caption" Class="ml-1 mb-1" Style="color:rgba(255,255,255,0.5)">Hành động</MudText>
+            <MudSelect @bind-Value="_filterAction" Placeholder="Chọn hành động"
                        Clearable="true" Variant="Variant.Outlined" Margin="Margin.Dense">
                 <MudSelectItem Value="@("")">Tất cả</MudSelectItem>
                 <MudSelectItem Value="@("play_poi")">🔊 Nghe POI</MudSelectItem>
@@ -20,11 +21,13 @@
                 @if (_isAdmin)
                 {
                     <MudSelectItem Value="@("pay_audio")">💰 Thanh toán</MudSelectItem>
+                    <MudSelectItem Value="@("register_poi")">📝 Đăng ký POI</MudSelectItem>
                 }
             </MudSelect>
         </MudItem>
         <MudItem xs="12" sm="3">
-            <MudSelect @bind-Value="_filterLang" Label="Ngôn ngữ"
+            <MudText Typo="Typo.caption" Class="ml-1 mb-1" Style="color:rgba(0,0,0,0.5)">Ngôn ngữ</MudText>
+            <MudSelect @bind-Value="_filterLang" Placeholder="Chọn ngôn ngữ"
                        Clearable="true" Variant="Variant.Outlined" Margin="Margin.Dense">
                 <MudSelectItem Value="@("")">Tất cả</MudSelectItem>
                 <MudSelectItem Value="@("vi")">🇻🇳 Tiếng Việt</MudSelectItem>
@@ -35,14 +38,16 @@
             </MudSelect>
         </MudItem>
         <MudItem xs="12" sm="3">
-            <MudDatePicker Label="Lọc ngày" @bind-Date="_filterDate" 
-                           Editable="true" Clearable="true" Variant="Variant.Outlined" Margin="Margin.Dense"
-                           DateFormat="dd/MM/yyyy" Placeholder="Chọn ngày..." />
+            <MudText Typo="Typo.caption" Class="ml-1 mb-1" Style="color:rgba(0,0,0,0.5)">Thời gian</MudText>
+            <MudDatePicker @bind-Date="_filterDate" 
+                            Editable="true" Clearable="true" Variant="Variant.Outlined" Margin="Margin.Dense"
+                            DateFormat="dd/MM/yyyy" Placeholder="Chọn ngày..." />
         </MudItem>
-        <MudItem xs="12" sm="3" Class="d-flex align-center">
+        <MudItem xs="12" sm="3" Class="d-flex flex-column justify-end">
             <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true"
-                       OnClick="@(() => LoadData())" StartIcon="@Icons.Material.Filled.Refresh" Style="height:40px;">
-                Tải lại
+                        OnClick="@(() => LoadData(true))" StartIcon="@Icons.Material.Filled.Refresh" 
+                        Disabled="_loading" Style="height:40px; text-transform:none;">
+                @(_loading ? "Đang tải..." : "TẢI LẠI")
             </MudButton>
         </MudItem>
     </MudGrid>
@@ -142,7 +147,7 @@ else
 
     protected override async Task OnInitializedAsync() => await LoadData();
 
-    async Task LoadData()
+    async Task LoadData(bool force = false)
     {
         _loading = true;
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
@@ -150,10 +155,10 @@ else
         _isAdmin = user.IsInRole("admin");
         
         var username = user.Identity?.Name ?? "";
-        var allPois = await Api.GetPoisAsync() ?? new();
+        var allPois = await Api.GetPoisAsync(force) ?? new();
         var myPoiIds = _isAdmin ? new List<string>() : allPois.Where(p => p.OwnerId == username).Select(p => p.Id).ToList();
 
-        _history = (await Api.GetHistoryAsync() ?? new())
+        _history = (await Api.GetHistoryAsync(force) ?? new())
             .Where(h => h.Action != "open_app")
             .ToList();
 
@@ -174,6 +179,8 @@ else
         "route_start" => "🗺️ Chỉ đường",
         "language_change" => "🌐 Đổi ngôn ngữ",
         "pay_audio" => "💰 Thanh toán",
+        "register_poi" => "📝 Đăng ký POI",
+        "merchant_register" => "👤 Đăng ký Chủ quán",
         _ => action
     };
 
@@ -186,6 +193,8 @@ else
         "route_start" => Color.Primary,
         "language_change" => Color.Secondary,
         "pay_audio" => Color.Success,
+        "register_poi" => Color.Info,
+        "merchant_register" => Color.Info,
         _ => Color.Default
     };
 
