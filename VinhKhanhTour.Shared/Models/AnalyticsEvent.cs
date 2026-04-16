@@ -1,4 +1,4 @@
-﻿using Google.Cloud.Firestore;
+using Google.Cloud.Firestore;
 using static Google.Api.Distribution.Types;
 using static Google.Cloud.Firestore.V1.StructuredAggregationQuery.Types.Aggregation.Types;
 
@@ -7,6 +7,7 @@ namespace VinhKhanhTour.Shared.Models;
 [FirestoreData]
 public class AnalyticsEvent
 {
+    [FirestoreProperty] public string DeviceId { get; set; } = "";
     [FirestoreProperty] public string EventType { get; set; } = "";
     [FirestoreProperty] public string PoiId { get; set; } = "";
     [FirestoreProperty] public string Language { get; set; } = "vi";

@@ -84,6 +84,7 @@ public class FirestoreService
         {
             var data = new Dictionary<string, object>
             {
+                { "DeviceId", ev.DeviceId ?? "" },
                 { "EventType", ev.EventType ?? "" },
                 { "PoiId", ev.PoiId ?? "" },
                 { "Language", ev.Language ?? "vi" },
@@ -119,6 +120,7 @@ public class FirestoreService
             {
                 var ev = new AnalyticsEvent
                 {
+                    DeviceId = d.ContainsField("DeviceId") ? d.GetValue<string>("DeviceId") : "",
                     EventType = d.ContainsField("EventType") ? d.GetValue<string>("EventType") : "",
                     PoiId = d.ContainsField("PoiId") ? d.GetValue<string>("PoiId") : "",
                     Language = d.ContainsField("Language") ? d.GetValue<string>("Language") : "vi",
@@ -267,6 +269,7 @@ public class FirestoreService
         // 2. Log to Analytics (Counted as 'Scan QR' in Dashboard)
         var ev = new AnalyticsEvent
         {
+            DeviceId = device,
             EventType = "scan_qr",
             PoiId = tourId,
             Language = lang,

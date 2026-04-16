@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using VinhKhanhTour.Api.Services;
 using VinhKhanhTour.Shared.Models;
 
@@ -23,13 +23,14 @@ public class AnalyticsController : ControllerBase
 
         return Ok(data.Select(e => new
         {
+            e.DeviceId,
             e.EventType,
             e.PoiId,
             e.Language,
             e.Duration,
             e.Lat,
             e.Lng,
-            timestamp = e.Timestamp.ToString("o") // 🔥 QUAN TRỌNG
+            timestamp = e.Timestamp.ToString("o")
         }));
     }
 
