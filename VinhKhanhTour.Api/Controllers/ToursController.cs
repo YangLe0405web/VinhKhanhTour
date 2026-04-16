@@ -37,9 +37,9 @@ public class ToursController : ControllerBase
 
     // POST api/tours/{id}/scan
     [HttpPost("{id}/scan")]
-    public async Task<IActionResult> Scan(string id)
+    public async Task<IActionResult> Scan(string id, [FromQuery] string? deviceId = null, [FromQuery] string? lang = null)
     {
-        await _db.IncrementQrScansAsync(id);
+        await _db.IncrementQrScansAsync(id, deviceId ?? "Mobile", lang ?? "vi");
         return Ok();
     }
 
