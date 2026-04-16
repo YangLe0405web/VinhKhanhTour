@@ -10,17 +10,15 @@
 <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6" Class="mt-4" Color="Color.Primary" Variant="Variant.Filled">
     <MudTabPanel Text="📊 Thống kê tổng hợp" Icon="@Icons.Material.Filled.BarChart">
         <MudGrid>
-            <AuthorizeView Roles="admin">
+            <AuthorizeView Roles="admin" Context="authContext">
                 <Authorized>
-        <AuthorizeView Roles="admin">
-            <Authorized>
-                <MudItem xs="12" sm="6" md="3">
-                    <MudPaper Class="pa-4" Elevation="2" Style="height: 100%; border-left: 4px solid #4caf50;">
-                        <MudText Typo="Typo.h3" Color="Color.Success">@((_totalRevenue + _totalMerchantRevenue).ToString("N0"))</MudText>
-                        <MudText Typo="Typo.subtitle1">Tổng doanh thu (VND)</MudText>
-                        <MudText Typo="Typo.caption">Gồm cả phí đăng ký đối tác</MudText>
-                    </MudPaper>
-                </MudItem>
+                    <MudItem xs="12" sm="6" md="3">
+                        <MudPaper Class="pa-4" Elevation="2" Style="height: 100%; border-left: 4px solid #4caf50;">
+                            <MudText Typo="Typo.h3" Color="Color.Success">@((_totalRevenue + _totalMerchantRevenue).ToString("N0"))</MudText>
+                            <MudText Typo="Typo.subtitle1">Tổng doanh thu (VND)</MudText>
+                            <MudText Typo="Typo.caption">Gồm cả phí đăng ký đối tác</MudText>
+                        </MudPaper>
+                    </MudItem>
                 <MudItem xs="12" sm="6" md="3">
                     <MudPaper Class="pa-4" Elevation="2" Style="height: 100%; border-left: 4px solid #ff9800;">
                         <MudText Typo="Typo.h3" Color="Color.Warning">@_uniqueDevicesCount</MudText>

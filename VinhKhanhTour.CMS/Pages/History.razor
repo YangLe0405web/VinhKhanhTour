@@ -155,12 +155,17 @@ else
 
     protected override async Task OnInitializedAsync() 
     {
-        // Parse device query string if exists
+        // Parse device query string if exists manually for Blazor WASM
         var uri = Nav.ToAbsoluteUri(Nav.Uri);
-        var queryParams = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
-        if (queryParams.TryGetValue("device", out var deviceId))
+        var query = uri.Query;
+        if (!string.IsNullOrEmpty(query) && query.Contains("device="))
         {
-            _filterDevice = deviceId;
+            var parts = query.Split(new[] { "device=" }, StringSplitOptions.None);
+            if (parts.Length > 1)
+            {
+                var val = parts[1].Split('&')[0];
+                _filterDevice = Uri.UnescapeDataString(val);
+            }
         }
 
         await LoadData();
