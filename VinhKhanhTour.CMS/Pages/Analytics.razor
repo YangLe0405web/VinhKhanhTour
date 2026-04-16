@@ -22,68 +22,63 @@
 else
 {
     <MudGrid>
-        @if (_isAdmin)
-        {
-            <MudItem xs="12" sm="6" md="4">
-                <MudPaper Class="pa-4" Elevation="2" Style="height: 100%;">
-                    <MudText Typo="Typo.h3" Color="Color.Success">@((_totalRevenue + _totalMerchantRevenue).ToString("N0"))</MudText>
-                    <MudText Typo="Typo.subtitle1">Tổng doanh thu (VND)</MudText>
-                    <MudText Typo="Typo.caption">Gồm cả phí đăng ký đối tác</MudText>
-                </MudPaper>
-            </MudItem>
-            <MudItem xs="12" sm="6" md="4">
-                <MudPaper Class="pa-4" Elevation="2" Style="height: 100%;">
-                    <MudText Typo="Typo.h3" Color="Color.Secondary">@(_totalMerchantRevenue.ToString("N0"))</MudText>
-                    <MudText Typo="Typo.subtitle1">Doanh thu Đăng ký (VND)</MudText>
-                    <MudText Typo="Typo.caption">Phí kích hoạt từ Merchant</MudText>
-                </MudPaper>
-            </MudItem>
-            <MudItem xs="12" sm="6" md="4">
-                <MudPaper Class="pa-4" Elevation="2" Style="height: 100%;">
-                    <MudText Typo="Typo.h3" Color="Color.Primary">@_totalQr</MudText>
-                    <MudText Typo="Typo.subtitle1">Lượt quét QR</MudText>
-                </MudPaper>
-            </MudItem>
-            <MudItem xs="12" sm="6" md="4">
-                <MudPaper Class="pa-4" Elevation="2" Style="height: 100%;">
-                    <MudText Typo="Typo.h3" Color="Color.Info">@_totalPlay</MudText>
-                    <MudText Typo="Typo.subtitle1">Lượt nghe Audio</MudText>
-                </MudPaper>
-            </MudItem>
-            <MudItem xs="12" sm="6" md="4">
-                <MudPaper Class="pa-4" Elevation="2" Style="height: 100%;">
-                    <MudText Typo="Typo.h3" Color="Color.Warning">@_avgDuration s</MudText>
-                    <MudText Typo="Typo.subtitle1">Thời gian nghe TB</MudText>
-                </MudPaper>
-            </MudItem>
-            <MudItem xs="12" sm="6" md="4">
-                <MudPaper Class="pa-4" Elevation="2" Style="height: 100%; border: 2px dashed rgba(255,255,255,0.1); background: transparent;">
-                    <MudText Typo="Typo.h3" Color="Color.Default">@_pois.Count</MudText>
-                    <MudText Typo="Typo.subtitle1">Tổng POI hệ thống</MudText>
-                </MudPaper>
-            </MudItem>
-        }
-        else
-        {
-            <MudItem xs="12" sm="4">
-                <MudPaper Class="pa-4" Elevation="2" Style="height: 100%;">
-                    <MudText Typo="Typo.h3" Color="Color.Primary">@_totalQr</MudText>
-                    <MudText Typo="Typo.subtitle1">Lượt quét QR</MudText>
-                </MudPaper>
-            </MudItem>
-            <MudItem xs="12" sm="4">
-                <MudPaper Class="pa-4" Elevation="2" Style="height: 100%;">
-                    <MudText Typo="Typo.h3" Color="Color.Info">@_totalPlay</MudText>
-                    <MudText Typo="Typo.subtitle1">Lượt nghe Audio</MudText>
-                </MudPaper>
-            </MudItem>
-            <MudItem xs="12" sm="4">
-                <MudPaper Class="pa-4" Elevation="2" Style="height: 100%;">
-                    <MudText Typo="Typo.h3" Color="Color.Warning">@_avgDuration s</MudText>
-                    <MudText Typo="Typo.subtitle1">Thời gian nghe TB</MudText>
-                </MudPaper>
-            </MudItem>
-        }
+        <AuthorizeView Roles="admin">
+            <Authorized>
+                <MudItem xs="12" sm="6" md="3">
+                    <MudPaper Class="pa-4" Elevation="2" Style="height: 100%; border-left: 4px solid #4caf50;">
+                        <MudText Typo="Typo.h3" Color="Color.Success">@((_totalRevenue + _totalMerchantRevenue).ToString("N0"))</MudText>
+                        <MudText Typo="Typo.subtitle1">Tổng doanh thu (VND)</MudText>
+                        <MudText Typo="Typo.caption">Gồm cả phí đăng ký đối tác</MudText>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="12" sm="6" md="3">
+                    <MudPaper Class="pa-4" Elevation="2" Style="height: 100%; border-left: 4px solid #ff9800;">
+                        <MudText Typo="Typo.h3" Color="Color.Warning">@_uniqueDevicesCount</MudText>
+                        <MudText Typo="Typo.subtitle1">Thiết bị duy nhất</MudText>
+                        <MudText Typo="Typo.caption">Khách hàng thực (Unique Users)</MudText>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="12" sm="6" md="3">
+                    <MudPaper Class="pa-4" Elevation="2" Style="height: 100%;">
+                        <MudText Typo="Typo.h3" Color="Color.Primary">@_totalQr</MudText>
+                        <MudText Typo="Typo.subtitle1">Tổng lượt quét QR</MudText>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="12" sm="6" md="3">
+                    <MudPaper Class="pa-4" Elevation="2" Style="height: 100%;">
+                        <MudText Typo="Typo.h3" Color="Color.Info">@_totalPlay</MudText>
+                        <MudText Typo="Typo.subtitle1">Lượt nghe Audio</MudText>
+                    </MudPaper>
+                </MudItem>
+            </Authorized>
+            <NotAuthorized>
+                <MudItem xs="12" sm="6" md="3">
+                    <MudPaper Class="pa-4" Elevation="2" Style="height: 100%; border-left: 4px solid #ff9800;">
+                        <MudText Typo="Typo.h3" Color="Color.Warning">@_uniqueDevicesCount</MudText>
+                        <MudText Typo="Typo.subtitle1">Khách ghé quán</MudText>
+                        <MudText Typo="Typo.caption">Tổng thiết bị duy nhất</MudText>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="12" sm="6" md="3">
+                    <MudPaper Class="pa-4" Elevation="2" Style="height: 100%;">
+                        <MudText Typo="Typo.h3" Color="Color.Primary">@_totalQr</MudText>
+                        <MudText Typo="Typo.subtitle1">Lượt quét QR</MudText>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="12" sm="6" md="3">
+                    <MudPaper Class="pa-4" Elevation="2" Style="height: 100%;">
+                        <MudText Typo="Typo.h3" Color="Color.Info">@_totalPlay</MudText>
+                        <MudText Typo="Typo.subtitle1">Lượt nghe Audio</MudText>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="12" sm="6" md="3">
+                    <MudPaper Class="pa-4" Elevation="2" Style="height: 100%;">
+                        <MudText Typo="Typo.h3" Color="Color.Default">@_avgDuration s</MudText>
+                        <MudText Typo="Typo.subtitle1">Thời gian nghe TB</MudText>
+                    </MudPaper>
+                </MudItem>
+            </NotAuthorized>
+        </AuthorizeView>
 
         <MudItem xs="12" md="6">
             <MudPaper Class="pa-4" Elevation="2" Style="height: 100%;">
@@ -122,6 +117,42 @@ else
             </MudPaper>
         </MudItem>
 
+        <MudItem xs="12" md="7">
+            <MudPaper Class="pa-6" Elevation="2">
+                <MudText Typo="Typo.h6" Class="mb-4">🕒 Lưu lượng khách theo khung giờ (Peak Hours)</MudText>
+                @if (_peakHourSeries.Count > 0)
+                {
+                    <MudChart ChartType="ChartType.Line" ChartSeries="@_peakHourSeries" 
+                              ChartLabels="@_peakHourLabels" Width="100%" Height="300px" 
+                              ChartOptions="@(new ChartOptions { ShowLegend = false, LineStrokeWidth = 4 })" />
+                }
+                <MudText Typo="Typo.caption" Color="Color.Secondary" Class="d-block mt-2 text-center">
+                    Trục ngang: 24 khung giờ trong ngày (Hệ thống tự động tính toán từ Log)
+                </MudText>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" md="5">
+            <MudPaper Class="pa-6" Elevation="2">
+                <MudText Typo="Typo.h6" Class="mb-4">📅 Mật độ khách theo Thứ (Weekly Peak)</MudText>
+                @if (_peakDaySeries.Count > 0)
+                {
+                    <MudChart ChartType="ChartType.Bar" ChartSeries="@_peakDaySeries" 
+                              ChartLabels="@_peakDayLabels" Width="100%" Height="300px" />
+                }
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12">
+            <MudPaper Class="pa-4" Elevation="2">
+                <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-2">
+                    <MudText Typo="Typo.h6">📍 POI Hotspots (Độ phổ biến địa điểm)</MudText>
+                    <MudText Typo="Typo.caption" Style="color:#fb923c">Vùng càng sáng = POI càng được quét nhiều</MudText>
+                </MudStack>
+                <div id="poi-heatmap" style="height:450px; width:100%; border-radius:12px; border: 1px solid rgba(255,255,255,0.1);"></div>
+            </MudPaper>
+        </MudItem>
+
         @if (_isAdmin)
         {
             <MudItem xs="12">
@@ -143,10 +174,6 @@ else
                     {
                         <MudAlert Severity="Severity.Info">Chưa đủ dữ liệu để vẽ biểu đồ doanh thu</MudAlert>
                     }
-
-                    <MudStack Row="true" Justify="Justify.Center" Class="mt-4">
-                        <MudText Typo="Typo.caption" Color="Color.Secondary">Số tiền thanh toán quét QR theo từng ngày</MudText>
-                    </MudStack>
                 </MudPaper>
             </MudItem>
 
@@ -246,6 +273,12 @@ else
     private List<ChartSeries> _chartSeries = new();
     private string[] _chartLabels = Array.Empty<string>();
 
+    // New Peak Charts
+    private List<ChartSeries> _peakHourSeries = new();
+    private string[] _peakHourLabels = new string[24];
+    private List<ChartSeries> _peakDaySeries = new();
+    private string[] _peakDayLabels = new[] { "Hai", "Ba", "Tư", "Năm", "Sáu", "Bảy", "CN" };
+
     bool _mapsInitialized = false;
     List<LocationTrace> _traces = new();
     List<AnalyticsEvent> _events = new();
@@ -256,6 +289,7 @@ else
     bool _isAdmin = false;
 
     int _totalPlay, _totalQr, _avgDuration, _uniquePois;
+    int _uniqueDevicesCount; // NEW
     double _totalRevenue;
     double _totalMerchantRevenue;
     List<KeyValuePair<string, int>> _topPois = new();
@@ -390,6 +424,10 @@ else
         _totalPlay = _unified.Count(e => IsPlayAction(e.EventType));
         _totalQr = _unified.Count(h => IsScanAction(h.EventType));
         
+        // --- NEW: Unique Devices ---
+        _uniqueDevicesCount = _unified.Where(e => !string.IsNullOrEmpty(e.Device))
+                                     .Select(e => e.Device).Distinct().Count();
+
         _avgDuration = _unified.Any(e => e.Duration > 0)
             ? (int)_unified.Where(e => e.Duration > 0).Average(e => e.Duration) : 0;
             
@@ -419,6 +457,30 @@ else
             .GroupBy(e => NormalizeLang(e.Language))
             .OrderByDescending(g => g.Count())
             .Select(g => new KeyValuePair<string, int>(g.Key, g.Count())).ToList();
+
+        // --- NEW: Peak Hour Data ---
+        var hourGroups = _unified.GroupBy(e => e.Timestamp.ToLocalTime().Hour)
+                                .Select(g => new { Hour = g.Key, Count = g.Count() })
+                                .ToList();
+        double[] hourPoints = new double[24];
+        for (int i = 0; i < 24; i++) 
+        {
+            _peakHourLabels[i] = i.ToString("D2");
+            hourPoints[i] = hourGroups.FirstOrDefault(g => g.Hour == i)?.Count ?? 0;
+        }
+        _peakHourSeries = new List<ChartSeries> { new ChartSeries { Name = "Lượt khách", Data = hourPoints } };
+
+        // --- NEW: Peak Day Data ---
+        var dayGroups = _unified.GroupBy(e => (int)e.Timestamp.ToLocalTime().DayOfWeek)
+                               .Select(g => new { Day = g.Key, Count = g.Count() })
+                               .ToList();
+        double[] dayPoints = new double[7];
+        int[] dayMap = { 1, 2, 3, 4, 5, 6, 0 }; // Chuyển từ Sun=0 sang Mon=1...Sun=0
+        for (int i = 0; i < 7; i++) 
+        {
+            dayPoints[i] = dayGroups.FirstOrDefault(g => g.Day == dayMap[i])?.Count ?? 0;
+        }
+        _peakDaySeries = new List<ChartSeries> { new ChartSeries { Name = "Lưu lượng khách", Data = dayPoints } };
 
         PrepareChartData();
     }
@@ -495,10 +557,36 @@ else
         {
             await JS.InvokeVoidAsync("initHeatmap",
                 _traces.Select(t => new { lat = t.Lat, lng = t.Lng }).ToList());
+            
             await JS.InvokeVoidAsync("initTraceMap",
                 _traces.GroupBy(t => t.SessionId)
                     .Select(g => g.OrderBy(t => t.Timestamp)
                         .Select(t => new { lat = t.Lat, lng = t.Lng }).ToList()).ToList());
+
+            // --- NEW: POI Hotspot Heatmap ---
+            var poiHotspots = _unified.Where(e => !string.IsNullOrEmpty(e.PoiId))
+                                     .GroupBy(e => e.PoiId)
+                                     .Select(g => {
+                                         var poi = _pois.FirstOrDefault(p => p.Id == g.Key);
+                                         return new {
+                                             lat = poi?.Latitude ?? 0,
+                                             lng = poi?.Longitude ?? 0,
+                                             name = poi?.Name ?? g.Key,
+                                             count = g.Count()
+                                         };
+                                     })
+                                     .Where(x => x.lat != 0)
+                                     .ToList();
+            
+            if (poiHotspots.Any())
+            {
+                var maxCount = poiHotspots.Max(x => x.count);
+                var mapData = poiHotspots.Select(x => new {
+                    x.lat, x.lng, x.name, x.count,
+                    weight = (double)x.count / maxCount // Trọng số từ 0.0 - 1.0
+                }).ToList();
+                await JS.InvokeVoidAsync("initPoiHeatmap", mapData);
+            }
         }
         catch (Exception ex) { Console.WriteLine($"Map error: {ex.Message}"); }
     }
