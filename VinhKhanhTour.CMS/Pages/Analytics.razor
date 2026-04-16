@@ -378,9 +378,9 @@
             if (_isAdmin)
             {
                 _pois = allPois;
-                _events = (t1.Result ?? new()).Where(e => e.EventType != "open_app").ToList();
+                _events = t1.Result ?? new();
                 _traces = t2.Result ?? new();
-                _history = (t3.Result ?? new()).Where(h => h.Action != "open_app").ToList();
+                _history = t3.Result ?? new();
             }
             else
             {
@@ -389,9 +389,9 @@
                 _pois = allPois.Where(p => p.OwnerId == username).ToList();
                 var managedIds = _pois.Select(p => p.Id).ToList();
 
-                _events = (t1.Result ?? new()).Where(e => e.EventType != "open_app" && managedIds.Contains(e.PoiId)).ToList();
+                _events = (t1.Result ?? new()).Where(e => managedIds.Contains(e.PoiId)).ToList();
                 _traces = new(); // Owners don't see traces for now
-                _history = (t3.Result ?? new()).Where(h => h.Action != "open_app" && managedIds.Contains(h.PoiId)).ToList();
+                _history = (t3.Result ?? new()).Where(h => managedIds.Contains(h.PoiId)).ToList();
             }
             
             BuildUnified();
@@ -540,12 +540,8 @@
                     ScanCount = g.Count(x => IsScanAction(x.EventType))
                 };
             })
-            // Hiển thị nếu có quét QR HOẶC là thiết bị test/máy ảo (Emulator, Simulator, Web)
-            .Where(x => x.ScanCount > 0 || 
-                        x.DeviceId.Contains("Emulator", StringComparison.OrdinalIgnoreCase) || 
-                        x.DeviceId.Contains("Simulator", StringComparison.OrdinalIgnoreCase) ||
-                        x.DeviceId.Contains("Virtual", StringComparison.OrdinalIgnoreCase) ||
-                        x.DeviceId == "Web")
+            // Hiển thị TẤT CẢ thiết bị có tương tác (để dễ dàng test cả máy ảo và máy thật)
+            .Where(x => true) 
             .OrderByDescending(x => x.LastActive)
             .ToList();
 
