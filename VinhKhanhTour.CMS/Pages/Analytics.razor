@@ -527,7 +527,7 @@
         }
         _peakDaySeries = new List<ChartSeries> { new ChartSeries { Name = "Lưu lượng khách", Data = dayPoints } };
 
-        // --- NEW: Active Device Sessions (Touring real devices) ---
+        // --- NEW: Active Device Sessions (Including Virtual Machines for Testing) ---
         _activeDevices = _unified
             .Where(e => !string.IsNullOrEmpty(e.Device))
             .GroupBy(e => e.Device)
@@ -540,7 +540,12 @@
                     ScanCount = g.Count(x => IsScanAction(x.EventType))
                 };
             })
-            .Where(x => x.ScanCount > 0) // Chỉ tính thiết bị đã quét QR thật
+            // Hiển thị nếu có quét QR HOẶC là thiết bị test/máy ảo (Emulator, Simulator, Web)
+            .Where(x => x.ScanCount > 0 || 
+                        x.DeviceId.Contains("Emulator", StringComparison.OrdinalIgnoreCase) || 
+                        x.DeviceId.Contains("Simulator", StringComparison.OrdinalIgnoreCase) ||
+                        x.DeviceId.Contains("Virtual", StringComparison.OrdinalIgnoreCase) ||
+                        x.DeviceId == "Web")
             .OrderByDescending(x => x.LastActive)
             .ToList();
 
