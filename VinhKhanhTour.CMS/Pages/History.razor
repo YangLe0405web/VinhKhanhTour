@@ -65,36 +65,53 @@
 }
 else
 {
-    <MudTable Items="FilteredHistory" Hover="true" Striped="true"
+    <MudTable Items="FilteredHistory" Hover="true" Striped="true" FixedHeader="true" Height="650px"
               HorizontalScrollbar="true" Breakpoint="Breakpoint.None">
         <HeaderContent>
-            <MudTh Style="min-width:160px">Thời gian</MudTh>
-            <MudTh Style="min-width:140px">Hành động</MudTh>
-            <MudTh Style="min-width:180px">POI</MudTh>
-            <MudTh Style="min-width:100px">Ngôn ngữ</MudTh>
+            <MudTh Style="min-width:140px">Thời gian</MudTh>
+            <MudTh Style="min-width:160px">Hành động</MudTh>
+            <MudTh Style="min-width:180px">Chi tiết / Địa điểm</MudTh>
             <MudTh Style="min-width:140px">Thiết bị</MudTh>
+            <MudTh Style="min-width:100px">Ngôn ngữ</MudTh>
             <MudTh Style="min-width:100px">Số tiền</MudTh>
             <MudTh Style="min-width:100px">Thời lượng</MudTh>
-            <MudTh Style="min-width:120px">Vị trí</MudTh>
+            <MudTh Style="min-width:120px">Vị trí (GPS)</MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd>
-                @context.Timestamp.ToLocalTime().ToString("dd/MM HH:mm")
+                <MudText Typo="Typo.body2" Style="font-weight: 500;">
+                    @context.Timestamp.ToLocalTime().ToString("HH:mm:ss")
+                </MudText>
+                <MudText Typo="Typo.caption" Style="color:gray">
+                    @context.Timestamp.ToLocalTime().ToString("dd/MM/yyyy")
+                </MudText>
             </MudTd>
             <MudTd>
                 <MudChip T="string" Size="Size.Small"
-                         Color="GetActionColor(context.Action)">
-                    @GetActionLabel(context.Action)
+                         Color="context.Color" Variant="Variant.Filled">
+                    @context.ActionLabel
                 </MudChip>
             </MudTd>
-            <MudTd>@context.PoiName</MudTd>
+            <MudTd>
+                @if (!string.IsNullOrEmpty(context.PoiName))
+                {
+                    <MudText Typo="Typo.body2" Style="font-weight: bold;">@context.PoiName</MudText>
+                    <MudText Typo="Typo.caption">@context.PoiId</MudText>
+                }
+                else
+                {
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">Hành động hệ thống / Di chuyển</MudText>
+                }
+            </MudTd>
+            <MudTd>
+                <MudText Typo="Typo.body2" Style="font-family: monospace;">@context.Device</MudText>
+            </MudTd>
             <MudTd>@GetLangFlag(context.Language)</MudTd>
-            <MudTd>@context.Device</MudTd>
             <MudTd>
                 @if (context.Amount > 0)
                 {
                     <MudText Typo="Typo.body2" Color="Color.Success" Style="font-weight:bold">
-                        @context.Amount.ToString("N0") @context.Currency
+                        @context.Amount.ToString("N0") VND
                     </MudText>
                 }
                 else
@@ -117,9 +134,9 @@ else
             <MudTd>
                 @if (context.Lat != 0 && context.Lng != 0)
                 {
-                    <MudLink href="@($"https://www.google.com/maps?q={context.Lat},{context.Lng}")" Target="_blank">
+                    <MudLink href="@($"https://www.google.com/maps?q={context.Lat},{context.Lng}")" Target="_blank" Style="text-decoration:none">
                         <MudIcon Icon="@Icons.Material.Filled.LocationOn" Size="Size.Small" Color="Color.Error" />
-                        @($"{context.Lat:F3},{context.Lng:F3}")
+                        <MudText Typo="Typo.caption">@($"{context.Lat:F4},{context.Lng:F4}")</MudText>
                     </MudLink>
                 }
                 else
@@ -139,15 +156,31 @@ else
 }
 
 @code {
-    List<AppHistory> _history = new();
+    class UnifiedHistory
+    {
+        public DateTime Timestamp { get; set; }
+        public string Action { get; set; } = "";
+        public string ActionLabel { get; set; } = "";
+        public Color Color { get; set; } = Color.Default;
+        public string PoiId { get; set; } = "";
+        public string PoiName { get; set; } = "";
+        public string Device { get; set; } = "";
+        public string Language { get; set; } = "";
+        public double Amount { get; set; }
+        public int Duration { get; set; }
+        public double Lat { get; set; }
+        public double Lng { get; set; }
+    }
+
+    List<UnifiedHistory> _history = new();
     bool _loading = true;
     string _filterAction = "";
     string _filterLang = "";
     string _filterDevice = "";
     DateTime? _filterDate;
     bool _isAdmin = false;
- 
-    IEnumerable<AppHistory> FilteredHistory => _history
+  
+    IEnumerable<UnifiedHistory> FilteredHistory => _history
         .Where(h => string.IsNullOrEmpty(_filterAction) || h.Action == _filterAction)
         .Where(h => string.IsNullOrEmpty(_filterLang) || h.Language == _filterLang)
         .Where(h => string.IsNullOrEmpty(_filterDevice) || (h.Device != null && h.Device.Contains(_filterDevice, StringComparison.OrdinalIgnoreCase)))
@@ -179,16 +212,71 @@ else
         _isAdmin = user.IsInRole("admin");
         
         var username = user.Identity?.Name ?? "";
-        var allPois = await Api.GetPoisAsync(force) ?? new();
-        var myPoiIds = _isAdmin ? new List<string>() : allPois.Where(p => p.OwnerId == username).Select(p => p.Id).ToList();
+        
+        // Load API concurrently
+        var logTask = Api.GetHistoryAsync(force);
+        var analyticTask = Api.GetAnalyticsAsync(force);
+        var traceTask = Api.GetTracesAsync(force);
+        var poiTask = Api.GetPoisAsync(force);
 
-        _history = (await Api.GetHistoryAsync(force) ?? new())
-            .Where(h => h.Action != "open_app")
+        await Task.WhenAll(logTask, analyticTask, traceTask, poiTask);
+
+        var logs = await logTask ?? new();
+        var events = await analyticTask ?? new();
+        var traces = await traceTask ?? new();
+        var pois = await poiTask ?? new();
+
+        var myPoiIds = _isAdmin ? new List<string>() : pois.Where(p => p.OwnerId == username).Select(p => p.Id).ToList();
+
+        // 1. Convert Logs
+        var unifiedLogs = logs.Select(h => new UnifiedHistory {
+            Timestamp = h.Timestamp,
+            Action = h.Action,
+            ActionLabel = GetActionLabel(h.Action),
+            Color = GetActionColor(h.Action),
+            PoiId = h.PoiId,
+            PoiName = h.PoiName,
+            Device = h.Device,
+            Language = h.Language,
+            Amount = h.Amount,
+            Duration = h.Duration,
+            Lat = h.Lat,
+            Lng = h.Lng
+        });
+
+        // 2. Convert Analytics (Audio)
+        var unifiedEvents = events.Select(e => new UnifiedHistory {
+            Timestamp = e.Timestamp,
+            Action = "play_poi",
+            ActionLabel = "🔊 Nghe Audio",
+            Color = Color.Success,
+            PoiId = e.PoiId,
+            PoiName = pois.FirstOrDefault(p => p.Id == e.PoiId)?.Name ?? e.PoiId,
+            Device = e.DeviceId,
+            Language = e.Language,
+            Duration = e.Duration,
+            Lat = e.Lat,
+            Lng = e.Lng
+        });
+
+        // 3. Convert Traces (GPS)
+        var unifiedTraces = traces.Select(t => new UnifiedHistory {
+            Timestamp = t.Timestamp,
+            Action = "move_gps",
+            ActionLabel = "📍 Di chuyển",
+            Color = Color.Default,
+            Device = t.DeviceId,
+            Lat = t.Lat,
+            Lng = t.Lng
+        });
+
+        _history = unifiedLogs.Concat(unifiedEvents).Concat(unifiedTraces)
+            .OrderByDescending(x => x.Timestamp)
             .ToList();
 
         if (!_isAdmin)
         {
-            _history = _history.Where(h => h.Action != "pay_audio" && myPoiIds.Contains(h.PoiId)).ToList();
+            _history = _history.Where(h => h.Action != "pay_audio" && (string.IsNullOrEmpty(h.PoiId) || myPoiIds.Contains(h.PoiId))).ToList();
         }
 
         _loading = false;
@@ -229,6 +317,6 @@ else
         "zh" => "🇨🇳 ZH",
         "ja" => "🇯🇵 JA",
         "ko" => "🇰🇷 KO",
-        _ => lang
+        _ => string.IsNullOrEmpty(lang) ? "--" : lang
     };
 }

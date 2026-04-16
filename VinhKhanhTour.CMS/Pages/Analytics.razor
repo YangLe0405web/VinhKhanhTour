@@ -246,7 +246,7 @@
             <ToolBarContent>
                 <MudText Typo="Typo.h6">Danh sách thiết bị khách hàng</MudText>
                 <MudSpacer />
-                <MudText Typo="Typo.caption" Style="color:#4caf50" Class="mr-4">● @_activeDevices.Count(x => x.IsOnline) khách đang online (5p gần nhất)</MudText>
+                <MudText Typo="Typo.caption" Style="color:#4caf50" Class="mr-4">● @_activeDevices.Count(x => x.IsOnline) khách đang online (30s gần nhất)</MudText>
                 <MudTextField @bind-Value="_searchString" Placeholder="Tìm theo ID thiết bị..." Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
             </ToolBarContent>
             <HeaderContent>
@@ -324,7 +324,7 @@
         public DateTime LastActive { get; set; }
         public string LastPoiName { get; set; } = "";
         public int ScanCount { get; set; }
-        public bool IsOnline => (DateTime.UtcNow - LastActive).TotalMinutes < 5;
+        public bool IsOnline => (DateTime.UtcNow - LastActive).TotalSeconds < 30;
     }
     private List<DeviceSession> _activeDevices = new();
     private string _searchString = "";
