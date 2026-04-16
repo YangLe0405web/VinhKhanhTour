@@ -412,15 +412,14 @@
     {
         var list = new List<UnifiedEvent>();
 
-        // 1. Nạp History trước
+        // 1. Nạp History
         foreach (var h in _history)
         {
             if (!_isAdmin && h.Action == "pay_audio") continue;
-
             list.Add(new UnifiedEvent
             {
                 Timestamp = h.Timestamp,
-                EventType = h.Action == "play_poi" ? "poi_play" : h.Action,
+                EventType = h.Action,
                 PoiId = h.PoiId,
                 PoiName = string.IsNullOrEmpty(h.PoiName) ? (_pois.FirstOrDefault(p => p.Id == h.PoiId)?.Name ?? "") : h.PoiName,
                 Language = h.Language,
@@ -432,38 +431,34 @@
             });
         }
 
-        // 2. Nạp Analytics Event gộp vào dòng tương ứng (Cho data cũ)
-        foreach (var e in _events.OrderBy(x => x.Timestamp))
+        // 2. Nạp Analytics Event (Play Audio)
+        foreach (var e in _events)
         {
-            var match = list.Where(u => 
-                u.PoiId == e.PoiId && 
-                (u.EventType == "poi_play" || u.EventType == "play_poi") && 
-                u.Duration == 0 && 
-                u.Timestamp >= e.Timestamp.AddMinutes(-5) && 
-                u.Timestamp <= e.Timestamp.AddMinutes(5))
-                .OrderBy(u => Math.Abs((u.Timestamp - e.Timestamp).TotalSeconds))
-                .FirstOrDefault();
+            list.Add(new UnifiedEvent
+            {
+                Timestamp = e.Timestamp,
+                EventType = "play_poi",
+                PoiId = e.PoiId,
+                PoiName = _pois.FirstOrDefault(p => p.Id == e.PoiId)?.Name ?? e.PoiId,
+                Language = e.Language,
+                Device = e.DeviceId,
+                Duration = e.Duration,
+                Lat = e.Lat,
+                Lng = e.Lng
+            });
+        }
 
-            if (match != null)
+        // 3. Nạp Location Traces (GPS)
+        foreach (var t in _traces)
+        {
+            list.Add(new UnifiedEvent
             {
-                match.Duration = e.Duration;
-                match.Lat = e.Lat;
-                match.Lng = e.Lng;
-            }
-            else
-            {
-                list.Add(new UnifiedEvent
-                {
-                    Timestamp = e.Timestamp,
-                    EventType = e.EventType,
-                    PoiId = e.PoiId,
-                    PoiName = _pois.FirstOrDefault(p => p.Id == e.PoiId)?.Name ?? e.PoiId,
-                    Language = e.Language,
-                    Duration = e.Duration,
-                    Lat = e.Lat,
-                    Lng = e.Lng,
-                });
-            }
+                Timestamp = t.Timestamp,
+                EventType = "move_gps",
+                Device = t.DeviceId,
+                Lat = t.Lat,
+                Lng = t.Lng
+            });
         }
 
         _unified = list.OrderByDescending(e => e.Timestamp).ToList();
