@@ -629,7 +629,7 @@
                 _traces.Select(t => new { lat = t.Lat, lng = t.Lng }).ToList());
             
             await JS.InvokeVoidAsync("initTraceMap",
-                _traces.GroupBy(t => t.SessionId)
+                _traces.GroupBy(t => t.DeviceId)
                     .Select(g => g.OrderBy(t => t.Timestamp)
                         .Select(t => new { lat = t.Lat, lng = t.Lng }).ToList()).ToList());
 
