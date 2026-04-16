@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "ls3k/z1E/lU=",
+  "dgSpecHash": "dmE+qVT3bbA=",
   "success": true,
-  "projectFilePath": "D:\\Projects\\VinhKhanhTour\\VinhKhanhTour.CMS\\VinhKhanhTour.CMS.csproj",
+  "projectFilePath": "d:\\Projects\\VinhKhanhTour\\VinhKhanhTour.CMS\\VinhKhanhTour.CMS.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Admin\\.nuget\\packages\\blazored.localstorage\\4.5.0\\blazored.localstorage.4.5.0.nupkg.sha512",
     "C:\\Users\\Admin\\.nuget\\packages\\google.api.commonprotos\\2.17.0\\google.api.commonprotos.2.17.0.nupkg.sha512",

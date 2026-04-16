@@ -7,21 +7,11 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @using System.Security.Claims
 
-<MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
-    <MudText Typo="Typo.h4">📈 Dashboard (Precision Stats)</MudText>
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" 
-               StartIcon="@Icons.Material.Filled.Refresh" 
-               Disabled="_loading"
-               OnClick="@(() => LoadAllData(true))">Làm mới</MudButton>
-</MudStack>
-
-@if (_loading)
-{
-    <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
-}
-else
-{
-    <MudGrid>
+<MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6" Class="mt-4" Color="Color.Primary" Variant="Variant.Filled">
+    <MudTabPanel Text="📊 Thống kê tổng hợp" Icon="@Icons.Material.Filled.BarChart">
+        <MudGrid>
+            <AuthorizeView Roles="admin">
+                <Authorized>
         <AuthorizeView Roles="admin">
             <Authorized>
                 <MudItem xs="12" sm="6" md="3">
@@ -228,31 +218,79 @@ else
             </MudItem>
         </AuthorizeView>
 
-        <MudItem xs="12">
-            <MudPaper Class="pa-4" Elevation="2">
-                <MudText Typo="Typo.h6" Class="mb-3">🕒 Sự kiện gần nhất (Kiểm tra Log)</MudText>
-                <MudTable Items="_unified.Take(10)" Hover="true" Dense="true">
-                    <HeaderContent>
-                        <MudTh>Thời gian</MudTh>
-                        <MudTh>Hành động</MudTh>
-                        <MudTh>POI</MudTh>
-                        <MudTh>Thiết bị</MudTh>
-                    </HeaderContent>
-                    <RowTemplate>
-                        <MudTd>@context.Timestamp.ToLocalTime().ToString("HH:mm:ss dd/MM")</MudTd>
-                        <MudTd>
-                            <MudChip T="string" Size="Size.Small" Color="@GetActionColor(context.EventType)">@context.EventType</MudChip>
-                        </MudTd>
-                        <MudTd>@context.PoiName</MudTd>
-                        <MudTd>@context.Device</MudTd>
-                    </RowTemplate>
-                </MudTable>
-            </MudPaper>
-        </MudItem>
-    </MudGrid>
-}
+            <MudItem xs="12">
+                <MudPaper Class="pa-4" Elevation="2">
+                    <MudText Typo="Typo.h6" Class="mb-3">🕒 Sự kiện gần nhất (Kiểm tra Log)</MudText>
+                    <MudTable Items="_unified.Take(10)" Hover="true" Dense="true">
+                        <HeaderContent>
+                            <MudTh>Thời gian</MudTh>
+                            <MudTh>Hành động</MudTh>
+                            <MudTh>POI</MudTh>
+                            <MudTh>Thiết bị</MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd>@context.Timestamp.ToLocalTime().ToString("HH:mm:ss dd/MM")</MudTd>
+                            <MudTd>
+                                <MudChip T="string" Size="Size.Small" Color="@GetActionColor(context.EventType)">@context.EventType</MudChip>
+                            </MudTd>
+                            <MudTd>@context.PoiName</MudTd>
+                            <MudTd>@context.Device</MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                </MudPaper>
+            </MudItem>
+        </MudGrid>
+    </MudTabPanel>
+
+    <MudTabPanel Text="📱 Thiết bị đang chạy" Icon="@Icons.Material.Filled.PhonelinkRing">
+        <MudTable Items="_activeDevices" Hover="true" FixedHeader="true" Height="600px" Filter="new Func<DeviceSession,bool>(FilterFunc)">
+            <ToolBarContent>
+                <MudText Typo="Typo.h6">Danh sách thiết bị khách hàng</MudText>
+                <MudSpacer />
+                <MudTextField @bind-Value="_searchString" Placeholder="Tìm theo ID thiết bị..." Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+            </ToolBarContent>
+            <HeaderContent>
+                <MudTh>Trạng thái</MudTh>
+                <MudTh>ID Thiết bị</MudTh>
+                <MudTh>Hoạt động cuối</MudTh>
+                <MudTh>Lượt quét</MudTh>
+                <MudTh>POI hiện tại</MudTh>
+                <MudTh>Thao tác</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd>
+                    <div class="d-flex align-center">
+                        <div class="status-dot @(context.IsOnline ? "online" : "offline")"></div>
+                        <MudText Typo="Typo.body2" Class="ml-2">@(context.IsOnline ? "Online" : "Offline")</MudText>
+                    </div>
+                </MudTd>
+                <MudTd Style="font-family: monospace; font-weight: bold;">@context.DeviceId</MudTd>
+                <MudTd>@context.LastActive.ToLocalTime().ToString("HH:mm:ss dd/MM")</MudTd>
+                <MudTd><MudChip T="string" Size="Size.Small" Color="Color.Info">@context.ScanCount lượt</MudChip></MudTd>
+                <MudTd>@context.LastPoiName</MudTd>
+                <MudTd>
+                    <MudButton Variant="Variant.Outlined" Size="Size.Small" Color="Color.Primary" 
+                               OnClick="@(() => Nav.NavigateTo($"/history?device={context.DeviceId}"))">
+                        Xem lịch sử
+                    </MudButton>
+                </MudTd>
+            </RowTemplate>
+            <NoRecordsContent>
+                <MudText>Không tìm thấy thiết bị nào khớp với yêu cầu</MudText>
+            </NoRecordsContent>
+        </MudTable>
+
+        <style>
+            .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+            .status-dot.online { background-color: #4caf50; box-shadow: 0 0 10px #4caf50; }
+            .status-dot.offline { background-color: #9e9e9e; }
+        </style>
+    </MudTabPanel>
+</MudTabs>
 
 @code {
+    [Inject] NavigationManager Nav { get; set; } = default!;
+
     class UnifiedEvent
     {
         public DateTime Timestamp { get; set; }
@@ -278,6 +316,18 @@ else
     private string[] _peakHourLabels = new string[24];
     private List<ChartSeries> _peakDaySeries = new();
     private string[] _peakDayLabels = new[] { "Hai", "Ba", "Tư", "Năm", "Sáu", "Bảy", "CN" };
+
+    // Device Management
+    class DeviceSession
+    {
+        public string DeviceId { get; set; } = "";
+        public DateTime LastActive { get; set; }
+        public string LastPoiName { get; set; } = "";
+        public int ScanCount { get; set; }
+        public bool IsOnline => (DateTime.UtcNow - LastActive).TotalMinutes < 10;
+    }
+    private List<DeviceSession> _activeDevices = new();
+    private string _searchString = "";
 
     bool _mapsInitialized = false;
     List<LocationTrace> _traces = new();
@@ -482,7 +532,32 @@ else
         }
         _peakDaySeries = new List<ChartSeries> { new ChartSeries { Name = "Lưu lượng khách", Data = dayPoints } };
 
+        // --- NEW: Active Device Sessions (Touring real devices) ---
+        _activeDevices = _unified
+            .Where(e => !string.IsNullOrEmpty(e.Device))
+            .GroupBy(e => e.Device)
+            .Select(g => {
+                var latest = g.OrderByDescending(x => x.Timestamp).First();
+                return new DeviceSession {
+                    DeviceId = g.Key,
+                    LastActive = latest.Timestamp,
+                    LastPoiName = latest.PoiName,
+                    ScanCount = g.Count(x => IsScanAction(x.EventType))
+                };
+            })
+            .Where(x => x.ScanCount > 0) // Chỉ tính thiết bị đã quét QR thật
+            .OrderByDescending(x => x.LastActive)
+            .ToList();
+
         PrepareChartData();
+    }
+
+    private bool FilterFunc(DeviceSession device)
+    {
+        if (string.IsNullOrWhiteSpace(_searchString)) return true;
+        if (device.DeviceId.Contains(_searchString, StringComparison.OrdinalIgnoreCase)) return true;
+        if (device.LastPoiName.Contains(_searchString, StringComparison.OrdinalIgnoreCase)) return true;
+        return false;
     }
 
     bool IsPlayAction(string action) => 

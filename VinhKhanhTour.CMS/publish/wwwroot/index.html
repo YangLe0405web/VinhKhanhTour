@@ -112,6 +112,28 @@
             }
             window._tracemap = map;
         };
+
+        window.initPoiHeatmap = (pois) => {
+            if (window._poiHeatmap) window._poiHeatmap.remove();
+            var map = L.map('poi-heatmap').setView([10.7613, 106.7047], 17);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+            
+            if (pois && pois.length > 0) {
+                // Vẽ Heatmap Layer
+                var heatData = pois.map(p => [p.lat, p.lng, p.weight]);
+                L.heatLayer(heatData, { radius: 40, blur: 25, max: 1.0 }).addTo(map);
+
+                // Vẽ Marker để tương tác
+                pois.forEach(p => {
+                    L.circleMarker([p.lat, p.lng], { 
+                        radius: 5 + (p.weight * 10), 
+                        color: '#fb923c', 
+                        fillOpacity: 0.8 
+                    }).addTo(map).bindPopup(`<b>${p.name}</b><br>Lượt tương tác: ${p.count}`);
+                });
+            }
+            window._poiHeatmap = map;
+        };
     </script>
 
     <!-- TOUR EDITOR -->

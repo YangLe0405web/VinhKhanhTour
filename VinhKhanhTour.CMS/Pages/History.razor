@@ -4,6 +4,7 @@
 @inject AuthenticationStateProvider AuthStateProvider
 @using Microsoft.AspNetCore.Components.Authorization
 @using System.Security.Claims
+@inject NavigationManager Nav
 
 <MudText Typo="Typo.h4" Class="mb-4">📋 Lịch sử ứng dụng</MudText>
 
@@ -38,10 +39,15 @@
             </MudSelect>
         </MudItem>
         <MudItem xs="12" sm="3">
-            <MudText Typo="Typo.caption" Class="ml-1 mb-1" Style="color:rgba(0,0,0,0.5)">Thời gian</MudText>
+            <MudText Typo="Typo.caption" Class="ml-1 mb-1" Style="color:rgba(255,255,255,0.5)">Thời gian</MudText>
             <MudDatePicker @bind-Date="_filterDate" 
                             Editable="true" Clearable="true" Variant="Variant.Outlined" Margin="Margin.Dense"
                             DateFormat="dd/MM/yyyy" Placeholder="Chọn ngày..." />
+        </MudItem>
+        <MudItem xs="12" sm="3">
+            <MudText Typo="Typo.caption" Class="ml-1 mb-1" Style="color:rgba(255,255,255,0.5)">ID Thiết bị</MudText>
+            <MudTextField @bind-Value="_filterDevice" Placeholder="Nhập ID thiết bị..." 
+                          Variant="Variant.Outlined" Margin="Margin.Dense" Clearable="true" />
         </MudItem>
         <MudItem xs="12" sm="3" Class="d-flex flex-column justify-end">
             <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true"
@@ -137,15 +143,28 @@ else
     bool _loading = true;
     string _filterAction = "";
     string _filterLang = "";
+    string _filterDevice = "";
     DateTime? _filterDate;
     bool _isAdmin = false;
  
     IEnumerable<AppHistory> FilteredHistory => _history
         .Where(h => string.IsNullOrEmpty(_filterAction) || h.Action == _filterAction)
         .Where(h => string.IsNullOrEmpty(_filterLang) || h.Language == _filterLang)
+        .Where(h => string.IsNullOrEmpty(_filterDevice) || (h.Device != null && h.Device.Contains(_filterDevice, StringComparison.OrdinalIgnoreCase)))
         .Where(h => !_filterDate.HasValue || h.Timestamp.ToLocalTime().Date == _filterDate.Value.Date);
 
-    protected override async Task OnInitializedAsync() => await LoadData();
+    protected override async Task OnInitializedAsync() 
+    {
+        // Parse device query string if exists
+        var uri = Nav.ToAbsoluteUri(Nav.Uri);
+        var queryParams = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+        if (queryParams.TryGetValue("device", out var deviceId))
+        {
+            _filterDevice = deviceId;
+        }
+
+        await LoadData();
+    }
 
     async Task LoadData(bool force = false)
     {
