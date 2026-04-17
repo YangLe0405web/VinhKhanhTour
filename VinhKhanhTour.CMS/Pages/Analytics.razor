@@ -107,27 +107,35 @@
         </MudItem>
 
         <MudItem xs="12" md="7">
-            <MudPaper Class="pa-6" Elevation="2">
-                <MudText Typo="Typo.h6" Class="mb-4">🕒 Lưu lượng khách theo khung giờ (Peak Hours)</MudText>
+            <MudPaper Class="pa-6 rounded-lg shadow-lg" Elevation="4" Style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); color: white;">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-3">
+                    <MudIcon Icon="@Icons.Material.Filled.AccessTime" Color="Color.Warning" />
+                    <MudText Typo="Typo.h6" Style="font-weight: 700;">Lưu lượng khách theo giờ (7 ngày qua)</MudText>
+                </MudStack>
                 @if (_peakHourSeries.Count > 0)
                 {
                     <MudChart ChartType="ChartType.Line" ChartSeries="@_peakHourSeries" 
-                              ChartLabels="@_peakHourLabels" Width="100%" Height="300px" 
-                              ChartOptions="@(new ChartOptions { ShowLegend = false, LineStrokeWidth = 4 })" />
+                              ChartLabels="@_peakHourLabels" Width="100%" Height="320px" 
+                              ChartOptions="@_peakChartOptions" />
                 }
-                <MudText Typo="Typo.caption" Color="Color.Secondary" Class="d-block mt-2 text-center">
-                    Trục ngang: 24 khung giờ trong ngày (Hệ thống tự động tính toán từ Log)
-                </MudText>
+                <div class="d-flex justify-center mt-2">
+                    <MudText Typo="Typo.caption" Style="color: rgba(255,255,255,0.6);">
+                        Dữ liệu được thống kê từ các tương tác thực tế của khách trong 7 ngày gần nhất
+                    </MudText>
+                </div>
             </MudPaper>
         </MudItem>
 
         <MudItem xs="12" md="5">
-            <MudPaper Class="pa-6" Elevation="2">
-                <MudText Typo="Typo.h6" Class="mb-4">📅 Mật độ khách theo Thứ (Weekly Peak)</MudText>
+            <MudPaper Class="pa-6 rounded-lg shadow-lg" Elevation="4" Style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); color: white;">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-3">
+                    <MudIcon Icon="@Icons.Material.Filled.CalendarToday" Color="Color.Info" />
+                    <MudText Typo="Typo.h6" Style="font-weight: 700;">Mật độ khách theo Thứ</MudText>
+                </MudStack>
                 @if (_peakDaySeries.Count > 0)
                 {
                     <MudChart ChartType="ChartType.Bar" ChartSeries="@_peakDaySeries" 
-                              ChartLabels="@_peakDayLabels" Width="100%" Height="300px" />
+                              ChartLabels="@_peakDayLabels" Width="100%" Height="320px" ChartOptions="@_barChartOptions" />
                 }
             </MudPaper>
         </MudItem>
@@ -198,13 +206,6 @@
             </MudItem>
         }
 
-        <AuthorizeView Roles="admin">
-            <MudItem xs="12">
-                <MudPaper Class="pa-4" Elevation="2">
-                    <MudText Typo="Typo.h6" Class="mb-3">🔥 Heatmap vị trí người dùng</MudText>
-                    <div id="heatmap" style="height:400px; width:100%; border-radius:8px;"></div>
-                </MudPaper>
-            </MudItem>
 
             <MudItem xs="12">
                 <MudPaper Class="pa-4" Elevation="2">
@@ -316,6 +317,13 @@
     private string[] _peakHourLabels = new string[24];
     private List<ChartSeries> _peakDaySeries = new();
     private string[] _peakDayLabels = new[] { "Hai", "Ba", "Tư", "Năm", "Sáu", "Bảy", "CN" };
+    private ChartOptions _peakChartOptions = new ChartOptions { 
+        ShowLegend = false, 
+        LineStrokeWidth = 4,
+        YAxisTicks = 20,
+        InterpolationOption = InterpolationOption.NaturalSpline
+    };
+    private ChartOptions _barChartOptions = new ChartOptions { ShowLegend = false };
 
     // Device Management
     class DeviceSession
@@ -503,8 +511,10 @@
             .OrderByDescending(g => g.Count())
             .Select(g => new KeyValuePair<string, int>(g.Key, g.Count())).ToList();
 
-        // --- NEW: Peak Hour Data ---
-        var hourGroups = _unified.GroupBy(e => e.Timestamp.ToLocalTime().Hour)
+        // --- NEW: Peak Hour Data (Last 7 Days) ---
+        var sevenDaysAgo = DateTime.UtcNow.AddDays(-7);
+        var recentData = _unified.Where(e => e.Timestamp >= sevenDaysAgo).ToList();
+        var hourGroups = recentData.GroupBy(e => e.Timestamp.ToLocalTime().Hour)
                                 .Select(g => new { Hour = g.Key, Count = g.Count() })
                                 .ToList();
         double[] hourPoints = new double[24];
@@ -515,8 +525,8 @@
         }
         _peakHourSeries = new List<ChartSeries> { new ChartSeries { Name = "Lượt khách", Data = hourPoints } };
 
-        // --- NEW: Peak Day Data ---
-        var dayGroups = _unified.GroupBy(e => (int)e.Timestamp.ToLocalTime().DayOfWeek)
+        // --- NEW: Peak Day Data (Last 7 Days) ---
+        var dayGroups = recentData.GroupBy(e => (int)e.Timestamp.ToLocalTime().DayOfWeek)
                                .Select(g => new { Day = g.Key, Count = g.Count() })
                                .ToList();
         double[] dayPoints = new double[7];
@@ -525,7 +535,7 @@
         {
             dayPoints[i] = dayGroups.FirstOrDefault(g => g.Day == dayMap[i])?.Count ?? 0;
         }
-        _peakDaySeries = new List<ChartSeries> { new ChartSeries { Name = "Lưu lượng khách", Data = dayPoints } };
+        _peakDaySeries = new List<ChartSeries> { new ChartSeries { Name = "Lượt khách", Data = dayPoints } };
 
         // --- NEW: Active Device Sessions (Including Virtual Machines for Testing) ---
         _activeDevices = _unified
@@ -626,8 +636,6 @@
         await Task.Delay(500);
         try
         {
-            await JS.InvokeVoidAsync("initHeatmap",
-                _traces.Select(t => new { lat = t.Lat, lng = t.Lng }).ToList());
             
             await JS.InvokeVoidAsync("initTraceMap",
                 _traces.GroupBy(t => t.DeviceId)
