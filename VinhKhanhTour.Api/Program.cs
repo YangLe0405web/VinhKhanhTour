@@ -8,10 +8,7 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Tắt reloadOnChange để tránh lỗi inotify trên Render Linux
-builder.Configuration.Sources.Clear();
-builder.Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: false);
-builder.Configuration.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: false);
+// Mặc định .NET 8 sẽ tự load appsettings.json và EnvironmentVariables
 builder.Configuration.AddEnvironmentVariables();
 
 // ── 1. Firebase Configuration ──
