@@ -11,6 +11,6 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 COPY --from=build /out .
 
-
+ENV ASPNETCORE_URLS=http://0.0.0.0:10000
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
-ENTRYPOINT ["sh", "-c", "dotnet VinhKhanhTour.Api.dll --urls http://0.0.0.0:${PORT:-8080}"]
+ENTRYPOINT ["dotnet", "VinhKhanhTour.Api.dll"]

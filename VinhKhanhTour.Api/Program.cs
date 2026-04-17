@@ -115,12 +115,20 @@ app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 
-// ── 4. Initialize Admin Account ──
-using (var scope = app.Services.CreateScope())
+// ── 4. Initialize Admin Account (Non-blocking for Render Port Scan) ──
+_ = Task.Run(async () => 
 {
-    var firestore = scope.ServiceProvider.GetRequiredService<FirestoreService>();
-    await firestore.InitializeAdminAsync();
-}
+    try 
+    {
+        using var scope = app.Services.CreateScope();
+        var firestore = scope.ServiceProvider.GetRequiredService<FirestoreService>();
+        await firestore.InitializeAdminAsync();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("🔥 ADMIN INIT ERROR: " + ex.Message);
+    }
+});
 
 app.MapGet("/", () => "Vinh Khanh Tour API is running!");
 app.MapControllers();
