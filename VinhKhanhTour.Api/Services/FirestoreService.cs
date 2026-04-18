@@ -199,6 +199,7 @@ public class FirestoreService
     // ── Location Trace ────────────────────────────────
     public async Task LogTraceAsync(LocationTrace trace)
     {
+        // Đã xóa Math.Round để đạt độ chính xác cao nhất
         await _db.Collection("traces").AddAsync(trace);
     }
 
@@ -206,10 +207,10 @@ public class FirestoreService
     {
         return await _cache.GetOrCreateAsync(CACHE_TRACES, async entry =>
         {
-            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10);
+            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5); // Giảm cache xuống 5p
             var snap = await _db.Collection("traces")
-                .OrderByDescending("Timestamp") // Thêm Sort để lấy cái mới nhất trước
-                .Limit(500) // Giảm còn 500
+                .OrderByDescending("Timestamp")
+                .Limit(2000) // Tăng lên 2000 để tránh bị lọc hết dữ liệu mới
                 .GetSnapshotAsync();
             return snap.Documents
                 .Select(d => d.ConvertTo<LocationTrace>())
