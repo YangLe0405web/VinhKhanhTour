@@ -9,137 +9,157 @@
 
 <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6" Class="mt-4" Color="Color.Primary" Variant="Variant.Filled">
     <MudTabPanel Text="📊 Thống kê tổng hợp" Icon="@Icons.Material.Filled.BarChart">
-        <MudGrid>
+        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
+            <MudText Typo="Typo.h5" Style="font-weight: 700; color: #fff;">📊 Thống kê khách</MudText>
+            <MudMenu StartIcon="@Icons.Material.Filled.FilterList" EndIcon="@Icons.Material.Filled.KeyboardArrowDown" 
+                     Label="@(_selectedDays == 1 ? "Hôm nay" : _selectedDays == 7 ? "7 ngày qua" : "30 ngày qua")" 
+                     Color="Color.Info" Variant="Variant.Outlined" Dense="true" Style="border-radius: 8px; background: rgba(255,255,255,0.05);">
+                <MudMenuItem OnClick="@(() => OnPeriodChanged(1))">Hôm nay</MudMenuItem>
+                <MudMenuItem OnClick="@(() => OnPeriodChanged(7))">7 ngày qua</MudMenuItem>
+                <MudMenuItem OnClick="@(() => OnPeriodChanged(30))">30 ngày qua</MudMenuItem>
+            </MudMenu>
+        </MudStack>
+
+        <MudGrid Class="mb-6">
+            @* Thẻ Tổng lượng khách *@
+            <MudItem xs="12" md="6">
+                <MudPaper Class="pa-6 rounded-xl shadow-lg" Elevation="4" Style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); color: white; height: 160px; display: flex; flex-direction: column; justify-content: center;">
+                    <MudText Typo="Typo.subtitle1" Style="opacity: 0.7; font-weight: 500;">Tổng lượng khách (@(_selectedDays) ngày qua)</MudText>
+                    <MudStack Row="true" AlignItems="AlignItems.Baseline" Spacing="2" Class="mt-2">
+                        <MudText Typo="Typo.h2" Style="font-weight: 800; color: #3b82f6;">@_totalRecentVisitors.ToString("N0")</MudText>
+                        <MudText Typo="Typo.h6" Style="color: #fbbf24; font-weight: 700;">↑ @(_growthPercent)%</MudText>
+                    </MudStack>
+                </MudPaper>
+            </MudItem>
+
+            @* Thẻ Giờ cao điểm *@
+            <MudItem xs="12" sm="6" md="3">
+                <MudPaper Class="pa-6 rounded-xl shadow-lg" Elevation="4" Style="background: #1a1a1a; color: white; height: 160px; display: flex; flex-direction: column; justify-content: center; align-items: center; border: 1px solid rgba(255,255,255,0.05);">
+                    <MudText Typo="Typo.subtitle1" Style="opacity: 0.7; width: 100%;">Giờ cao điểm</MudText>
+                    <MudStack AlignItems="AlignItems.Center" Spacing="1" Class="mt-1">
+                        <MudIcon Icon="@Icons.Material.Filled.AccessTime" Style="font-size: 2.5rem; color: #fbbf24;" />
+                        <MudText Typo="Typo.h4" Style="font-weight: 800;">@_peakHourStr</MudText>
+                    </MudStack>
+                </MudPaper>
+            </MudItem>
+
+            @* Thẻ Ngày đông nhất *@
+            <MudItem xs="12" sm="6" md="3">
+                <MudPaper Class="pa-6 rounded-xl shadow-lg" Elevation="4" Style="background: #1a1a1a; color: white; height: 160px; display: flex; flex-direction: column; justify-content: center; align-items: center; border: 1px solid rgba(255,255,255,0.05);">
+                    <MudText Typo="Typo.subtitle1" Style="opacity: 0.7; width: 100%;">Ngày đông nhất</MudText>
+                    <MudStack AlignItems="AlignItems.Center" Spacing="1" Class="mt-1">
+                        <MudIcon Icon="@Icons.Material.Filled.CalendarMonth" Style="font-size: 2.5rem; color: #a5b4fc;" />
+                        <MudText Typo="Typo.h4" Style="font-weight: 800;">@_peakDayStr</MudText>
+                    </MudStack>
+                </MudPaper>
+            </MudItem>
+
+            @* Biểu đồ theo giờ *@
+            <MudItem xs="12" md="7">
+                <MudPaper Class="pa-6 rounded-xl shadow-lg" Elevation="4" Style="background: linear-gradient(135deg, #0d0d0d 0%, #1a1a1a 100%); color: white;">
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-4">
+                        <MudIcon Icon="@Icons.Material.Filled.Timeline" Color="Color.Info" />
+                        <MudText Typo="Typo.h6" Style="font-weight: 700;">Lưu lượng khách theo giờ</MudText>
+                    </MudStack>
+                    @if (_peakHourSeries.Count > 0)
+                    {
+                        <MudChart ChartType="ChartType.Line" ChartSeries="@_peakHourSeries" 
+                                  ChartLabels="@_peakHourLabels" Width="100%" Height="320px" 
+                                  ChartOptions="@_peakChartOptions" />
+                    }
+                    <div class="d-flex justify-center mt-2">
+                        <MudText Typo="Typo.caption" Style="color: rgba(255,255,255,0.4);">
+                            Dữ liệu tương tác thực tế trong @_selectedDays ngày qua
+                        </MudText>
+                    </div>
+                </MudPaper>
+            </MudItem>
+
+            @* Biểu đồ theo Thứ *@
+            <MudItem xs="12" md="5">
+                <MudPaper Class="pa-6 rounded-xl shadow-lg" Elevation="4" Style="background: linear-gradient(135deg, #0d0d0d 0%, #1a1a1a 100%); color: white;">
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-4">
+                        <MudIcon Icon="@Icons.Material.Filled.BarChart" Color="Color.Warning" />
+                        <MudText Typo="Typo.h6" Style="font-weight: 700;">Mật độ khách theo Thứ</MudText>
+                    </MudStack>
+                    @if (_peakDaySeries.Count > 0)
+                    {
+                        <MudChart ChartType="ChartType.Bar" ChartSeries="@_peakDaySeries" 
+                                  ChartLabels="@_peakDayLabels" Width="100%" Height="320px" ChartOptions="@_barChartOptions" />
+                    }
+                </MudPaper>
+            </MudItem>
+
+            @* Các chỉ số cũ *@
             <AuthorizeView Roles="admin" Context="authContext">
                 <Authorized>
-                <MudItem xs="12" sm="6" md="3">
-                    <MudPaper Class="pa-4" Elevation="2" Style="height: 100%; border-left: 4px solid #4caf50;">
-                        <MudText Typo="Typo.h3" Color="Color.Success">@((_totalRevenue + _totalMerchantRevenue).ToString("N0"))</MudText>
-                        <MudText Typo="Typo.subtitle1">Tổng doanh thu (VND)</MudText>
-                        <MudText Typo="Typo.caption">Gồm cả phí đăng ký đối tác</MudText>
-                    </MudPaper>
-                </MudItem>
-                <MudItem xs="12" sm="6" md="3">
-                    <MudPaper Class="pa-4" Elevation="2" Style="height: 100%; border-left: 4px solid #2196f3;">
-                        <MudText Typo="Typo.h3" Color="Color.Info">@_activeDevices.Count(x => x.IsOnline)</MudText>
-                        <MudText Typo="Typo.subtitle1">Đang Online</MudText>
-                        <MudText Typo="Typo.caption">Số khách đang thực hiện Tour</MudText>
-                    </MudPaper>
-                </MudItem>
-                <MudItem xs="12" sm="6" md="3">
-                    <MudPaper Class="pa-4" Elevation="2" Style="height: 100%; border-left: 4px solid #ff9800;">
-                        <MudText Typo="Typo.h3" Color="Color.Warning">@_uniqueDevicesCount</MudText>
-                        <MudText Typo="Typo.subtitle1">Thiết bị duy nhất</MudText>
-                        <MudText Typo="Typo.caption">Tổng lượng khách (All-time)</MudText>
-                    </MudPaper>
-                </MudItem>
-                <MudItem xs="12" sm="6" md="3">
-                    <MudPaper Class="pa-4" Elevation="2" Style="height: 100%;">
-                        <MudText Typo="Typo.h3" Color="Color.Primary">@_totalQr</MudText>
-                        <MudText Typo="Typo.subtitle1">Tổng lượt quét QR</MudText>
-                    </MudPaper>
-                </MudItem>
-            </Authorized>
-            <NotAuthorized>
-                <MudItem xs="12" sm="6" md="3">
-                    <MudPaper Class="pa-4" Elevation="2" Style="height: 100%; border-left: 4px solid #ff9800;">
-                        <MudText Typo="Typo.h3" Color="Color.Warning">@_uniqueDevicesCount</MudText>
-                        <MudText Typo="Typo.subtitle1">Khách ghé quán</MudText>
-                        <MudText Typo="Typo.caption">Tổng thiết bị duy nhất</MudText>
-                    </MudPaper>
-                </MudItem>
-                <MudItem xs="12" sm="6" md="3">
-                    <MudPaper Class="pa-4" Elevation="2" Style="height: 100%;">
-                        <MudText Typo="Typo.h3" Color="Color.Primary">@_totalQr</MudText>
-                        <MudText Typo="Typo.subtitle1">Lượt quét QR</MudText>
-                    </MudPaper>
-                </MudItem>
-                <MudItem xs="12" sm="6" md="3">
-                    <MudPaper Class="pa-4" Elevation="2" Style="height: 100%;">
-                        <MudText Typo="Typo.h3" Color="Color.Info">@_totalPlay</MudText>
-                        <MudText Typo="Typo.subtitle1">Lượt nghe Audio</MudText>
-                    </MudPaper>
-                </MudItem>
-                <MudItem xs="12" sm="6" md="3">
-                    <MudPaper Class="pa-4" Elevation="2" Style="height: 100%;">
-                        <MudText Typo="Typo.h3" Color="Color.Default">@_avgDuration s</MudText>
-                        <MudText Typo="Typo.subtitle1">Thời gian nghe TB</MudText>
-                    </MudPaper>
-                </MudItem>
-            </NotAuthorized>
-        </AuthorizeView>
+                    <MudItem xs="12" sm="6" md="3">
+                        <MudPaper Class="pa-4 rounded-lg" Elevation="2" Style="border-left: 4px solid #4caf50; background: #1a1a1a; color: white;">
+                            <MudText Typo="Typo.h4" Color="Color.Success">@((_totalRevenue + _totalMerchantRevenue).ToString("N0"))</MudText>
+                            <MudText Typo="Typo.subtitle2" Style="opacity: 0.8;">Tổng doanh thu (VND)</MudText>
+                        </MudPaper>
+                    </MudItem>
+                    <MudItem xs="12" sm="6" md="3">
+                        <MudPaper Class="pa-4 rounded-lg" Elevation="2" Style="border-left: 4px solid #2196f3; background: #1a1a1a; color: white;">
+                            <MudText Typo="Typo.h4" Color="Color.Info">@_activeDevices.Count(x => x.IsOnline)</MudText>
+                            <MudText Typo="Typo.subtitle2" Style="opacity: 0.8;">Đang Online</MudText>
+                        </MudPaper>
+                    </MudItem>
+                    <MudItem xs="12" sm="6" md="3">
+                        <MudPaper Class="pa-4 rounded-lg" Elevation="2" Style="border-left: 4px solid #ff9800; background: #1a1a1a; color: white;">
+                            <MudText Typo="Typo.h4" Color="Color.Warning">@_uniqueDevicesCount</MudText>
+                            <MudText Typo="Typo.subtitle2" Style="opacity: 0.8;">Thiết bị duy nhất</MudText>
+                        </MudPaper>
+                    </MudItem>
+                    <MudItem xs="12" sm="6" md="3">
+                        <MudPaper Class="pa-4 rounded-lg" Elevation="2" Style="background: #1a1a1a; color: white;">
+                            <MudText Typo="Typo.h4" Color="Color.Primary">@_totalQr</MudText>
+                            <MudText Typo="Typo.subtitle2" Style="opacity: 0.8;">Tổng lượt quét QR</MudText>
+                        </MudPaper>
+                    </MudItem>
+                </Authorized>
+            </AuthorizeView>
 
-        <MudItem xs="12" md="6">
-            <MudPaper Class="pa-4" Elevation="2" Style="height: 100%;">
-                <MudText Typo="Typo.h6" Class="mb-3">🏆 Top POI được nghe nhiều nhất</MudText>
-                <MudTable Items="_topPois" Hover="true" Dense="true" Elevation="0">
-                    <HeaderContent>
-                        <MudTh>#</MudTh><MudTh>POI</MudTh><MudTh>Lượt</MudTh>
-                    </HeaderContent>
-                    <RowTemplate>
-                        <MudTd>@(_topPois.IndexOf(context) + 1)</MudTd>
-                        <MudTd>@context.Key</MudTd>
-                        <MudTd><MudChip T="string" Size="Size.Small" Color="Color.Primary">@context.Value</MudChip></MudTd>
-                    </RowTemplate>
-                </MudTable>
-            </MudPaper>
-        </MudItem>
+            <MudItem xs="12" md="6">
+                <MudPaper Class="pa-4 rounded-lg" Elevation="2" Style="background: #161b22; color: #c9d1d9;">
+                    <MudText Typo="Typo.h6" Class="mb-3">🏆 Top POI được nghe nhiều nhất</MudText>
+                    <MudTable Items="_topPois" Hover="true" Dense="true" Elevation="0" Class="transparent-table">
+                        <HeaderContent>
+                            <MudTh>POI</MudTh><MudTh>Lượt</MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd>@context.Key</MudTd>
+                            <MudTd><MudChip T="string" Size="Size.Small" Color="Color.Primary">@context.Value</MudChip></MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                </MudPaper>
+            </MudItem>
 
-        <MudItem xs="12" md="6">
-            <MudPaper Class="pa-4" Elevation="2" Style="height: 100%;">
-                <MudText Typo="Typo.h6" Class="mb-3">🌐 Phân bố ngôn ngữ</MudText>
-                <MudTable Items="_langStats" Hover="true" Dense="true" Elevation="0">
-                    <HeaderContent>
-                        <MudTh>Ngôn ngữ</MudTh><MudTh>Lượt</MudTh><MudTh>Tỉ lệ</MudTh>
-                    </HeaderContent>
-                    <RowTemplate>
-                        <MudTd>@GetLangFlag(context.Key)</MudTd>
-                        <MudTd>@context.Value</MudTd>
-                        <MudTd>
-                            <MudStack Row="true" AlignItems="AlignItems.Center">
-                                <MudProgressLinear Value="@GetPercent(context.Value)" Color="Color.Info" Class="flex-grow-1" />
-                                <MudText Typo="Typo.caption">@GetPercent(context.Value).ToString("F1")%</MudText>
-                            </MudStack>
-                        </MudTd>
-                    </RowTemplate>
-                </MudTable>
-            </MudPaper>
-        </MudItem>
+            <MudItem xs="12" md="6">
+                <MudPaper Class="pa-4 rounded-lg" Elevation="2" Style="background: #161b22; color: #c9d1d9;">
+                    <MudText Typo="Typo.h6" Class="mb-3">🌐 Phân bổ ngôn ngữ</MudText>
+                    <MudTable Items="_langStats" Hover="true" Dense="true" Elevation="0" Class="transparent-table">
+                        <HeaderContent>
+                            <MudTh>Ngôn ngữ</MudTh><MudTh>Tỉ lệ</MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd>@GetLangFlag(context.Key)</MudTd>
+                            <MudTd>
+                                <MudStack Row="true" AlignItems="AlignItems.Center">
+                                    <MudProgressLinear Value="@GetPercent(context.Value)" Color="Color.Info" Class="flex-grow-1" />
+                                    <MudText Typo="Typo.caption">@GetPercent(context.Value).ToString("F1")%</MudText>
+                                </MudStack>
+                            </MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                </MudPaper>
+            </MudItem>
 
-        <MudItem xs="12" md="7">
-            <MudPaper Class="pa-6 rounded-lg shadow-lg" Elevation="4" Style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); color: white;">
-                <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-3">
-                    <MudIcon Icon="@Icons.Material.Filled.AccessTime" Color="Color.Warning" />
-                    <MudText Typo="Typo.h6" Style="font-weight: 700;">Lưu lượng khách theo giờ (7 ngày qua)</MudText>
-                </MudStack>
-                @if (_peakHourSeries.Count > 0)
-                {
-                    <MudChart ChartType="ChartType.Line" ChartSeries="@_peakHourSeries" 
-                              ChartLabels="@_peakHourLabels" Width="100%" Height="320px" 
-                              ChartOptions="@_peakChartOptions" />
-                }
-                <div class="d-flex justify-center mt-2">
-                    <MudText Typo="Typo.caption" Style="color: rgba(255,255,255,0.6);">
-                        Dữ liệu được thống kê từ các tương tác thực tế của khách trong 7 ngày gần nhất
-                    </MudText>
-                </div>
-            </MudPaper>
-        </MudItem>
-
-        <MudItem xs="12" md="5">
-            <MudPaper Class="pa-6 rounded-lg shadow-lg" Elevation="4" Style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); color: white;">
-                <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-3">
-                    <MudIcon Icon="@Icons.Material.Filled.CalendarToday" Color="Color.Info" />
-                    <MudText Typo="Typo.h6" Style="font-weight: 700;">Mật độ khách theo Thứ</MudText>
-                </MudStack>
-                @if (_peakDaySeries.Count > 0)
-                {
-                    <MudChart ChartType="ChartType.Bar" ChartSeries="@_peakDaySeries" 
-                              ChartLabels="@_peakDayLabels" Width="100%" Height="320px" ChartOptions="@_barChartOptions" />
-                }
-            </MudPaper>
-        </MudItem>
-
+            <style>
+                .transparent-table { background: transparent !important; }
+                .transparent-table text { color: #c9d1d9 !important; }
+                .transparent-table th { color: #8b949e !important; }
+            </style>
         <MudItem xs="12">
             <MudPaper Class="pa-4" Elevation="2">
                 <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-2">
@@ -210,8 +230,8 @@
             <MudItem xs="12">
                 <MudPaper Class="pa-4" Elevation="2">
                     <MudText Typo="Typo.h6" Class="mb-3">🗺️ Tuyến di chuyển người dùng</MudText>
-                    <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mb-2">
-                        Tọa độ được làm tròn 3 chữ số (~111m) để bảo vệ quyền riêng tư
+                    <MudText Typo="Typo.caption" Color="Color.Success" Class="mb-2" Style="font-weight: 600;">
+                        📍 Dữ liệu lộ trình chính xác thời gian thực (High Precision GPS)
                     </MudText>
                     <div id="tracemap" style="height:400px; width:100%; border-radius:8px;"></div>
                 </MudPaper>
@@ -305,6 +325,32 @@
         public double Lng { get; set; }
         public double Amount { get; set; }
     }
+
+    // Dashboard Filters & New Stats
+    private int _selectedDays = 7;
+    private int _totalRecentVisitors = 0;
+    private string _peakHourStr = "--:--";
+    private string _peakDayStr = "---";
+    private double _growthPercent = 0;
+
+    private async Task OnPeriodChanged(int days)
+    {
+        _selectedDays = days;
+        ComputeStats();
+        StateHasChanged();
+    }
+
+    private string GetDayName(int dayOfWeek) => dayOfWeek switch
+    {
+        1 => "Thứ 2",
+        2 => "Thứ 3",
+        3 => "Thứ 4",
+        4 => "Thứ 5",
+        5 => "Thứ 6",
+        6 => "Thứ 7",
+        0 => "Chủ Nhật",
+        _ => "---"
+    };
 
     // Chart
     private int _chartIndex = -1;
@@ -511,9 +557,19 @@
             .OrderByDescending(g => g.Count())
             .Select(g => new KeyValuePair<string, int>(g.Key, g.Count())).ToList();
 
-        // --- NEW: Peak Hour Data (Last 7 Days) ---
-        var sevenDaysAgo = DateTime.UtcNow.AddDays(-7);
-        var recentData = _unified.Where(e => e.Timestamp >= sevenDaysAgo).ToList();
+        // --- NEW: Dynamic Filtered Data & Growth ---
+        var filterDate = DateTime.UtcNow.AddDays(-_selectedDays);
+        var recentData = _unified.Where(e => e.Timestamp >= filterDate).ToList();
+        var previousDate = filterDate.AddDays(-_selectedDays);
+        var previousCount = _unified.Count(e => e.Timestamp >= previousDate && e.Timestamp < filterDate);
+        
+        _totalRecentVisitors = recentData.Count;
+        if (previousCount > 0)
+            _growthPercent = Math.Round((double)(_totalRecentVisitors - previousCount) / previousCount * 100, 1);
+        else
+            _growthPercent = _totalRecentVisitors > 0 ? 100 : 0;
+
+        // --- NEW: Peak Hour Data ---
         var hourGroups = recentData.GroupBy(e => e.Timestamp.ToLocalTime().Hour)
                                 .Select(g => new { Hour = g.Key, Count = g.Count() })
                                 .ToList();
@@ -524,18 +580,30 @@
             hourPoints[i] = hourGroups.FirstOrDefault(g => g.Hour == i)?.Count ?? 0;
         }
         _peakHourSeries = new List<ChartSeries> { new ChartSeries { Name = "Lượt khách", Data = hourPoints } };
+        
+        if (hourGroups.Any())
+        {
+            var maxHour = hourGroups.OrderByDescending(g => g.Count).First();
+            _peakHourStr = $"{maxHour.Hour:D2}:00";
+        }
 
-        // --- NEW: Peak Day Data (Last 7 Days) ---
+        // --- NEW: Peak Day Data ---
         var dayGroups = recentData.GroupBy(e => (int)e.Timestamp.ToLocalTime().DayOfWeek)
                                .Select(g => new { Day = g.Key, Count = g.Count() })
                                .ToList();
         double[] dayPoints = new double[7];
-        int[] dayMap = { 1, 2, 3, 4, 5, 6, 0 }; // Chuyển từ Sun=0 sang Mon=1...Sun=0
+        int[] dayMap = { 1, 2, 3, 4, 5, 6, 0 }; // Mon=1...Sun=0
         for (int i = 0; i < 7; i++) 
         {
             dayPoints[i] = dayGroups.FirstOrDefault(g => g.Day == dayMap[i])?.Count ?? 0;
         }
         _peakDaySeries = new List<ChartSeries> { new ChartSeries { Name = "Lượt khách", Data = dayPoints } };
+
+        if (dayGroups.Any())
+        {
+            var maxDay = dayGroups.OrderByDescending(g => g.Count).First();
+            _peakDayStr = GetDayName(maxDay.Day);
+        }
 
         // --- NEW: Active Device Sessions (Including Virtual Machines for Testing) ---
         _activeDevices = _unified
@@ -637,10 +705,44 @@
         try
         {
             
-            await JS.InvokeVoidAsync("initTraceMap",
-                _traces.GroupBy(t => t.DeviceId)
-                    .Select(g => g.OrderBy(t => t.Timestamp)
-                        .Select(t => new { lat = t.Lat, lng = t.Lng }).ToList()).ToList());
+            // Chuẩn bị dữ liệu Trace có lọc theo thời gian và tách lộ trình
+            var filterDate = DateTime.UtcNow.AddDays(-_selectedDays);
+            var filteredTraces = _traces.Where(t => t.Timestamp >= filterDate).ToList();
+            
+            var routesForJs = new List<object>();
+            var groupedTraces = filteredTraces.GroupBy(t => t.DeviceId);
+
+            foreach (var group in groupedTraces)
+            {
+                var sortedPoints = group.OrderBy(t => t.Timestamp).ToList();
+                if (!sortedPoints.Any()) continue;
+
+                var currentRoutePoints = new List<object>();
+                
+                for (int i = 0; i < sortedPoints.Count; i++)
+                {
+                    var p = sortedPoints[i];
+                    
+                    // Nếu khoảng cách giữa 2 điểm > 1 giờ, tách thành route mới
+                    if (i > 0 && (p.Timestamp - sortedPoints[i-1].Timestamp).TotalHours > 1)
+                    {
+                        if (currentRoutePoints.Any())
+                        {
+                            routesForJs.Add(new { id = group.Key, points = currentRoutePoints });
+                        }
+                        currentRoutePoints = new List<object>();
+                    }
+                    
+                    currentRoutePoints.Add(new { lat = p.Lat, lng = p.Lng, time = p.Timestamp });
+                }
+
+                if (currentRoutePoints.Any())
+                {
+                    routesForJs.Add(new { id = group.Key, points = currentRoutePoints });
+                }
+            }
+
+            await JS.InvokeVoidAsync("initTraceMap", routesForJs);
 
             // --- NEW: POI Hotspot Heatmap ---
             var poiHotspots = _unified.Where(e => !string.IsNullOrEmpty(e.PoiId))

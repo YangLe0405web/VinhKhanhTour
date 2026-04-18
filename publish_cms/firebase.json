@@ -1,0 +1,20 @@
+{
+    "hosting": {
+        "public": "publish/wwwroot",
+        "ignore": [
+            "firebase.json",
+            "**/.*",
+            "**/node_modules/**"
+        ],
+        "rewrites": [
+            {
+                "source": "/poi/**",
+                "destination": "/poi.html"
+            },
+            {
+                "source": "**",
+                "destination": "/index.html"
+            }
+        ]
+    }
+}

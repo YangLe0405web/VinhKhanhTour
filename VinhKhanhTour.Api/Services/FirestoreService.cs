@@ -89,8 +89,8 @@ public class FirestoreService
                 { "PoiId", ev.PoiId ?? "" },
                 { "Language", ev.Language ?? "vi" },
                 { "Duration", ev.Duration },
-                { "Lat", Math.Round(ev.Lat, 3) },
-                { "Lng", Math.Round(ev.Lng, 3) },
+                { "Lat", ev.Lat },
+                { "Lng", ev.Lng },
                 { "Timestamp", Timestamp.GetCurrentTimestamp() }
             };
 
@@ -199,8 +199,6 @@ public class FirestoreService
     // ── Location Trace ────────────────────────────────
     public async Task LogTraceAsync(LocationTrace trace)
     {
-        trace.Lat = Math.Round(trace.Lat, 3);
-        trace.Lng = Math.Round(trace.Lng, 3);
         await _db.Collection("traces").AddAsync(trace);
     }
 

@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Thuyết Minh — Vĩnh Khánh</title>
+    
+    <!-- Premium Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-dark: #120d0c;
+            --card-light: #fdfaf5;
+            --accent-red: #b71c1c;
+            --accent-gold: #d4af37;
+            --accent-gold-soft: rgba(212, 175, 55, 0.15);
+            --text-main: #2c2121;
+            --text-muted: #6e5e5e;
+            --shadow-soft: 0 20px 50px rgba(0,0,0,0.5);
+            --radius-main: 28px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--card-light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 24px 16px;
+            overflow-x: hidden;
+            background-image: radial-gradient(circle at top, #2a1b18 0%, #120d0c 100%);
+        }
+
+        /* ── Header Badge ── */
+        .mag-header {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 16px;
+            border: 1px solid var(--accent-gold);
+            border-radius: 99px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--accent-gold);
+            margin-bottom: 24px;
+            font-weight: 600;
+        }
+        .mag-header::before {
+            content: '';
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background-color: var(--accent-gold);
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        /* ── Main Magazine Card ── */
+        .mag-card {
+            background-color: var(--card-light);
+            width: 100%;
+            max-width: 420px;
+            border-radius: var(--radius-main);
+            overflow: hidden;
+            box-shadow: var(--shadow-soft);
+            color: var(--text-main);
+            position: relative;
+            animation: slideIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* ── Banner Section ── */
+        .mag-banner {
+            height: 180px;
+            background: linear-gradient(135deg, #422722 0%, var(--accent-red) 100%);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: height 0.5s ease;
+        }
+        
+        #poi-img-container {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0; left: 0;
+            opacity: 0.8;
+            mix-blend-mode: multiply;
+            display: none;
+        }
+
+        .mag-banner-overlay {
+            width: 80px;
+            height: 80px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            z-index: 2;
+        }
+
+        .mag-cat-pill {
+            position: absolute;
+            bottom: -14px;
+            left: 28px;
+            background-color: var(--bg-dark);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 99px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            z-index: 10;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        /* ── Body Content ── */
+        .mag-body {
+            padding: 36px 28px 28px;
+            text-align: center;
+        }
+
+        .mag-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 28px;
+            font-weight: 900;
+            color: #1a1110;
+            margin-bottom: 8px;
+            line-height: 1.25;
+        }
+
+        .mag-divider {
+            width: 40px;
+            height: 2px;
+            background: var(--accent-gold);
+            margin: 12px auto 24px;
+            position: relative;
+        }
+        .mag-divider::after {
+            content: '⬥';
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--card-light);
+            padding: 0 6px;
+            font-size: 10px;
+            color: var(--accent-gold);
+        }
+
+        /* ── Language Selector ── */
+        .mag-label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .lang-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 28px;
+        }
+
+        .lang-btn {
+            background: white;
+            border: 1px solid #e5e0d8;
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .lang-btn span { font-size: 10px; color: #999; }
+        
+        .lang-btn.active {
+            background-color: #2c2121;
+            color: white;
+            border-color: #2c2121;
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        /* ── Player Section AI (TTS) ── */
+        .player-card-ai {
+            background-color: var(--bg-dark);
+            border-radius: 20px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .play-btn-circle {
+            width: 52px;
+            height: 52px;
+            background-color: var(--accent-red);
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+            flex-shrink: 0;
+            box-shadow: 0 5px 15px rgba(183, 28, 28, 0.4);
+        }
+        .play-btn-circle:active { transform: scale(0.95); }
+        .play-btn-circle svg { width: 24px; height: 24px; fill: white; margin-left: 2px; }
+
+        .ai-info {
+            text-align: left;
+            flex-grow: 1;
+        }
+        .ai-info-title {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255,255,255,0.4);
+            margin-bottom: 4px;
+        }
+        .ai-info-status {
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .waveform {
+            display: flex;
+            align-items: flex-end;
+            gap: 2px;
+            height: 12px;
+            margin-top: 6px;
+            opacity: 0.3;
+        }
+        .waveform.active { opacity: 1; }
+        .wf-bar {
+            width: 2px;
+            background-color: var(--accent-gold);
+            border-radius: 1px;
+            transition: height 0.2s ease;
+        }
+        .waveform.active .wf-bar {
+            animation: wave 1.2s infinite ease-in-out;
+        }
+        @keyframes wave {
+            0%, 100% { height: 4px; }
+            50% { height: 12px; }
+        }
+
+        /* ── Player Section PRO (MP3) ── */
+        .section-pro {
+            margin-bottom: 24px;
+            display: none;
+        }
+        .player-card-pro {
+            background-color: white;
+            border: 1.5px solid #ece4d8;
+            border-radius: 20px;
+            padding: 20px;
+            text-align: left;
+        }
+        
+        .pro-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .pro-icon {
+            width: 40px;
+            height: 40px;
+            background-color: var(--accent-gold-soft);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-gold);
+        }
+        .pro-meta h4 { font-size: 14px; font-weight: 700; color: var(--text-main); }
+        .pro-meta p { font-size: 12px; color: var(--text-muted); }
+
+        .custom-prog-bar {
+            width: 100%;
+            height: 4px;
+            background-color: #eee9e1;
+            border-radius: 2px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            position: relative;
+        }
+        .prog-filling {
+            height: 100%;
+            width: 0%;
+            background-color: var(--accent-gold);
+            border-radius: 2px;
+        }
+
+        .pro-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .pro-time { font-size: 11px; color: var(--text-muted); font-weight: 500; min-width: 35px; }
+        .pro-btns { display: flex; align-items: center; gap: 20px; }
+        .ctrl-btn { border: none; background: none; cursor: pointer; color: var(--text-main); font-size: 18px; }
+        .pro-play-btn { 
+            width: 44px; height: 44px; 
+            background: #2c2121; color: white; 
+            border-radius: 50%; display: flex; 
+            align-items: center; justify-content: center;
+        }
+
+        /* ── Content Text Box ── */
+        .content-card {
+            background-color: white;
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid #f0ebe1;
+        }
+        .content-box {
+            font-size: 15px;
+            line-height: 1.8;
+            color: #4a3e3e;
+            text-align: justify;
+            max-height: 200px;
+            overflow-y: auto;
+            padding-right: 8px;
+        }
+        .content-box::-webkit-scrollbar { width: 4px; }
+        .content-box::-webkit-scrollbar-thumb { background: #e0d8cc; border-radius: 4px; }
+
+        /* ── Footer ── */
+        .mag-footer {
+            margin-top: auto;
+            padding: 30px 0;
+            text-align: center;
+            font-size: 10px;
+            color: rgba(255,255,255,0.3);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* ── Payment Section ── */
+        .pay-card {
+            background: linear-gradient(135deg, #fdfaf5 0%, #f7f1e6 100%);
+            border: 2px solid var(--accent-gold);
+            padding: 24px;
+            border-radius: 20px;
+            margin-bottom: 24px;
+            text-align: center;
+            display: none;
+        }
+        .pay-btn {
+            background: #2c2121;
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 14px;
+            margin-top: 16px;
+            width: 100%;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .pay-btn:disabled { opacity: 0.5; }
+
+        .debug-section {
+            display: none !important;
+        }
+
+        /* ── Loading State ── */
+        #loader {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-dark);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loader">
+        <div class="mag-header">⌛ Đang tải câu chuyện...</div>
+    </div>
+
+    <div class="mag-header" id="header-title">Phố Vĩnh Khánh</div>
+
+    <div class="mag-card">
+        <!-- Banner Visual -->
+        <div class="mag-banner">
+            <img id="poi-img-container" src="" alt="" />
+            <div class="mag-banner-overlay" id="mag-cat-icon">🍜</div>
+            <div class="mag-cat-pill" id="mag-cat-badge">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="var(--accent-gold)"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                <span id="poi-cat-label">ẨM THỰC</span>
+            </div>
+        </div>
+
+        <div class="mag-body">
+            <!-- Header Info -->
+            <h1 class="mag-title" id="poi-name">---</h1>
+            <div class="mag-divider"></div>
+
+            <!-- Lang Switcher -->
+            <span class="mag-label" id="label-select-lang">Chọn ngôn ngữ</span>
+            <div class="lang-grid" id="lang-selector"></div>
+
+            <!-- AI Player Card -->
+            <div class="player-card-ai" id="tts-section">
+                <button class="play-btn-circle" id="play-btn" onclick="toggleSpeak()">
+                    <svg id="svg-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    <svg id="svg-stop" viewBox="0 0 24 24" style="display:none"><path d="M6 6h12v12H6z"/></svg>
+                </button>
+                <div class="ai-info">
+                    <div class="ai-info-title" id="label-ai-voice">Giọng đọc AI</div>
+                    <div class="ai-info-status" id="status">Bấm để nghe thuyết minh</div>
+                    <div class="waveform" id="waveform">
+                        <div class="wf-bar" style="animation-delay: 0.1s"></div>
+                        <div class="wf-bar" style="animation-delay: 0.3s"></div>
+                        <div class="wf-bar" style="animation-delay: 0.5s"></div>
+                        <div class="wf-bar" style="animation-delay: 0.2s"></div>
+                        <div class="wf-bar" style="animation-delay: 0.4s"></div>
+                        <div class="wf-bar" style="animation-delay: 0.1s"></div>
+                        <div class="wf-bar" style="animation-delay: 0.6s"></div>
+                        <div class="wf-bar" style="animation-delay: 0.2s"></div>
+                        <div class="wf-bar" style="animation-delay: 0.4s"></div>
+                        <div class="wf-bar" style="animation-delay: 0.1s"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Block -->
+            <div id="pay-block" class="pay-card">
+                <div style="font-size: 32px; margin-bottom: 12px;">🔒</div>
+                <h3 id="pay-title" style="font-size: 18px; margin-bottom: 8px;">Nội dung cao cấp</h3>
+                <p id="pay-desc" style="font-size: 13px; color: #666; margin-bottom: 20px;">
+                    Để nghe thuyết minh chuyên nghiệp và xem chi tiết, vui lòng thanh toán một phần phí nhỏ (tương đương 1 ly trà đá).
+                </p>
+                <button class="pay-btn" id="pay-btn-trigger" onclick="handlePayment()">
+                    <span id="pay-btn-text">THANH TOÁN</span> <span id="pay-amount">25.000</span> VNĐ
+                </button>
+            </div>
+
+            <!-- PRO MP3 Player Card -->
+            <div id="audio-section" class="section-pro">
+                <span class="mag-label">Audio Chuyên Nghiệp</span>
+                <div class="player-card-pro">
+                    <div class="pro-header">
+                        <div class="pro-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+                        </div>
+                        <div class="pro-meta">
+                            <h4 id="pro-filename">vi_thuyet_minh.mp3</h4>
+                            <p id="pro-lang-name">Tiếng Việt • Studio Quality</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Progress Bar -->
+                    <div class="custom-prog-bar" id="pro-bar-container" onclick="seekAudio(event)">
+                        <div class="prog-filling" id="pro-bar-filling"></div>
+                    </div>
+
+                    <div class="pro-controls">
+                        <span class="pro-time" id="pro-time-cur">0:00</span>
+                        <div class="pro-btns">
+                            <button class="ctrl-btn" onclick="skipBack()">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+                            </button>
+                            <button class="ctrl-btn pro-play-btn" onclick="toggleMP3()">
+                                <svg id="pro-svg-play" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                                <svg id="pro-svg-pause" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                            </button>
+                            <button class="ctrl-btn" onclick="skipForward()">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6h2v12h-2z"/></svg>
+                            </button>
+                        </div>
+                        <span class="pro-time" id="pro-time-total">0:00</span>
+                    </div>
+                    <audio id="audio-player" preload="metadata"></audio>
+                </div>
+            </div>
+
+            <!-- Content Text Section -->
+            <div class="mag-label" id="label-story-content">Nội dung câu chuyện</div>
+            <div class="content-card">
+                <div class="content-box" id="script-box">...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mag-footer">
+        © VinhKhanhTour • Audio Guide
+    </div>
+
+    <div class="debug-section" id="debug-box" onclick="this.style.display='none'">
+        <div>Debug Information:</div>
+        <div id="debug-content"></div>
+    </div>
+
+    <script>
+        const API = 'https://vinhkhanh-api.onrender.com';
+        const pathParts = window.location.pathname.split('/').filter(p => p);
+        const poiId = pathParts[pathParts.length - 1];
+
+        const LANGS = {
+            vi: { 
+                label: 'VN', text: 'Việt', tts: 'vi-VN',
+                header: "Phố Vĩnh Khánh", select: "Chọn ngôn ngữ", ai: "Giọng đọc AI", 
+                status: "Bấm để nghe thuyết minh", status_playing: "🔊 Đang đọc thuyết minh...", 
+                story: "Nội dung câu chuyện", pro: "Audio Chuyên Nghiệp"
+            },
+            en: { 
+                label: 'GB', text: 'EN', tts: 'en-US',
+                header: "Vinh Khanh Street", select: "Select Language", ai: "AI Voice", 
+                status: "Click to listen to narration", status_playing: "🔊 Reading narration...", 
+                story: "The Story Content", pro: "Professional Audio"
+            },
+            zh: { 
+                label: 'CN', text: '中文', tts: 'zh-CN',
+                header: "永庆街", select: "选择语言", ai: "人工智能语音", 
+                status: "点击收听解说", status_playing: "🔊 正在朗读解说...", 
+                story: "故事内容", pro: "专业音频"
+            },
+            ja: { 
+                label: 'JP', text: '日本語', tts: 'ja-JP',
+                header: "ヴィン・カイン通り", select: "言語を選択", ai: "AI音声", 
+                status: "クリックして解説を聞く", status_playing: "🔊 解説を読み上げています...", 
+                story: "物語の内容", pro: "プロフェッショナルオーディオ"
+            },
+            ko: { 
+                label: 'KR', text: '한국어', tts: 'ko-KR',
+                header: "빈칸 거리", select: "언어 선택", ai: "AI 음성", 
+                status: "나레이션을 들으려면 클릭하세요", status_playing: "🔊 나레이션을 읽는 중...", 
+                story: "이야기 내용", pro: "전문 오디오"
+            },
+        };
+
+        const CAT_DATA = {
+            food: { icon: '🍜', label: 'Ẩm thực' },
+            drink: { icon: '🥤', label: 'Đồ uống' },
+            landmark: { icon: '🏛️', label: 'Di tích' }
+        };
+
+        const PAYMENT_LANGS = {
+            vi: {
+                title: "Nội dung cao cấp",
+                desc: "Để nghe thuyết minh chuyên nghiệp và xem chi tiết, vui lòng thanh toán một phần phí nhỏ (tương đương 1 ly trà đá).",
+                btn: "THANH TOÁN",
+                processing: "ĐANG XỬ LÝ...",
+                success: "Thanh toán thành công! Bạn đã mở khóa nội dung thuyết minh.",
+                error: "Lỗi khi xử lý thanh toán. Vui lòng thử lại."
+            },
+            en: {
+                title: "Premium Content",
+                desc: "To listen to professional narration and view story details, please make a small payment (approx. $1).",
+                btn: "PAY NOW",
+                processing: "PROCESSING...",
+                success: "Payment successful! Audio content unlocked.",
+                error: "Payment error. Please try again."
+            },
+            zh: {
+                title: "高级内容",
+                desc: "要收听专业旁白并查看故事详情，请支付少量费用。",
+                btn: "立即支付",
+                processing: "正在处理...",
+                success: "支付成功！已解锁音频内容。",
+                error: "支付错误。请再试一次。"
+            },
+            ja: {
+                title: "プレミアムコンテンツ",
+                desc: "プロのナレーションを聞いてストーリーの詳細を確認するには、少額の支払いが必要です。",
+                btn: "今すぐ支払う",
+                processing: "処理中...",
+                success: "お支払いが完了しました！コンテンツが解除されました。",
+                error: "支払いエラー。もう一度やり直してください。"
+            },
+            ko: {
+                title: "프리미엄 콘텐츠",
+                desc: "전문 내레이션을 듣고 자세한 이야기를 확인하려면 소액 결제가 필요합니다.",
+                btn: "지금 결제",
+                processing: "처리 중...",
+                success: "결제가 완료되었습니다! 오디오 콘텐츠가 잠금 해제되었습니다.",
+                error: "결제 오류. 다시 시도해 주세요."
+            }
+        };
+
+        let poiData = null;
+        let currentLang = 'vi';
+        let isSpeaking = false;
+        let isMP3Playing = false;
+        let hasAccess = false;
+        let deviceId = '';
+
+        // ── Analytics & History ──
+        let userLat = 0;
+        let userLng = 0;
+        let playStartedAt = null;
+        let totalTimeHeard = 0;
+
+        function setCookie(name, value, days) {
+            let expires = "";
+            if (days) {
+                let date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = "; expires=" + date.toUTCString();
+            }
+            document.cookie = name + "=" + (value || "") + expires + "; path=/; SameSite=Lax";
+        }
+
+        function getCookie(name) {
+            let nameEQ = name + "=";
+            let ca = document.cookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+            }
+            return null;
+        }
+
+        async function fetchWithRetry(url, options = {}, retries = 3, backoff = 1000) {
+            showDebug(`Fetching: ${url.replace(API, '[API]')}`);
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (!response.ok && response.status >= 500) throw new Error(`Server Error ${response.status}`);
+                    return response;
+                } catch (err) {
+                    const isLast = i === retries - 1;
+                    const errorMsg = `Lần ${i+1} lỗi: ${err.message}`;
+                    showDebug(errorMsg);
+                    console.warn(errorMsg);
+                    if (isLast) throw new Error(`Lỗi kết nối sau ${retries} lần thử: ${err.message}`);
+                    await new Promise(r => setTimeout(r, backoff * (i + 1)));
+                }
+            }
+        }
+
+        function getDeviceId() {
+            const cookieId = getCookie('vinhkhanh_visitor_id');
+            const storageId = localStorage.getItem('vinhkhanh_visitor_id');
+            
+            let id = cookieId || storageId;
+            let source = cookieId ? 'Cookie' : (storageId ? 'Storage' : 'New');
+
+            if (!id || id === 'null' || id === 'undefined' || id.length < 5) {
+                id = 'v6_' + Math.random().toString(36).substr(2, 9);
+                source = 'Generated';
+            }
+            
+            // Re-sync both
+            setCookie('vinhkhanh_visitor_id', id, 365);
+            localStorage.setItem('vinhkhanh_visitor_id', id);
+            
+            showDebug(`DeviceID: ${id} (from ${source})`);
+            return id;
+        }
+        deviceId = getDeviceId();
+
+        function showDebug(msg) {
+            const box = document.getElementById('debug-box');
+            const content = document.getElementById('debug-content');
+            box.style.display = 'block';
+            content.innerHTML += `<div>[${new Date().toLocaleTimeString()}] > ${msg}</div>`;
+        }
+
+        const mp3Player = document.getElementById('audio-player');
+
+        // Request Location (Promise with timeout)
+        function requestLocation() {
+            return new Promise((resolve) => {
+                if (!("geolocation" in navigator)) return resolve(null);
+                
+                const timer = setTimeout(() => {
+                    console.warn("⏱️ Location timeout (5s)");
+                    resolve(null);
+                }, 5000);
+
+                navigator.geolocation.getCurrentPosition((pos) => {
+                    clearTimeout(timer);
+                    userLat = pos.coords.latitude;
+                    userLng = pos.coords.longitude;
+                    console.log("📍 Location captured:", userLat, userLng);
+                    resolve({ lat: userLat, lng: userLng });
+                }, () => {
+                    clearTimeout(timer);
+                    console.warn("⚠️ Location access denied.");
+                    resolve(null);
+                });
+            });
+        }
+
+        async function logEvent(action, extra = {}) {
+            if (!poiData) return;
+            
+            // Fallback: Nếu không lấy được vị trí GPS (0,0), lấy vị trí của POI luôn
+            let logLat = userLat;
+            let logLng = userLng;
+            if (logLat === 0 && logLng === 0) {
+                logLat = poiData.latitude || 0;
+                logLng = poiData.longitude || 0;
+                console.log("📍 GPS failed, using POI location fallback:", logLat, logLng);
+            }
+
+            const body = {
+                action: action,
+                poiId: poiData.id,
+                poiName: poiData.name,
+                language: currentLang,
+                device: deviceId,
+                lat: logLat,
+                lng: logLng,
+                duration: extra.duration || 0,
+                timestamp: new Date().toISOString()
+            };
+            
+            const url = `${API}/api/history`;
+
+            // Dùng sendBeacon khi thoát trang hoặc khi cần độ tin cậy cao trên Mobile
+            if (extra.isLeaving || extra.urgent) {
+                if (navigator.sendBeacon) {
+                    const blob = new Blob([JSON.stringify(body)], { type: 'application/json' });
+                    navigator.sendBeacon(url, blob);
+                } else {
+                    fetch(url, { method: 'POST', body: JSON.stringify(body), keepalive: true }).catch(()=>{});
+                }
+                return;
+            }
+
+            try {
+                await fetchWithRetry(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                }).catch(() => {});
+            } catch (e) { }
+        }
+
+        function startTrackDuration() {
+            if (!playStartedAt) playStartedAt = Date.now();
+        }
+
+        function stopTrackDuration() {
+            if (playStartedAt) {
+                totalTimeHeard += Math.round((Date.now() - playStartedAt) / 1000);
+                playStartedAt = null;
+            }
+        }
+
+        let isUnlocked = false;
+        async function unlockAudio() {
+            if (isUnlocked) return;
+            try {
+                // Unlock TTS
+                const silent = new SpeechSynthesisUtterance(' ');
+                silent.volume = 0;
+                window.speechSynthesis.speak(silent);
+                
+                // Unlock MP3 Player Context
+                mp3Player.play().then(() => {
+                    mp3Player.pause();
+                    mp3Player.currentTime = 0;
+                }).catch(() => {});
+
+                isUnlocked = true;
+                console.log("🔊 Audio & TTS Context Unlocked");
+            } catch(e) {}
+        }
+
+        // Bắt sự kiện thoát trang Mobile chính xác hơn
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === "hidden") {
+                stopTrackDuration();
+                if (totalTimeHeard > 0) {
+                    logEvent('listen_poi', { duration: totalTimeHeard, isLeaving: true });
+                    totalTimeHeard = 0; 
+                }
+            } else {
+                if (isSpeaking || isMP3Playing) startTrackDuration();
+            }
+        });
+
+        async function checkAccess() {
+            try {
+                const url = `${API}/api/pois/${poiId}/check-access?deviceId=${encodeURIComponent(deviceId)}`;
+                const res = await fetchWithRetry(url);
+                const data = await res.json();
+                hasAccess = data.paid;
+                showDebug(`Access check: ${hasAccess}`);
+            } catch (e) {
+                hasAccess = false;
+                showDebug(`Access check error: ${e.message}`);
+            }
+        }
+
+        async function handlePayment() {
+            const btn = document.getElementById('pay-btn-trigger');
+            btn.disabled = true;
+            btn.textContent = PAYMENT_LANGS[currentLang]?.processing || 'PROCESSING...';
+            
+            try {
+                // Simulate delay for UX
+                await new Promise(r => setTimeout(r, 1000));
+                
+                const res = await fetchWithRetry(`${API}/api/pois/${poiId}/pay`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        device: deviceId, 
+                        language: currentLang,
+                        poiId: poiId 
+                    })
+                });
+                
+                if (res.ok) {
+                    hasAccess = true;
+                    alert(PAYMENT_LANGS[currentLang]?.success || 'Thanh toán thành công!');
+                    refreshAccessUI();
+                } else {
+                    const errData = await res.json().catch(() => ({}));
+                    alert(`${PAYMENT_LANGS[currentLang]?.error || 'Lỗi'}: ${errData.error || ''}`);
+                }
+            } catch (e) {
+                alert(PAYMENT_LANGS[currentLang]?.error || 'Lỗi kết nối hoặc API không phản hồi. Vui lòng thử lại.');
+            } finally {
+                btn.disabled = false;
+                translatePaymentUI();
+                document.getElementById('pay-amount').textContent = poiData.price?.toLocaleString() || '25.000';
+            }
+        }
+
+        function translatePaymentUI() {
+            const langData = PAYMENT_LANGS[currentLang] || PAYMENT_LANGS['vi'];
+            document.getElementById('pay-title').textContent = langData.title;
+            document.getElementById('pay-desc').textContent = langData.desc;
+            document.getElementById('pay-btn-text').textContent = langData.btn;
+        }
+
+        function refreshAccessUI() {
+            const payBlock = document.getElementById('pay-block');
+            const ttsBlock = document.getElementById('tts-section');
+            const audioBlock = document.getElementById('audio-section');
+            const contentBox = document.getElementById('script-box');
+
+            if (poiData.requirePayment && !hasAccess) {
+                payBlock.style.display = 'block';
+                ttsBlock.style.display = 'none';
+                audioBlock.style.display = 'none';
+                contentBox.style.filter = 'blur(4px)';
+                contentBox.style.pointerEvents = 'none';
+                
+                translatePaymentUI();
+                document.getElementById('pay-amount').textContent = poiData.price?.toLocaleString() || '25.000';
+            } else {
+                payBlock.style.display = 'none';
+                ttsBlock.style.display = 'flex';
+                // audioBlock display handled by checkAudio()
+                contentBox.style.filter = 'none';
+                contentBox.style.pointerEvents = 'auto';
+                checkAudio();
+            }
+        }
+
+        async function loadPoi() {
+            showDebug(`DeviceID: ${deviceId}`);
+            showDebug(`POI: ${poiId}`);
+            
+            // GPS capture
+            requestLocation().then(loc => {
+                if (loc) showDebug(`GPS: ${loc.lat.toFixed(4)}, ${loc.lng.toFixed(4)}`);
+                else showDebug(`GPS: Không lấy được (Hãy bật vị trí)`);
+            });
+            
+            try {
+                const res = await fetch(`${API}/api/pois`);
+                if (!res.ok) throw new Error("API Connection Failed");
+                const pois = await res.json();
+                poiData = pois.find(p => p.id === poiId);
+
+                if (!poiData) {
+                    showDebug(`Lỗi: Không tìm thấy POI ${poiId}`);
+                    document.getElementById('loader').innerHTML = '<div class="mag-header" style="color:red">Không tìm thấy POI</div>';
+                    return;
+                }
+
+                showDebug(`POI Data: OK (${poiData.name})`);
+
+                // Detect Lang
+                const browserLang = (navigator.language || 'vi').split('-')[0];
+                if (poiData.content?.[browserLang]) currentLang = browserLang;
+
+                // Check Access
+                try {
+                    const accUrl = `${API}/api/pois/${poiId}/check-access?deviceId=${encodeURIComponent(deviceId)}`;
+                    const accRes = await fetchWithRetry(accUrl);
+                    const accData = await accRes.json();
+                    hasAccess = accData.paid;
+                    showDebug(`Access: ${hasAccess}`);
+                } catch (e) {
+                    showDebug(`Access check error: ${e.message}`);
+                }
+                
+                refreshAccessUI();
+                renderPoi();
+
+                // Hide loader
+                document.getElementById('loader').style.display = 'none';
+
+                // Log scan
+                logEvent('scan_qr');
+                fetchWithRetry(`${API}/api/pois/${poiId}/scan`, { method: 'POST' }).catch(() => { });
+
+            } catch (err) {
+                showDebug(`Fatal Error: ${err.message}`);
+                document.getElementById('loader').innerHTML = `<div class="mag-header" style="color:red">Lỗi: ${err.message}</div>`;
+            }
+        }
+
+        // ── 2. Render UI ──
+        function renderPoi() {
+            const cat = CAT_DATA[poiData.category] || { icon: '📍', label: 'Địa điểm' };
+            
+            document.getElementById('poi-name').textContent = poiData.name;
+            document.getElementById('mag-cat-icon').textContent = cat.icon;
+            document.getElementById('poi-cat-label').textContent = cat.label;
+            
+            // Language buttons
+            const selector = document.getElementById('lang-selector');
+            selector.innerHTML = '';
+            Object.keys(LANGS).filter(l => poiData.content?.[l]).forEach(lang => {
+                const btn = document.createElement('button');
+                btn.className = 'lang-btn' + (lang === currentLang ? ' active' : '');
+                btn.innerHTML = `<b>${LANGS[lang].label}</b> <span>${LANGS[lang].text}</span>`;
+                btn.onclick = () => selectLang(lang);
+                selector.appendChild(btn);
+            });
+
+            updateContent();
+            translatePaymentUI();
+            
+            // Update other labels
+            const l = LANGS[currentLang] || LANGS['vi'];
+            document.getElementById('header-title').textContent = l.header;
+            document.getElementById('label-select-lang').textContent = l.select;
+            document.getElementById('label-ai-voice').textContent = l.ai;
+            document.getElementById('label-story-content').textContent = l.story;
+            document.getElementById('status').textContent = isSpeaking ? l.status_playing : l.status;
+            const proLabel = document.querySelector('#audio-section .mag-label');
+            if (proLabel) proLabel.textContent = l.pro;
+        }
+
+        function updateContent() {
+            const text = poiData.content?.[currentLang] || poiData.content?.['vi'] || '';
+            document.getElementById('script-box').textContent = text;
+        }
+
+        function selectLang(lang) {
+            if (isSpeaking || isMP3Playing) stopTrackDuration();
+            if (isSpeaking) stopSpeak();
+            if (isMP3Playing) pauseMP3();
+            currentLang = lang;
+            renderPoi();
+            checkAudio();
+        }
+
+        // ── 3. TTS Logic ──
+        async function toggleSpeak() {
+            await unlockAudio();
+            if (isSpeaking) {
+                stopSpeak();
+                stopTrackDuration();
+                if (totalTimeHeard > 0) {
+                    logEvent('listen_poi', { duration: totalTimeHeard });
+                    totalTimeHeard = 0;
+                }
+            } else {
+                pauseMP3(); 
+                speak();
+                startTrackDuration();
+                logEvent('play_poi', { urgent: true }); // Log ngay lập tức
+            }
+        }
+
+        function speak() {
+            const text = poiData.content?.[currentLang] || '';
+            if (!text) return;
+
+            window.speechSynthesis.cancel();
+            
+            // Đảm bảo tạo utterance ngay trong stack này để iOS không chặn
+            const utter = new SpeechSynthesisUtterance(text);
+            
+            // Xử lý giọng đọc mobile
+            const voices = window.speechSynthesis.getVoices();
+            if (voices.length > 0) {
+                const preferredVoice = voices.find(v => v.lang.startsWith(currentLang));
+                if (preferredVoice) utter.voice = preferredVoice;
+            }
+
+            utter.lang = LANGS[currentLang]?.tts || 'vi-VN';
+            utter.rate = 1;
+            utter.pitch = 1;
+            utter.volume = 1;
+
+            utter.onstart = () => {
+                isSpeaking = true;
+                updateTTSUI();
+            };
+            utter.onend = utter.onerror = () => {
+                isSpeaking = false;
+                stopTrackDuration();
+                updateTTSUI();
+            };
+            
+            window.speechSynthesis.speak(utter);
+        }
+
+        function stopSpeak() {
+            window.speechSynthesis.cancel();
+            isSpeaking = false;
+            updateTTSUI();
+        }
+
+        function updateTTSUI() {
+            const btn = document.getElementById('play-btn');
+            const svgPlay = document.getElementById('svg-play');
+            const svgStop = document.getElementById('svg-stop');
+            const status = document.getElementById('status');
+            const wf = document.getElementById('waveform');
+            const l = LANGS[currentLang] || LANGS['vi'];
+
+            if (isSpeaking) {
+                svgPlay.style.display = 'none';
+                svgStop.style.display = 'block';
+                status.textContent = l.status_playing;
+                wf.classList.add('active');
+            } else {
+                svgPlay.style.display = 'block';
+                svgStop.style.display = 'none';
+                status.textContent = l.status;
+                wf.classList.remove('active');
+            }
+        }
+
+        // ── 4. MP3 Logic ──
+        function checkAudio() {
+            const url = poiData.audioUrls?.[currentLang];
+            const section = document.getElementById('audio-section');
+            if (url) {
+                section.style.display = 'block';
+                mp3Player.src = url;
+                document.getElementById('pro-filename').textContent = `${currentLang}_story.mp3`;
+                document.getElementById('pro-lang-name').textContent = `${LANGS[currentLang].text} • High Quality`;
+            } else {
+                section.style.display = 'none';
+                mp3Player.pause();
+                isMP3Playing = false;
+                updateMP3UI();
+            }
+        }
+
+        async function toggleMP3() {
+            await unlockAudio();
+            if (isMP3Playing) {
+                pauseMP3();
+                stopTrackDuration();
+                if (totalTimeHeard > 0) {
+                    logEvent('listen_poi', { duration: totalTimeHeard });
+                    totalTimeHeard = 0;
+                }
+            } else {
+                stopSpeak(); 
+                playMP3();
+                startTrackDuration();
+                logEvent('play_poi', { urgent: true }); // Log ngay lập tức
+            }
+        }
+
+        function playMP3() {
+            mp3Player.play();
+            isMP3Playing = true;
+            updateMP3UI();
+        }
+
+        function pauseMP3() {
+            mp3Player.pause();
+            isMP3Playing = false;
+            updateMP3UI();
+        }
+
+        mp3Player.onended = () => {
+            isMP3Playing = false;
+            stopTrackDuration();
+            if (totalTimeHeard > 0) {
+                logEvent('listen_poi', { duration: totalTimeHeard });
+                totalTimeHeard = 0;
+            }
+            updateMP3UI();
+        };
+
+        function updateMP3UI() {
+            const svgPlay = document.getElementById('pro-svg-play');
+            const svgPause = document.getElementById('pro-svg-pause');
+            if (isMP3Playing) {
+                svgPlay.style.display = 'none';
+                svgPause.style.display = 'block';
+            } else {
+                svgPlay.style.display = 'block';
+                svgPause.style.display = 'none';
+            }
+        }
+
+        // Audio Player Progress
+        mp3Player.addEventListener('timeupdate', () => {
+            const filling = document.getElementById('pro-bar-filling');
+            const curTimeEl = document.getElementById('pro-time-cur');
+            const totalTimeEl = document.getElementById('pro-time-total');
+
+            const cur = mp3Player.currentTime;
+            const dur = mp3Player.duration;
+
+            if (dur > 0) {
+                const perc = (cur / dur) * 100;
+                filling.style.width = perc + '%';
+                
+                curTimeEl.textContent = formatTime(cur);
+                totalTimeEl.textContent = formatTime(dur);
+            }
+        });
+
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60);
+            const s = Math.floor(seconds % 60);
+            return `${m}:${s < 10 ? '0' : ''}${s}`;
+        }
+
+        function seekAudio(e) {
+            const rect = document.getElementById('pro-bar-container').getBoundingClientRect();
+            const pos = (e.clientX - rect.left) / rect.width;
+            mp3Player.currentTime = pos * mp3Player.duration;
+        }
+
+        function skipBack() { mp3Player.currentTime -= 10; }
+        function skipForward() { mp3Player.currentTime += 10; }
+
+        // Start
+        loadPoi();
+
+    </script>
+</body>
+</html>
