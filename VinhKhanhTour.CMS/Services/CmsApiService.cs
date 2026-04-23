@@ -14,7 +14,7 @@ public class CmsApiService
     private List<AnalyticsEvent>? _analyticsCache;
     private List<LocationTrace>? _tracesCache;
     private DateTime _lastRefresh = DateTime.MinValue;
-    private readonly TimeSpan _cacheDuration = TimeSpan.FromMinutes(5);
+    private readonly TimeSpan _cacheDuration = TimeSpan.FromMinutes(30);
 
     public CmsApiService(HttpClient http) => _http = http;
 
@@ -93,7 +93,7 @@ public class CmsApiService
     public async Task<List<AppHistory>?> GetHistoryAsync(bool force = false)
     {
         if (!force && _historyCache != null && IsCacheValid()) return _historyCache;
-        _historyCache = await _http.GetFromJsonAsync<List<AppHistory>>("api/history?limit=2000");
+        _historyCache = await _http.GetFromJsonAsync<List<AppHistory>>("api/history?limit=500");
         return _historyCache;
     }
 
@@ -114,7 +114,7 @@ public class CmsApiService
     public async Task<List<AnalyticsEvent>?> GetAnalyticsAsync(bool force = false)
     {
         if (!force && _analyticsCache != null && IsCacheValid()) return _analyticsCache;
-        _analyticsCache = await _http.GetFromJsonAsync<List<AnalyticsEvent>>("api/analytics?limit=2000");
+        _analyticsCache = await _http.GetFromJsonAsync<List<AnalyticsEvent>>("api/analytics?limit=500");
         return _analyticsCache;
     }
 
@@ -122,7 +122,7 @@ public class CmsApiService
     public async Task<List<LocationTrace>?> GetTracesAsync(bool force = false)
     {
         if (!force && _tracesCache != null && IsCacheValid()) return _tracesCache;
-        _tracesCache = await _http.GetFromJsonAsync<List<LocationTrace>>("api/trace?limit=2000");
+        _tracesCache = await _http.GetFromJsonAsync<List<LocationTrace>>("api/trace?limit=300");
         return _tracesCache;
     }
 

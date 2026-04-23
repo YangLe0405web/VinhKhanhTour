@@ -40,28 +40,29 @@ window.onload = async () => {
     renderMarkers();
     await loadData();
     handleDeepLink();
-    // KHÔNG dùng GPS thật — chỉ dùng D-pad di chuyển ảo
-    logAction('log_visit', null, 'Web Visitor Online');
-    setInterval(() => { if (state.isTracking) sendTrace(); }, 3000);
+    // Chỉ log 1 lần duy nhất khi mở trang (tiết kiệm writes)
+    if (!sessionStorage.getItem('vk_visited')) {
+        logAction('log_visit', null, 'Web Visitor Online');
+        sessionStorage.setItem('vk_visited', '1');
+    }
+    // GPS trace mỗi 60 giây thay vì 3 giây (giảm 20x writes)
+    setInterval(() => { if (state.isTracking) sendTrace(); }, 60000);
 };
 
 // ── SYNC FIREBASE CMS ──────────────────────────────────────
 async function logAction(type, poi, note = '', duration = 0) {
     const devId = getDeviceId();
+    // CHỈ gửi 1 endpoint (history) thay vì 2 — tiết kiệm 50% writes
     const payload = {
-        DeviceId: devId, EventType: type, PoiId: poi ? poi.Id : '',
-        Language: config.lang, Lat: parseFloat(state.userPos[0]), Lng: parseFloat(state.userPos[1]),
-        Duration: parseInt(duration), Timestamp: new Date().toISOString()
+        Action: type, PoiId: poi ? poi.Id : '', PoiName: poi ? poi.Name : note,
+        Device: devId, Language: config.lang, Duration: parseInt(duration),
+        Lat: parseFloat(state.userPos[0]), Lng: parseFloat(state.userPos[1]),
+        Timestamp: new Date().toISOString()
     };
-    const opt = { method: 'POST', mode: 'cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) };
-
-    fetch(`${API}/api/analytics`, opt).catch(() => {});
     fetch(`${API}/api/history`, {
-        ...opt,
-        body: JSON.stringify({
-            Action: type, PoiId: payload.PoiId, PoiName: poi ? poi.Name : note,
-            Device: devId, Language: config.lang, Duration: parseInt(duration), Timestamp: payload.Timestamp
-        })
+        method: 'POST', mode: 'cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
     }).catch(() => {});
 }
 

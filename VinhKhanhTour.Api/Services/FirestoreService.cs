@@ -48,7 +48,7 @@ public class FirestoreService
     {
         return await _cache.GetOrCreateAsync(CACHE_POIS, async entry =>
         {
-            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10);
+            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(60);
             var snap = await _db.Collection("pois").GetSnapshotAsync();
             return snap.Documents
                 .Select(d => d.ConvertTo<PoiModel>())
@@ -95,9 +95,8 @@ public class FirestoreService
             };
 
             await _db.Collection("analytics").AddAsync(data);
-            
-            // Invalidate analytics cache for real-time feedback
-            _cache.Remove(CACHE_ANALYTICS);
+            // KHÔNG invalidate cache mỗi lần write để tiết kiệm reads
+            // Cache tự hết hạn sau 30 phút
         }
         catch (Exception ex)
         {
@@ -110,10 +109,10 @@ public class FirestoreService
     {
         return await _cache.GetOrCreateAsync(CACHE_ANALYTICS, async entry =>
         {
-            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10);
+            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30);
             var snap = await _db.Collection("analytics")
                 .OrderByDescending("Timestamp")
-                .Limit(2000)
+                .Limit(500)
                 .GetSnapshotAsync();
 
             return snap.Documents.Select(d =>
@@ -147,10 +146,10 @@ public class FirestoreService
         var key = $"{CACHE_HISTORY}_{limit}";
         return await _cache.GetOrCreateAsync(key, async entry =>
         {
-            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5);
+            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30);
             var snap = await _db.Collection("history")
                 .OrderByDescending("Timestamp")
-                .Limit(limit)
+                .Limit(500)
                 .GetSnapshotAsync();
             return snap.Documents
                 .Select(d => d.ConvertTo<AppHistory>())
@@ -162,10 +161,7 @@ public class FirestoreService
     {
         history.Id = Guid.NewGuid().ToString("N")[..8];
         await _db.Collection("history").Document(history.Id).SetAsync(history);
-        
-        // Invalidate history cache
-        _cache.Remove(CACHE_HISTORY);
-        _cache.Remove($"{CACHE_HISTORY}_2000");
+        // KHÔNG invalidate cache để tiết kiệm reads
     }
 
     public async Task<bool> CheckPoiAccessAsync(string deviceId, string poiId)
@@ -207,10 +203,10 @@ public class FirestoreService
     {
         return await _cache.GetOrCreateAsync(CACHE_TRACES, async entry =>
         {
-            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5); // Giảm cache xuống 5p
+            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30);
             var snap = await _db.Collection("traces")
                 .OrderByDescending("Timestamp")
-                .Limit(2000) // Tăng lên 2000 để tránh bị lọc hết dữ liệu mới
+                .Limit(300)
                 .GetSnapshotAsync();
             return snap.Documents
                 .Select(d => d.ConvertTo<LocationTrace>())
