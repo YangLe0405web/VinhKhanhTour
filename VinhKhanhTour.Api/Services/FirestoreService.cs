@@ -19,6 +19,16 @@ public class FirestoreService
     private const string CACHE_HISTORY = "history_list";
     private const string CACHE_TRACES = "traces_list";
 
+    // Xóa toàn bộ cache — gọi khi CMS bấm TẢI LẠI (force=true)
+    public void ClearAllCache()
+    {
+        _cache.Remove(CACHE_POIS);
+        _cache.Remove(CACHE_ANALYTICS);
+        _cache.Remove(CACHE_HISTORY);
+        _cache.Remove($"{CACHE_HISTORY}_500");
+        _cache.Remove(CACHE_TRACES);
+    }
+
     public FirestoreService(IMemoryCache cache)
     {
         _cache = cache;

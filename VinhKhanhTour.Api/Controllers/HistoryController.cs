@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using VinhKhanhTour.Api.Services;
 using VinhKhanhTour.Shared.Models;
 
@@ -12,10 +12,13 @@ public class HistoryController : ControllerBase
 
     public HistoryController(FirestoreService db) => _db = db;
 
-    // GET api/history
+    // GET api/history?force=true
     [HttpGet]
-    public async Task<IActionResult> GetAll([FromQuery] int limit = 100)
-        => Ok(await _db.GetHistoryAsync(limit));
+    public async Task<IActionResult> GetAll([FromQuery] int limit = 100, [FromQuery] bool force = false)
+    {
+        if (force) _db.ClearAllCache();
+        return Ok(await _db.GetHistoryAsync(limit));
+    }
 
     // POST api/history
     [HttpPost]

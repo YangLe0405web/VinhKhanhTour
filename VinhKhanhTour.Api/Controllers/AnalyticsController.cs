@@ -15,10 +15,11 @@ public class AnalyticsController : ControllerBase
         _db = db;
     }
 
-    // GET api/analytics
+    // GET api/analytics?force=true
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll([FromQuery] bool force = false)
     {
+        if (force) _db.ClearAllCache();
         var data = await _db.GetAnalyticsAsync();
 
         return Ok(data.Select(e => new

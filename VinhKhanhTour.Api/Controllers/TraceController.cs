@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using VinhKhanhTour.Api.Services;
 using VinhKhanhTour.Shared.Models;
 
@@ -20,8 +20,11 @@ public class TraceController : ControllerBase
         return Ok();
     }
 
-    // GET api/trace — CMS lấy để vẽ heatmap
+    // GET api/trace?force=true — CMS lấy để vẽ heatmap
     [HttpGet]
-    public async Task<IActionResult> GetAll()
-        => Ok(await _db.GetTracesAsync());
+    public async Task<IActionResult> GetAll([FromQuery] bool force = false)
+    {
+        if (force) _db.ClearAllCache();
+        return Ok(await _db.GetTracesAsync());
+    }
 }
