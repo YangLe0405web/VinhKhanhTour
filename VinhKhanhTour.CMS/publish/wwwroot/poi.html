@@ -770,15 +770,15 @@
             }
 
             const body = {
-                action: action,
-                poiId: poiData.id,
-                poiName: poiData.name,
-                language: currentLang,
-                device: deviceId,
-                lat: logLat,
-                lng: logLng,
-                duration: extra.duration || 0,
-                timestamp: new Date().toISOString()
+                Action: action,
+                PoiId: poiData.id || poiData.Id,
+                PoiName: poiData.name || poiData.Name,
+                Language: currentLang.toUpperCase(),
+                Device: deviceId,
+                Lat: logLat,
+                Lng: logLng,
+                Duration: extra.duration || 0,
+                Timestamp: new Date().toISOString()
             };
             
             const url = `${API}/api/history`;
@@ -1031,13 +1031,20 @@
             // Language buttons
             const selector = document.getElementById('lang-selector');
             selector.innerHTML = '';
-            const contentObj = poiData.content || poiData.Content || {};
-            Object.keys(LANGS).filter(l => contentObj[l]).forEach(lang => {
-                const btn = document.createElement('button');
-                btn.className = 'lang-btn' + (lang === currentLang ? ' active' : '');
-                btn.innerHTML = `<b>${LANGS[lang].label}</b> <span>${LANGS[lang].text}</span>`;
-                btn.onclick = () => selectLang(lang);
-                selector.appendChild(btn);
+            
+            // Check mapping for all 5 languages
+            ['vi','en','zh','ja','ko'].forEach(lang => {
+                const contentObj = poiData.content || poiData.Content || {};
+                // Fallback check for MAUI specific fields if content dict is missing
+                const hasScript = contentObj[lang] || poiData['TtsScript' + (lang === 'vi' ? '' : lang.charAt(0).toUpperCase() + lang.slice(1))];
+                
+                if (hasScript) {
+                    const btn = document.createElement('button');
+                    btn.className = 'lang-btn' + (lang === currentLang ? ' active' : '');
+                    btn.innerHTML = `<b>${LANGS[lang].label}</b> <span>${LANGS[lang].text}</span>`;
+                    btn.onclick = () => selectLang(lang);
+                    selector.appendChild(btn);
+                }
             });
 
             updateContent();
@@ -1058,8 +1065,13 @@
 
         function updateContent() {
             const contentObj = poiData.content || poiData.Content || {};
-            const text = contentObj[currentLang] || contentObj['vi'] || '';
+            const langSuffix = (currentLang === 'vi' ? '' : currentLang.charAt(0).toUpperCase() + currentLang.slice(1));
+            const text = contentObj[currentLang] || poiData['TtsScript' + langSuffix] || contentObj['vi'] || poiData['TtsScript'] || '';
             document.getElementById('script-box').textContent = text;
+            
+            // Cập nhật tên theo ngôn ngữ nếu có trường NameEn, NameZh...
+            const localizedName = poiData['Name' + langSuffix] || poiData.name || poiData.Name;
+            document.getElementById('poi-name').textContent = localizedName;
         }
 
         function selectLang(lang) {

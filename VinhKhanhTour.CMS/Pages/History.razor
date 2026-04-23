@@ -12,7 +12,8 @@
     <MudGrid>
         <MudItem xs="12" sm="3">
             <MudText Typo="Typo.caption" Class="ml-1 mb-1" Style="color:rgba(255,255,255,0.5)">Hành động</MudText>
-            <MudSelect @bind-Value="_filterAction" Placeholder="Chọn hành động"
+            <MudSelect T="string" Value="_filterAction" ValueChanged="@(v => { _filterAction = v; RefreshFilter(); })"
+                       Placeholder="Chọn hành động"
                        Clearable="true" Variant="Variant.Outlined" Margin="Margin.Dense">
                 <MudSelectItem Value="@("")">Tất cả</MudSelectItem>
                 <MudSelectItem Value="@("play_poi")">🔊 Nghe POI</MudSelectItem>
@@ -29,7 +30,8 @@
         </MudItem>
         <MudItem xs="12" sm="3">
             <MudText Typo="Typo.caption" Class="ml-1 mb-1" Style="color:rgba(0,0,0,0.5)">Ngôn ngữ</MudText>
-            <MudSelect @bind-Value="_filterLang" Placeholder="Chọn ngôn ngữ"
+            <MudSelect T="string" Value="_filterLang" ValueChanged="@(v => { _filterLang = v; RefreshFilter(); })"
+                       Placeholder="Chọn ngôn ngữ"
                        Clearable="true" Variant="Variant.Outlined" Margin="Margin.Dense">
                 <MudSelectItem Value="@("")">Tất cả</MudSelectItem>
                 <MudSelectItem Value="@("vi")">🇻🇳 Tiếng Việt</MudSelectItem>
@@ -41,13 +43,13 @@
         </MudItem>
         <MudItem xs="12" sm="3">
             <MudText Typo="Typo.caption" Class="ml-1 mb-1" Style="color:rgba(255,255,255,0.5)">Thời gian</MudText>
-            <MudDatePicker @bind-Date="_filterDate" 
+            <MudDatePicker Date="_filterDate" DateChanged="@(v => { _filterDate = v; RefreshFilter(); })" 
                             Editable="true" Clearable="true" Variant="Variant.Outlined" Margin="Margin.Dense"
                             DateFormat="dd/MM/yyyy" Placeholder="Chọn ngày..." />
         </MudItem>
         <MudItem xs="12" sm="3">
             <MudText Typo="Typo.caption" Class="ml-1 mb-1" Style="color:rgba(255,255,255,0.5)">ID Thiết bị</MudText>
-            <MudTextField @bind-Value="_filterDevice" Placeholder="Nhập ID thiết bị..." 
+            <MudTextField T="string" Value="_filterDevice" ValueChanged="@(v => { _filterDevice = v; RefreshFilter(); })" Placeholder="Nhập ID thiết bị..." 
                           Variant="Variant.Outlined" Margin="Margin.Dense" Clearable="true" />
         </MudItem>
         <MudItem xs="12" sm="3" Class="d-flex flex-column justify-end">
@@ -181,11 +183,19 @@ else
     DateTime? _filterDate;
     bool _isAdmin = false;
   
-    IEnumerable<UnifiedHistory> FilteredHistory => _history
-        .Where(h => string.IsNullOrEmpty(_filterAction) || h.Action == _filterAction)
-        .Where(h => string.IsNullOrEmpty(_filterLang) || h.Language == _filterLang)
-        .Where(h => string.IsNullOrEmpty(_filterDevice) || (h.Device != null && h.Device.Contains(_filterDevice, StringComparison.OrdinalIgnoreCase)))
-        .Where(h => !_filterDate.HasValue || h.Timestamp.ToLocalTime().Date == _filterDate.Value.Date);
+    IList<UnifiedHistory> FilteredHistory => _filteredCache;
+    List<UnifiedHistory> _filteredCache = new();
+
+    void RefreshFilter()
+    {
+        _filteredCache = _history
+            .Where(h => string.IsNullOrEmpty(_filterAction) || h.Action == _filterAction)
+            .Where(h => string.IsNullOrEmpty(_filterLang) || h.Language == _filterLang)
+            .Where(h => string.IsNullOrEmpty(_filterDevice) || (h.Device != null && h.Device.Contains(_filterDevice, StringComparison.OrdinalIgnoreCase)))
+            .Where(h => !_filterDate.HasValue || h.Timestamp.ToLocalTime().Date == _filterDate.Value.Date)
+            .Take(500)
+            .ToList();
+    }
 
     protected override async Task OnInitializedAsync() 
     {
@@ -260,18 +270,10 @@ else
             Lng = e.Lng
         });
 
-        // 3. Convert Traces (GPS)
-        var unifiedTraces = traces.Select(t => new UnifiedHistory {
-            Timestamp = t.Timestamp,
-            Action = "move_gps",
-            ActionLabel = "📍 Di chuyển",
-            Color = Color.Default,
-            Device = t.DeviceId,
-            Lat = t.Lat,
-            Lng = t.Lng
-        });
+        // KHÔNG nạp traces vào lịch sử (quá nhiều record GPS gây lag)
+        // Traces chỉ dùng cho heatmap ở Dashboard
 
-        _history = unifiedLogs.Concat(unifiedEvents).Concat(unifiedTraces)
+        _history = unifiedLogs.Concat(unifiedEvents)
             .OrderByDescending(x => x.Timestamp)
             .ToList();
 
@@ -280,6 +282,7 @@ else
             _history = _history.Where(h => h.Action != "pay_audio" && (string.IsNullOrEmpty(h.PoiId) || myPoiIds.Contains(h.PoiId))).ToList();
         }
 
+        RefreshFilter();
         _loading = false;
     }
 

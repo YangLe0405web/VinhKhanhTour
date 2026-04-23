@@ -218,6 +218,31 @@ public class FirestoreService
         }) ?? new();
     }
 
+    public async Task<List<LocationTrace>> GetAllTracesAsync(string? days = null)
+    {
+        var traces = new List<LocationTrace>();
+        Query query = _db.Collection("traces");
+
+        // Hỗ trợ lọc theo bộ lọc của Dashboard (Hôm nay, 7, 30 ngày)
+        if (!string.IsNullOrEmpty(days) && days != "all")
+        {
+            int d = days switch { "today" => 0, "7" => 7, "30" => 30, _ => -1 };
+            if (d >= 0)
+            {
+                var cutoff = DateTime.UtcNow.AddDays(-d).Date;
+                query = query.WhereGreaterThanOrEqualTo("Timestamp", cutoff.ToString("o"));
+            }
+        }
+
+        var snap = await query.GetSnapshotAsync();
+        foreach (var doc in snap.Documents)
+        {
+            var t = doc.ConvertTo<LocationTrace>();
+            traces.Add(t);
+        }
+        return traces;
+    }
+
     // ── Tour ──────────────────────────────────────────
     public async Task<List<TourModel>> GetAllToursAsync()
     {
