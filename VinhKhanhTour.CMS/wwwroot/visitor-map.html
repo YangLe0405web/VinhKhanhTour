@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
     <title>Vĩnh Khánh Tour — Web App</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-    <link rel="stylesheet" href="visitor-map.css"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+    <link rel="stylesheet" href="visitor-map.css?v=8.6"/>
 </head>
 <body>
     <div id="app">
@@ -18,6 +19,11 @@
 
         <div class="main">
             <div id="map"></div>
+            
+            <!-- Nút tắt chỉ đường floating -->
+            <button id="btn-stop-route" onclick="stopRouting()" style="display:none; position:absolute; top:80px; left:50%; transform:translateX(-50%); z-index:1001; background:#D32F2F; color:white; border:none; padding:10px 20px; border-radius:30px; font-weight:700; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                ✕ Tắt chỉ đường
+            </button>
 
             <!-- D-Pad Điều khiển ảo -->
             <div class="dpad">
@@ -59,6 +65,7 @@
                 <div class="setting-card">
                     <span class="setting-label">⏲️ Thời gian chờ (giây)</span>
                     <div class="seg-group">
+                        <button class="seg-btn" data-key="cooldown" data-val="3" onclick="setSettings('cooldown', 3)">3s</button>
                         <button class="seg-btn active" data-key="cooldown" data-val="10" onclick="setSettings('cooldown',10)">10s</button>
                         <button class="seg-btn" data-key="cooldown" data-val="30" onclick="setSettings('cooldown',30)">30s</button>
                         <button class="seg-btn" data-key="cooldown" data-val="60" onclick="setSettings('cooldown',60)">60s</button>
@@ -81,7 +88,8 @@
                 <div class="sheet-title">Tên địa điểm</div>
                 <div class="sheet-subtitle">Khoảng cách: --m</div>
                 <div class="sheet-actions">
-                    <button class="btn-route" onclick="openDetail()">Xem chi tiết</button>
+                    <button class="btn-route" onclick="startRouting(state.selectedPoi)">🗺️ Chỉ đường</button>
+                    <button class="btn-route" style="background:#4527A0" onclick="openDetail()">📄 Chi tiết</button>
                     <button class="btn-secondary" onclick="hideBottomSheet()">Đóng</button>
                 </div>
             </div>
@@ -115,6 +123,7 @@
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="visitor-map.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+    <script src="visitor-map.js?v=9.5"></script>
 </body>
 </html>

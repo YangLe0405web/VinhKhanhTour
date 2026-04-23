@@ -39,7 +39,10 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options => {
+        options.JsonSerializerOptions.PropertyNamingPolicy = null; // Chấp nhận cả PascalCase từ MAUI/Web
+    });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -98,11 +101,11 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 
 var app = builder.Build();
 
-// Đưa CORS lên đầu để đảm bảo luôn gán Header ngay cả khi có lỗi ở middleware sau
-app.UseCors("AllowAll");
-
 app.UseForwardedHeaders();
 app.UseRouting();
+
+// CORS phải đặt SAU UseRouting và TRƯỚC UseAuthentication
+app.UseCors("AllowAll");
 
 app.UseSwagger();
 app.UseSwaggerUI(c =>
