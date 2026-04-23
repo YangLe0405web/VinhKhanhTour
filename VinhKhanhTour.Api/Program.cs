@@ -98,6 +98,9 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 
 var app = builder.Build();
 
+// Đưa CORS lên đầu để đảm bảo luôn gán Header ngay cả khi có lỗi ở middleware sau
+app.UseCors("AllowAll");
+
 app.UseForwardedHeaders();
 app.UseRouting();
 
@@ -108,7 +111,6 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = "swagger";
 });
 
-app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 

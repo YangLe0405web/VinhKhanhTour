@@ -1,0 +1,16 @@
+{
+  "name": "VinhKhánh Tour - Thuyết minh tự động",
+  "short_name": "Vĩnh Khánh",
+  "start_url": "/visitor-map.html",
+  "display": "standalone",
+  "background_color": "#1a1a1a",
+  "theme_color": "#fbbf24",
+  "icons": [
+    {
+      "src": "favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
