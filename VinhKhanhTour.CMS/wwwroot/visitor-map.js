@@ -96,8 +96,9 @@ function normalizePoi(p) {
         RadiusMeters: parseInt(p.RadiusMeters || p.radiusMeters || p.Radius || 30), Category: p.Category || p.category,
         Content: p.Content || p.content || {}, AudioUrls: p.AudioUrls || p.audioUrls || {}
     };
-    poi.Description = poi.Content[config.lang] || poi.Content['vi'] || "";
-    poi.AudioUrl = poi.AudioUrls[config.lang] || poi.AudioUrls['vi'] || "";
+    poi.Description = poi.Content[config.lang] || poi.Content['vi'] || poi.Content['en'] || Object.values(poi.Content)[0] || "";
+    // Audio: CHỈ lấy đúng ngôn ngữ hiện tại, không fallback sang ngôn ngữ khác
+    poi.AudioUrl = (poi.AudioUrls || {})[config.lang] || "";
     return poi;
 }
 
@@ -125,10 +126,18 @@ function checkProximity() {
 
 function playMedia(poi) {
     stopAllAudio();
+    console.log(`🎵 POI: ${poi.Name} | Lang: ${config.lang} | AudioUrl: ${poi.AudioUrl || 'NONE -> TTS'}`);
     if (poi.AudioUrl && poi.AudioUrl.startsWith('http')) {
         audioPlayer.src = poi.AudioUrl;
-        audioPlayer.play().catch(() => playTts(poi.Description));
+        audioPlayer.playbackRate = config.speed;
+        audioPlayer.play().then(() => {
+            console.log('✅ Đang phát Audio file');
+        }).catch(e => {
+            console.warn('⚠️ Audio bị chặn, chuyển TTS:', e.message);
+            playTts(poi.Description);
+        });
     } else {
+        console.log('📢 Không có audio file -> Phát TTS');
         playTts(poi.Description);
     }
 }
@@ -161,5 +170,23 @@ function hideBottomSheet() { document.querySelector('.bottom-sheet').style.displ
 function startGps() { if ("geolocation" in navigator) navigator.geolocation.watchPosition(pos => { if (state.isTracking) updateUserPos(pos.coords.latitude, pos.coords.longitude); }, null, { enableHighAccuracy: true }); }
 function getDistance(la1, lo1, la2, lo2) { const R = 6371e3; const dLat = (la2-la1)*Math.PI/180, dLon = (lo2-lo1)*Math.PI/180; const a = Math.sin(dLat/2)**2 + Math.cos(la1*Math.PI/180)*Math.cos(la2*Math.PI/180)*Math.sin(dLon/2)**2; return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); }
 function getOfflinePois() { return [{ Id:"poi_01", Name:"Cổng Phố Vĩnh Khánh", Latitude:10.7595, Longitude:106.7048, RadiusMeters:30, Content:{vi:"Chào mừng đến Phố Vĩnh Khánh!"} }].map(normalizePoi); }
-function handleDeepLink() { const params = new URLSearchParams(location.search); const poiId = params.get('poiId'); const tourId = params.get('tourId'); if (poiId) { const poi = state.allPoi.find(p => p && p.Id === poiId); if (poi) { map.setView([poi.Latitude, poi.Longitude], 18); showBottomSheet(poi); logAction('scan_qr', poi); } } if (tourId) { logTourScan(tourId); } }
+function handleDeepLink() {
+    const params = new URLSearchParams(location.search);
+    const poiId = params.get('poiId');
+    const tourId = params.get('tourId');
+    if (poiId) {
+        const poi = state.allPoi.find(p => p && p.Id === poiId);
+        if (poi) {
+            map.setView([poi.Latitude, poi.Longitude], 18);
+            showBottomSheet(poi);
+            logAction('scan_qr', poi);
+            // Gọi API tăng số lượt quét QR
+            const devId = getDeviceId();
+            fetch(`${API}/api/tours/${poiId}/scan?deviceId=${devId}&lang=${config.lang}`, { method: 'POST', mode: 'cors' }).catch(() => {});
+        }
+    }
+    if (tourId) {
+        logTourScan(tourId);
+    }
+}
 function move(dl, dg) { updateUserPos(state.userPos[0]+dl, state.userPos[1]+dg); map.panTo(state.userPos); }

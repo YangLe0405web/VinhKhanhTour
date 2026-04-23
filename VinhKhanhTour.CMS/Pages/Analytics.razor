@@ -639,6 +639,7 @@
     bool IsPlayAction(string action) => 
         string.Equals(action, "poi_play", StringComparison.OrdinalIgnoreCase) || 
         string.Equals(action, "play_poi", StringComparison.OrdinalIgnoreCase) || 
+        string.Equals(action, "play_audio", StringComparison.OrdinalIgnoreCase) ||
         string.Equals(action, "listen_poi", StringComparison.OrdinalIgnoreCase);
 
     bool IsScanAction(string action) => 
@@ -649,7 +650,9 @@
     Color GetActionColor(string action) => action.ToLower() switch
     {
         "scan_qr" => Color.Success,
-        "poi_play" or "play_poi" or "listen_poi" => Color.Primary,
+        "poi_play" or "play_poi" or "listen_poi" or "play_audio" => Color.Primary,
+        "play_audio_end" => Color.Default,
+        "log_visit" => Color.Info,
         "route_start" => Color.Warning,
         "language_change" => Color.Secondary,
         _ => Color.Default
@@ -748,8 +751,10 @@
 
             await JS.InvokeVoidAsync("initTraceMap", routesForJs);
 
-            // --- NEW: POI Hotspot Heatmap ---
-            var poiHotspots = _unified.Where(e => !string.IsNullOrEmpty(e.PoiId))
+            // --- POI Hotspot Heatmap (Lọc theo thời gian) ---
+            var heatmapFilterDate = DateTime.UtcNow.AddDays(-_selectedDays);
+            var poiHotspots = _unified
+                                     .Where(e => !string.IsNullOrEmpty(e.PoiId) && e.Timestamp >= heatmapFilterDate)
                                      .GroupBy(e => e.PoiId)
                                      .Select(g => {
                                          var poi = _pois.FirstOrDefault(p => p.Id == g.Key);
