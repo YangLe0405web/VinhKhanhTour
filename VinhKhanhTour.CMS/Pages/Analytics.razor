@@ -337,6 +337,8 @@
     {
         _selectedDays = days;
         ComputeStats();
+        // Xóa cờ initialized để vẽ lại bản đồ
+        _mapsInitialized = false; 
         StateHasChanged();
     }
 
@@ -640,7 +642,9 @@
         string.Equals(action, "listen_poi", StringComparison.OrdinalIgnoreCase);
 
     bool IsScanAction(string action) => 
-        string.Equals(action, "scan_qr", StringComparison.OrdinalIgnoreCase);
+        string.Equals(action, "scan_qr", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(action, "tour_scan", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(action, "Quét QR", StringComparison.OrdinalIgnoreCase);
 
     Color GetActionColor(string action) => action.ToLower() switch
     {
