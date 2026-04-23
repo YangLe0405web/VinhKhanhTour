@@ -4,6 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Thuyết Minh — Vĩnh Khánh</title>
+
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#fbbf24">
+    <link rel="apple-touch-icon" href="favicon.png">
     
     <!-- Premium Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -543,9 +550,25 @@
     </div>
 
     <script>
+        // ── PWA Service Worker Registration ──
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('[PWA] Service Worker registered'))
+                    .catch(err => console.log('[PWA] Service Worker failed', err));
+            });
+        }
+
         const API = 'https://vinhkhanh-api.onrender.com';
-        const pathParts = window.location.pathname.split('/').filter(p => p);
-        const poiId = pathParts[pathParts.length - 1];
+        const urlParams = new URLSearchParams(window.location.search);
+        let poiId = urlParams.get('id') || urlParams.get('poiId');
+        
+        if (!poiId) {
+            const pathParts = window.location.pathname.split('/').filter(p => p);
+            poiId = pathParts[pathParts.length - 1];
+        }
+        
+        let currentLang = urlParams.get('lang') || 'vi';
 
         const LANGS = {
             vi: { 
@@ -630,7 +653,6 @@
         };
 
         let poiData = null;
-        let currentLang = 'vi';
         let isSpeaking = false;
         let isMP3Playing = false;
         let hasAccess = false;
@@ -908,23 +930,51 @@
 
         async function loadPoi() {
             showDebug(`DeviceID: ${deviceId}`);
-            showDebug(`POI: ${poiId}`);
             
-            // GPS capture
-            requestLocation().then(loc => {
-                if (loc) showDebug(`GPS: ${loc.lat.toFixed(4)}, ${loc.lng.toFixed(4)}`);
-                else showDebug(`GPS: Không lấy được (Hãy bật vị trí)`);
-            });
+            // ── Tour Detection Logic ──
+            const urlParams = new URLSearchParams(window.location.search);
+            const tourId = urlParams.get('t');
+            if (tourId) {
+                showDebug(`Tour detected: ${tourId}`);
+                try {
+                    const tourRes = await fetch(`${API}/api/tours/${tourId}`);
+                    if (tourRes.ok) {
+                        const tourData = await tourRes.json();
+                        if (tourData.poiIds && tourData.poiIds.length > 0) {
+                            poiId = tourData.poiIds[0]; // Chuyển sang POI đầu tiên của Tour
+                            showDebug(`Tour Mode: Loaded first POI -> ${poiId}`);
+                        }
+                    } else {
+                        showDebug(`Lỗi: Không tìm thấy Tour ID ${tourId}`);
+                    }
+                } catch (e) { 
+                    console.error("Tour fetch error", e); 
+                    showDebug(`Lỗi kết nối Tour: ${e.message}`);
+                }
+            }
+
+            // Kiểm tra nếu poiId vẫn là tên file (do /poi.html) thì reset về rỗng
+            if (poiId === 'poi.html' || poiId === 'poi') {
+                poiId = '';
+            }
+
+            if (!poiId) {
+                showDebug(`Chờ quét mã POI...`);
+                document.getElementById('loader').innerHTML = '<div class="mag-header">📍 Vui lòng quét mã địa điểm</div>';
+                return;
+            }
+
+            showDebug(`Loading POI: ${poiId}`);
             
             try {
                 const res = await fetch(`${API}/api/pois`);
                 if (!res.ok) throw new Error("API Connection Failed");
                 const pois = await res.json();
-                poiData = pois.find(p => p.id === poiId);
+                poiData = pois.find(p => (p.id?.toLowerCase() === poiId.toLowerCase()) || (p.Id?.toLowerCase() === poiId.toLowerCase()));
 
                 if (!poiData) {
                     showDebug(`Lỗi: Không tìm thấy POI ${poiId}`);
-                    document.getElementById('loader').innerHTML = '<div class="mag-header" style="color:red">Không tìm thấy POI</div>';
+                    document.getElementById('loader').innerHTML = '<div class="mag-header" style="color:red">Không tìm thấy địa điểm</div>';
                     return;
                 }
 
@@ -963,16 +1013,26 @@
 
         // ── 2. Render UI ──
         function renderPoi() {
-            const cat = CAT_DATA[poiData.category] || { icon: '📍', label: 'Địa điểm' };
+            const catKey = (poiData.category || poiData.Category || 'landmark').toLowerCase();
+            const cat = CAT_DATA[catKey] || { icon: '📍', label: 'Địa điểm' };
             
-            document.getElementById('poi-name').textContent = poiData.name;
+            document.getElementById('poi-name').textContent = poiData.name || poiData.Name;
             document.getElementById('mag-cat-icon').textContent = cat.icon;
             document.getElementById('poi-cat-label').textContent = cat.label;
+
+            // Hiển thị ảnh nếu có
+            const img = document.getElementById('poi-img-container');
+            const imgUrl = poiData.imageUrl || poiData.ImageUrl;
+            if (imgUrl) {
+                img.src = imgUrl;
+                img.style.display = 'block';
+            }
             
             // Language buttons
             const selector = document.getElementById('lang-selector');
             selector.innerHTML = '';
-            Object.keys(LANGS).filter(l => poiData.content?.[l]).forEach(lang => {
+            const contentObj = poiData.content || poiData.Content || {};
+            Object.keys(LANGS).filter(l => contentObj[l]).forEach(lang => {
                 const btn = document.createElement('button');
                 btn.className = 'lang-btn' + (lang === currentLang ? ' active' : '');
                 btn.innerHTML = `<b>${LANGS[lang].label}</b> <span>${LANGS[lang].text}</span>`;
@@ -990,12 +1050,15 @@
             document.getElementById('label-ai-voice').textContent = l.ai;
             document.getElementById('label-story-content').textContent = l.story;
             document.getElementById('status').textContent = isSpeaking ? l.status_playing : l.status;
-            const proLabel = document.querySelector('#audio-section .mag-label');
+            
+            const audioBlock = document.getElementById('audio-section');
+            const proLabel = audioBlock.querySelector('.mag-label');
             if (proLabel) proLabel.textContent = l.pro;
         }
 
         function updateContent() {
-            const text = poiData.content?.[currentLang] || poiData.content?.['vi'] || '';
+            const contentObj = poiData.content || poiData.Content || {};
+            const text = contentObj[currentLang] || contentObj['vi'] || '';
             document.getElementById('script-box').textContent = text;
         }
 

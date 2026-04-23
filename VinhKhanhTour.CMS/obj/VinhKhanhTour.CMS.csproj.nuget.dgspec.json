@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "d:\\Projects\\VinhKhanhTour\\VinhKhanhTour.CMS\\VinhKhanhTour.CMS.csproj": {}
+    "D:\\Projects\\VinhKhanhTour\\VinhKhanhTour.CMS\\VinhKhanhTour.CMS.csproj": {}
   },
   "projects": {
-    "d:\\Projects\\VinhKhanhTour\\VinhKhanhTour.CMS\\VinhKhanhTour.CMS.csproj": {
+    "D:\\Projects\\VinhKhanhTour\\VinhKhanhTour.CMS\\VinhKhanhTour.CMS.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "d:\\Projects\\VinhKhanhTour\\VinhKhanhTour.CMS\\VinhKhanhTour.CMS.csproj",
+        "projectUniqueName": "D:\\Projects\\VinhKhanhTour\\VinhKhanhTour.CMS\\VinhKhanhTour.CMS.csproj",
         "projectName": "VinhKhanhTour.CMS",
-        "projectPath": "d:\\Projects\\VinhKhanhTour\\VinhKhanhTour.CMS\\VinhKhanhTour.CMS.csproj",
+        "projectPath": "D:\\Projects\\VinhKhanhTour\\VinhKhanhTour.CMS\\VinhKhanhTour.CMS.csproj",
         "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
-        "outputPath": "d:\\Projects\\VinhKhanhTour\\VinhKhanhTour.CMS\\obj\\",
+        "outputPath": "D:\\Projects\\VinhKhanhTour\\VinhKhanhTour.CMS\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -33,8 +33,8 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "d:\\Projects\\VinhKhanhTour\\VinhKhanhTour.Shared\\VinhKhanhTour.Shared.csproj": {
-                "projectPath": "d:\\Projects\\VinhKhanhTour\\VinhKhanhTour.Shared\\VinhKhanhTour.Shared.csproj"
+              "D:\\Projects\\VinhKhanhTour\\VinhKhanhTour.Shared\\VinhKhanhTour.Shared.csproj": {
+                "projectPath": "D:\\Projects\\VinhKhanhTour\\VinhKhanhTour.Shared\\VinhKhanhTour.Shared.csproj"
               }
             }
           }
@@ -122,14 +122,14 @@
         }
       }
     },
-    "d:\\Projects\\VinhKhanhTour\\VinhKhanhTour.Shared\\VinhKhanhTour.Shared.csproj": {
+    "D:\\Projects\\VinhKhanhTour\\VinhKhanhTour.Shared\\VinhKhanhTour.Shared.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "d:\\Projects\\VinhKhanhTour\\VinhKhanhTour.Shared\\VinhKhanhTour.Shared.csproj",
+        "projectUniqueName": "D:\\Projects\\VinhKhanhTour\\VinhKhanhTour.Shared\\VinhKhanhTour.Shared.csproj",
         "projectName": "VinhKhanhTour.Shared",
-        "projectPath": "d:\\Projects\\VinhKhanhTour\\VinhKhanhTour.Shared\\VinhKhanhTour.Shared.csproj",
+        "projectPath": "D:\\Projects\\VinhKhanhTour\\VinhKhanhTour.Shared\\VinhKhanhTour.Shared.csproj",
         "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
-        "outputPath": "d:\\Projects\\VinhKhanhTour\\VinhKhanhTour.Shared\\obj\\",
+        "outputPath": "D:\\Projects\\VinhKhanhTour\\VinhKhanhTour.Shared\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

@@ -142,9 +142,9 @@ else
                     </MudPaper>
     
                     @* Hướng dẫn *@
-                    <MudAlert Severity="Severity.Info" Dense="true" Class="mt-1">
-                        Khách quét mã này sẽ mở thẳng app VinhKhanhTour trên điện thoại
-                        (Android &amp; iOS). App phải được cài đặt trước.
+                    <MudAlert Severity="Severity.Success" Dense="true" Class="mt-1" Icon="@Icons.Material.Filled.InstallMobile">
+                        Khách quét mã này sẽ mở thẳng <b>Web App (PWA)</b> toàn màn hình. 
+                        Nếu điện thoại đã cài App di động, hệ thống sẽ tự động đề xuất mở trong App.
                     </MudAlert>
     
                 </MudStack>
@@ -290,9 +290,7 @@ else
     }
 
     string GetQrUrl(TourModel tour)
-        => tour.QrType == "play"
-            ? $"vinhkhanh://play/{tour.Id}"
-            : $"vinhkhanh://navigate/{tour.Id}";
+        => $"https://vinhkhanhtour-c8e3f.web.app/visitor-map.html?t={tour.Id}";
 
     void ShowQr(TourModel tour)
     {

@@ -93,14 +93,14 @@
         };
 
         window.initTraceMap = (routes) => {
+            console.log("📍 Tracemap Debug: Nhận được", routes?.length, "lộ trình.");
             if (window._tracemap) window._tracemap.remove();
             
-            // Khởi tạo bản đồ với tọa độ mặc định, nhưng sẽ tự điều chỉnh sau
             var map = L.map('tracemap').setView([10.7613, 106.7047], 16);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
             
             var colors = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
-            var bounds = L.latLngBounds(); // Để tự động căn chỉnh vùng xem
+            var bounds = L.latLngBounds();
             
             if (routes && routes.length > 0) {
                 routes.forEach((route, i) => {
@@ -110,40 +110,38 @@
                     var color = colors[i % colors.length];
                     var coords = points.map(p => {
                         var latLng = [p.lat, p.lng];
-                        bounds.extend(latLng); // Mở rộng vùng bao phủ
+                        bounds.extend(latLng);
                         return latLng;
                     });
 
-                    // 1. Vẽ đường di chuyển (Polyline)
+                    // Vẽ đường di chuyển nét liền, đậm hơn
                     var polyline = L.polyline(coords, { 
                         color: color, 
-                        weight: 4, 
-                        opacity: 0.7,
-                        dashArray: '5, 10' // Tạo hiệu ứng đường đứt đoạn để đỡ bị rối khi nhiều khách
+                        weight: 5, 
+                        opacity: 0.9
                     }).addTo(map);
 
-                    // 2. Click vào đường để xem ID thiết bị
-                    polyline.bindPopup(`<b>Thiết bị:</b> ${route.id}<br><b>Số điểm ghi nhận:</b> ${points.length}`);
+                    polyline.bindPopup(`<b>Thiết bị:</b> ${route.id}<br><b>Số điểm:</b> ${points.length}`);
 
-                    // 3. Đánh dấu điểm bắt đầu (Xanh) và kết thúc (Đỏ)
                     var startPoint = points[0];
                     var endPoint = points[points.length - 1];
 
-                    // Điểm bắt đầu
+                    // Điểm bắt đầu (Xanh)
                     L.circleMarker([startPoint.lat, startPoint.lng], {
-                        radius: 6, fillColor: '#10b981', color: '#fff', weight: 2, opacity: 1, fillOpacity: 0.9
+                        radius: 7, fillColor: '#10b981', color: '#fff', weight: 2, opacity: 1, fillOpacity: 1
                     }).addTo(map).bindPopup(`<b>Bắt đầu</b><br>${route.id}<br>${new Date(startPoint.time).toLocaleString()}`);
 
-                    // Điểm kết thúc
+                    // Điểm kết thúc (Đỏ)
                     L.circleMarker([endPoint.lat, endPoint.lng], {
-                        radius: 6, fillColor: '#ef4444', color: '#fff', weight: 2, opacity: 1, fillOpacity: 0.9
-                    }).addTo(map).bindPopup(`<b>Hiện tại/Kết thúc</b><br>${route.id}<br>${new Date(endPoint.time).toLocaleString()}`);
+                        radius: 8, fillColor: '#ef4444', color: '#fff', weight: 2, opacity: 1, fillOpacity: 1
+                    }).addTo(map).bindPopup(`<b>Điểm mới nhất</b><br>${route.id}<br>${new Date(endPoint.time).toLocaleString()}`);
                 });
 
-                // Tự động căn chỉnh bản đồ nếu có dữ liệu
                 if (bounds.isValid()) {
                     map.fitBounds(bounds, { padding: [50, 50] });
                 }
+            } else {
+                console.warn("⚠️ Tracemap: Không có dữ liệu để hiển thị.");
             }
             window._tracemap = map;
         };

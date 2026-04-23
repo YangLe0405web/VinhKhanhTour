@@ -1,577 +1,120 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Bản đồ Tham quan V8.3 — Vĩnh Khánh</title>
-    
-    <link rel="manifest" href="/manifest.json" />
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#0f172a">
-    <link rel="apple-touch-icon" href="favicon.png">
-
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-
-    <style>
-        :root {
-            --primary: #fb923c;
-            --bg-dark: #0f172a;
-            --nav-bg: #1e1b4b; /* Navy Blue MAUI */
-            --accent-blue: #3b82f6;
-            --card-gray: rgba(255, 255, 255, 0.05);
-        }
-        
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Inter', sans-serif; }
-        body { background: var(--bg-dark); color: white; overflow: hidden; height: 100vh; position: relative; }
-        
-        #map { position: absolute; top: 0; bottom: 65px; left: 0; right: 0; z-index: 1; }
-
-        /* Bottom Navigation chuẩn MAUI */
-        .bottom-nav {
-            position: fixed; bottom: 0; left: 0; right: 0; height: 65px;
-            background: var(--nav-bg); display: flex; align-items: center; justify-content: space-around;
-            z-index: 2000; border-top: 1px solid rgba(255,255,255,0.1); padding-bottom: env(safe-area-inset-bottom);
-        }
-        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: rgba(255,255,255,0.5); font-size: 11px; cursor: pointer; flex: 1; }
-        .nav-item.active { color: white; font-weight: 800; }
-        .nav-item i { font-size: 22px; }
-
-        /* Stats Overlay giống App */
-        .stats-overlay {
-            position: fixed; top: 15px; left: 15px; right: 15px; z-index: 1000;
-            display: flex; justify-content: space-between; align-items: center; pointer-events: none;
-        }
-        .stat-pill {
-            background: rgba(30, 41, 59, 0.85); backdrop-filter: blur(10px);
-            padding: 8px 14px; border-radius: 99px; font-size: 12px;
-            color: white; border: 1px solid rgba(255,255,255,0.1); pointer-events: auto;
-        }
-
-        /* Bottom Sheet POI giống MAUI */
-        .bottom-sheet {
-            position: fixed; bottom: 65px; left: 0; right: 0;
-            background: white; color: #1e293b; 
-            padding: 20px; border-radius: 28px 28px 0 0;
-            z-index: 1500; box-shadow: 0 -10px 40px rgba(0,0,0,0.3);
-            transform: translateY(0); transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .sheet-handle { width: 40px; height: 4px; background: #e2e8f0; border-radius: 2px; margin: -10px auto 15px; cursor: pointer; }
-
-        .poi-info { display: flex; gap: 15px; margin-bottom: 20px; }
-        .poi-img { width: 90px; height: 90px; border-radius: 20px; object-fit: cover; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .poi-details { flex: 1; }
-        .poi-details h2 { font-size: 18px; color: #0f172a; margin-bottom: 4px; }
-        .rating-row { display: flex; align-items: center; gap: 5px; font-size: 13px; color: #64748b; margin-bottom: 6px; }
-        .rating-stars { color: #f59e0b; }
-
-        .action-row { display: flex; gap: 10px; }
-        .btn-full { 
-            flex: 1; height: 48px; border-radius: 24px; border: none; 
-            font-weight: 800; font-size: 13px; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-        }
-        .btn-blue { background: #2563eb; color: white; }
-        .btn-gray { background: #f1f5f9; color: #475569; }
-
-        /* Settings View dạng Card MAUI */
-        .settings-view { 
-            position: fixed; top: 0; bottom: 65px; left: 0; right: 0; 
-            background: var(--bg-dark); z-index: 1800; padding: 20px;
-            overflow-y: auto; display: none;
-        }
-        .setting-card { background: var(--card-gray); padding: 15px; border-radius: 20px; margin-bottom: 20px; }
-        .setting-label { font-size: 14px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; color: rgba(255,255,255,0.8); }
-        
-        .seg-group { display: flex; gap: 6px; background: rgba(0,0,0,0.2); padding: 4px; border-radius: 12px; }
-        .seg-btn { 
-            flex: 1; padding: 10px; border: none; background: transparent; 
-            color: rgba(255,255,255,0.4); font-weight: 800; font-size: 12px;
-            border-radius: 8px; cursor: pointer; transition: 0.2s;
-        }
-        .seg-btn.active { background: #3b82f6; color: white; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4); }
-
-        /* List View */
-        .list-view { 
-            position: fixed; top: 0; bottom: 65px; left: 0; right: 0; 
-            background: var(--bg-dark); z-index: 1800; padding: 20px;
-            overflow-y: auto; display: none;
-        }
-        .poi-card { background: var(--card-gray); border-radius: 20px; overflow: hidden; margin-bottom: 15px; position: relative; }
-        .poi-card img { width: 100%; height: 160px; object-fit: cover; }
-        .poi-card-content { padding: 15px; }
-        .cat-badge { position: absolute; top: 110px; left: 15px; background: var(--primary); padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 800; }
-
-        /* D-Pad ảo (MAUI Style) */
-        .dpad {
-            position: fixed; bottom: 150px; left: 20px; z-index: 1000;
-            display: grid; grid-template-columns: repeat(3, 44px); gap: 6px;
-        }
-        .move-btn { width: 44px; height: 44px; background: #3b82f6; border: none; border-radius: 12px; color: white; display:flex; align-items:center; justify-content:center; }
-    </style>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+    <title>Vĩnh Khánh Tour — Web App</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <link rel="stylesheet" href="visitor-map.css"/>
 </head>
 <body>
-    <div id="loader" style="position:fixed; inset:0; z-index:9999; background:var(--bg-dark); display:flex; align-items:center; justify-content:center;">
-        <div style="width:30px; height:30px; border:3px solid rgba(255,255,255,0.1); border-top-color:#fb923c; border-radius:50%; animation:spin 0.8s linear infinite;"></div>
-    </div>
-    <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
-
-    <div id="map"></div>
-
-    <div class="stats-overlay">
-        <div class="stat-pill" id="pos-display">📍 10.75950, 106.70501</div>
-        <div style="display: flex; gap: 8px;">
-            <div class="stat-pill" style="background: #ef4444; border:none;" id="top-lang-btn">🇻🇳 Tiếng Việt</div>
-            <div class="stat-pill" style="background: #3b82f6; border:none;" onclick="stopSpeak()">⏹ Dừng</div>
+    <div id="app">
+        <!-- Header -->
+        <div class="header">
+            <div class="status">Đang tải dữ liệu...</div>
+            <button id="btn-lang">🇻🇳 Tiếng Việt</button>
+            <button id="btn-start" onclick="toggleTracking()">Bắt đầu</button>
         </div>
-    </div>
 
-    <!-- Tour Status Bar (New) -->
-    <div id="tour-info-bar" style="display:none; position:fixed; top:70px; left:15px; right:15px; background:rgba(30,41,59,0.9); backdrop-filter:blur(10px); border-radius:15px; padding:12px 18px; z-index:100; border:1px solid rgba(251,146,60,0.3); box-shadow:0 10px 25px rgba(0,0,0,0.4);">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <div>
-                <div style="font-size:10px; color:#fb923c; font-weight:800; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:2px;">Tour Mode</div>
-                <div id="tour-title-display" style="font-size:15px; font-weight:700; color:white; max-width:180px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Tên Tour</div>
+        <div class="main">
+            <div id="map"></div>
+
+            <!-- D-Pad Điều khiển ảo -->
+            <div class="dpad">
+                <div></div><button onclick="move(0.00005,0)">▲</button><div></div>
+                <button onclick="move(0,-0.00007)">◀</button><button onclick="move(0,0)">●</button><button onclick="move(0,0.00007)">▶</button>
+                <div></div><button onclick="move(-0.00005,0)">▼</button><div></div>
             </div>
-            <div style="text-align:right;">
-                <div style="font-size:9px; color:rgba(255,255,255,0.4); font-weight:700;">TIẾN ĐỘ</div>
-                <div id="tour-step-display" style="font-size:18px; font-weight:900; color:#fb923c; font-family:monospace;">01/10</div>
-            </div>
-        </div>
-    </div>
 
-    <!-- Premium D-Pad (Emulator-style) -->
-    <div id="virtual-controls" style="position:fixed; bottom:120px; right:20px; z-index:999; display:flex; flex-direction:column; align-items:center; gap:5px; background:rgba(15,23,42,0.8); padding:15px; border-radius:50%; border:1px solid rgba(255,255,255,0.1); backdrop-filter:blur(10px); box-shadow:0 10px 30px rgba(0,0,0,0.5);">
-        <button class="move-btn" onclick="moveBy(0.0001, 0)" style="width:35px; height:35px; background:none; border:none; color:white; font-size:20px;">▲</button>
-        <div style="display:flex; align-items:center; gap:5px;">
-            <button class="move-btn" onclick="moveBy(0, -0.0001)" style="width:35px; height:35px; background:none; border:none; color:white; font-size:20px;">◀</button>
-            <button onclick="resetPos()" style="width:40px; height:40px; background:#fb923c; border:none; border-radius:50%; color:white; font-size:12px; font-weight:900; box-shadow:0 0 15px rgba(251,146,60,0.5);">GPS</button>
-            <button class="move-btn" onclick="moveBy(0, 0.0001)" style="width:35px; height:35px; background:none; border:none; color:white; font-size:20px;">▶</button>
-        </div>
-        <button class="move-btn" onclick="moveBy(-0.0001, 0)" style="width:35px; height:35px; background:none; border:none; color:white; font-size:20px;">▼</button>
-    </div>
-
-    <!-- POI SHEET giống MAUI -->
-    <div id="poi-sheet" class="bottom-sheet" style="display: none;">
-        <div class="sheet-handle" onclick="closeSheet()"></div>
-        <div class="poi-info">
-            <img id="poi-img" class="poi-img" src="favicon.png">
-            <div class="poi-details">
-                <h2 id="poi-title">Tên địa điểm</h2>
-                <div class="rating-row">
-                    <span class="rating-stars">★★★★★</span>
-                    <span>4.8 (6.4k) • <span id="dist-val">23m</span></span>
+            <!-- View Danh sách -->
+            <div id="list-view" class="view">
+                <div class="search-box">
+                    <input type="text" id="search-input" placeholder="Tìm kiếm địa điểm..." oninput="updatePoiList()">
                 </div>
-                <p id="poi-desc" style="font-size: 13px; color: #64748b; line-height: 1.4;"></p>
+                <div id="poi-list"></div>
             </div>
-        </div>
-        <div class="poi-sheet-btns">
-            <button class="btn-full btn-blue" onclick="getDirection()"><i>🧭</i> Chỉ đường</button>
-            <button class="btn-full btn-red btn-cancel-route" style="display:none; margin-top:10px; background:#ef4444;" onclick="cancelRoute()" id="btn-cancel-route">✕ Hủy chỉ đường</button>
-            <div id="tour-nav-btns" style="display:none; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
-                <button class="btn-full btn-gray" style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.1);" onclick="prevPoi()">◀ TRƯỚC</button>
-                <button class="btn-full btn-gray" style="background:rgba(251,146,60,0.2); border:1px solid rgba(251,146,60,0.3); color:#fb923c;" onclick="nextPoi()">TIẾP THEO ▶</button>
-            </div>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
-                <button class="btn-full btn-gray" onclick="openDetail()">Chi tiết</button>
-                <button class="btn-full btn-gray" onclick="speakManual()">🎧 Thuyết minh</button>
-            </div>
-        </div>
-    </div>
 
-    <!-- LIST VIEW giống MAUI -->
-    <div id="list-view" class="list-view">
-        <div style="display:flex; align-items:center; background:rgba(255,255,255,0.1); border-radius:12px; padding:8px 15px; margin-bottom:20px;">
-            <i style="margin-right:10px; opacity:0.5">🔍</i>
-            <input type="text" id="poi-search" placeholder="Tìm kiếm địa điểm..." oninput="renderPoiList()" 
-                style="background:transparent; border:none; color:white; outline:none; flex:1; font-size:14px;">
-        </div>
-        <h3 style="margin-bottom: 20px; font-weight:800; font-size:16px;">📋 Danh sách tham quan</h3>
-        <div id="poi-list"></div>
-    </div>
+            <!-- View Cài đặt -->
+            <div id="settings-view" class="view">
+                <div class="setting-card">
+                    <span class="setting-label">🗣️ Ngôn ngữ thuyết minh</span>
+                    <div class="lang-grid">
+                        <button class="lang-btn active" onclick="setSettings('lang','vi')">🇻🇳 Việt</button>
+                        <button class="lang-btn" onclick="setSettings('lang','en')">🇬🇧 English</button>
+                        <button class="lang-btn" onclick="setSettings('lang','zh')">🇨🇳 中文</button>
+                        <button class="lang-btn" onclick="setSettings('lang','ja')">🇯🇵 日本語</button>
+                        <button class="lang-btn" onclick="setSettings('lang','ko')">🇰🇷 한국어</button>
+                    </div>
+                </div>
 
-    <!-- SETTINGS VIEW giống MAUI -->
-    <div id="settings-view" class="settings-view">
-        <h3 id="lbl-settings-title" style="text-align:center; margin-bottom: 25px; font-weight:800">⚙️ Cài đặt</h3>
-        
-        <div class="setting-card">
-            <label class="setting-label" id="lbl-repeat">🔁 Số lần đọc lại</label>
-            <div class="seg-group" id="seg-repeat">
-                <button class="seg-btn" onclick="setRepeat(1)">1x</button>
-                <button class="seg-btn" onclick="setRepeat(2)">2x</button>
-                <button class="seg-btn" onclick="setRepeat(3)">3x</button>
-                <button class="seg-btn" onclick="setRepeat(4)">4x</button>
-                <button class="seg-btn" onclick="setRepeat(5)">5x</button>
+                <div class="setting-card">
+                    <span class="setting-label">🔄 Số lần lặp lại</span>
+                    <div class="seg-group">
+                        <button class="seg-btn active" data-key="repeat" data-val="1" onclick="setSettings('repeat',1)">1x</button>
+                        <button class="seg-btn" data-key="repeat" data-val="2" onclick="setSettings('repeat',2)">2x</button>
+                        <button class="seg-btn" data-key="repeat" data-val="3" onclick="setSettings('repeat',3)">3x</button>
+                    </div>
+                </div>
+
+                <div class="setting-card">
+                    <span class="setting-label">⏲️ Thời gian chờ (giây)</span>
+                    <div class="seg-group">
+                        <button class="seg-btn active" data-key="cooldown" data-val="10" onclick="setSettings('cooldown',10)">10s</button>
+                        <button class="seg-btn" data-key="cooldown" data-val="30" onclick="setSettings('cooldown',30)">30s</button>
+                        <button class="seg-btn" data-key="cooldown" data-val="60" onclick="setSettings('cooldown',60)">60s</button>
+                    </div>
+                </div>
+
+                <div class="setting-card">
+                    <span class="setting-label">📡 Bán kính quét (m)</span>
+                    <div class="seg-group">
+                        <button class="seg-btn active" data-key="radius" data-val="30" onclick="setSettings('radius',30)">30m</button>
+                        <button class="seg-btn" data-key="radius" data-val="50" onclick="setSettings('radius',50)">50m</button>
+                        <button class="seg-btn" data-key="radius" data-val="100" onclick="setSettings('radius',100)">100m</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Sheet -->
+            <div class="bottom-sheet">
+                <div class="sheet-handle"></div>
+                <div class="sheet-title">Tên địa điểm</div>
+                <div class="sheet-subtitle">Khoảng cách: --m</div>
+                <div class="sheet-actions">
+                    <button class="btn-route" onclick="openDetail()">Xem chi tiết</button>
+                    <button class="btn-secondary" onclick="hideBottomSheet()">Đóng</button>
+                </div>
+            </div>
+
+            <!-- View Chi tiết -->
+            <div id="detail-view" class="view" style="padding:0">
+                <div class="detail-header">
+                    <button onclick="closeDetail()">✕</button>
+                    <div style="font-weight:700">Chi tiết địa điểm</div>
+                </div>
+                <div class="detail-body">
+                    <div class="detail-name">...</div>
+                    <div class="detail-section">
+                        <h3>Giới thiệu</h3>
+                        <p id="detail-desc">...</p>
+                    </div>
+                    <div class="detail-actions">
+                        <button class="btn-listen" onclick="playPoiAudio(state.selectedPoi)">🔊 Nghe thuyết minh</button>
+                        <button class="btn-back-map" onclick="closeDetail(); hideBottomSheet()">Trở về bản đồ</button>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="setting-card">
-            <label class="setting-label" id="lbl-cooldown">⏱ Thời gian chờ (giây)</label>
-            <div class="seg-group" id="seg-cooldown">
-                <button class="seg-btn" onclick="setCooldown(3)">3s</button>
-                <button class="seg-btn" onclick="setCooldown(10)">10s</button>
-                <button class="seg-btn" onclick="setCooldown(30)">30s</button>
-                <button class="seg-btn" onclick="setCooldown(120)">120s</button>
-            </div>
-        </div>
-
-        <div class="setting-card">
-            <label class="setting-label" id="lbl-radius">📡 Bán kính (m)</label>
-            <div class="seg-group" id="seg-radius">
-                <button class="seg-btn" onclick="setRadius(10)">10m</button>
-                <button class="seg-btn" onclick="setRadius(30)">30m</button>
-                <button class="seg-btn" onclick="setRadius(50)">50m</button>
-                <button class="seg-btn" onclick="setRadius(100)">100m</button>
-            </div>
-        </div>
-
-        <div class="setting-card">
-            <label class="setting-label" id="lbl-lang">🌐 Ngôn ngữ</label>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                <button class="btn-full btn-gray" id="lang-vi" style="border:1px solid rgba(255,255,255,0.1)" onclick="setLang('vi')">🇻🇳 Việt</button>
-                <button class="btn-full btn-gray" id="lang-en" style="border:1px solid rgba(255,255,255,0.1)" onclick="setLang('en')">🇬🇧 En</button>
-                <button class="btn-full btn-gray" id="lang-zh" style="border:1px solid rgba(255,255,255,0.1)" onclick="setLang('zh')">🇨🇳 中</button>
-                <button class="btn-full btn-gray" id="lang-ja" style="border:1px solid rgba(255,255,255,0.1)" onclick="setLang('ja')">🇯🇵 日</button>
-                <button class="btn-full btn-gray" id="lang-ko" style="border:1px solid rgba(255,255,255,0.1)" onclick="setLang('ko')">🇰🇷 한</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Bottom Navigation -->
-    <nav class="bottom-nav">
-        <div class="nav-item active" id="nav-map" onclick="showTab('map')">
-            <i>🗺️</i> <span id="lbl-tab-map">Bản đồ</span>
-        </div>
-        <div class="nav-item" id="nav-list" onclick="showTab('list')">
-            <i>📋</i> <span id="lbl-tab-list">Danh sách</span>
-        </div>
-        <div class="nav-item" id="nav-settings" onclick="showTab('settings')">
-            <i>⚙️</i> <span id="lbl-tab-settings">Cài đặt</span>
-        </div>
-    </nav>
+        <!-- Bottom Nav -->
+        <div class="bottom-nav">
+            <div class="nav-item active" data-page="map"><i>🗺️</i><span>Bản đồ</span></div>
+            <div class="nav-item" data-page="list"><i>📋</i><span>Danh sách</span></div>
+            <div class="nav-item" data-page="settings"><i>⚙️</i><span>Cài đặt</span></div>
         </div>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script>
-        const API = 'https://vinhkhanh-api.onrender.com';
-        let map, userMarker, userCircle, pois = [], markers = [], circles = [];
-        let isVirtual = true, vLat = 10.7602, vLng = 106.7051;
-        let selectedId = null, lastNearestPoiId = null, routeLine = null;
-        let isTourMode = false, tourData = null, currentTourIndex = 0;
-        let currentlyInside = new Set();
-        let currentLang = localStorage.getItem('vk_lang') || 'vi';
-        let configRadius = parseInt(localStorage.getItem('vk_rad')) || 30;
-        let configCooldown = parseInt(localStorage.getItem('vk_cool')) || 10;
-        let configRepeat = parseInt(localStorage.getItem('vk_rpt')) || 1;
-
-        function moveBy(la,ln) { moveVirtual(la,ln); }
-        function resetPos() { resetVirtual(); }
-
-        const deviceId = localStorage.getItem('vk_device_id') || ('WebUser_' + Math.floor(Math.random()*10000));
-        localStorage.setItem('vk_device_id', deviceId);
-        const deviceName = `WebBrowser (${navigator.platform})`;
-
-        const voiceLangs = { 'vi': 'vi-VN', 'en': 'en-US', 'zh': 'zh-CN', 'ko': 'ko-KR', 'ja': 'ja-JP' };
-        let lastTriggerTimes = new Map();
-        let currentSpeakingPoiId = null;
-        let speechStartTime = null;
-
-        const deviceId = localStorage.getItem('vk_device_id') || ('WebUser_' + Math.floor(Math.random()*10000));
-        localStorage.setItem('vk_device_id', deviceId);
-        const deviceName = `WebBrowser (${navigator.platform})`;
-
-        const LOCALES = {
-            'vi': {
-                'settings_title': '⚙️ Cài đặt', 'repeat': '🔁 Số lần đọc lại', 'cooldown': '⏱ Thời gian chờ (giây)', 'radius': '📡 Bán kính (m)', 'lang': '🌐 Ngôn ngữ',
-                'tab_map': 'Bản đồ', 'tab_list': 'Danh sách', 'tab_settings': 'Cài đặt', 'search': 'Tìm điểm tham quan...', 'direction': '🧭 Chỉ đường',
-                'cancel_route': '✕ Hủy chỉ đường', 'detail': 'Chi tiết', 'audio': '🎧 Thuyết minh', 'distance': '📏 Cách', 'start': '▶ Bắt đầu', 'stop': '⏹ Dừng'
-            },
-            'en': {
-                'settings_title': '⚙️ Settings', 'repeat': '🔁 Repeat count', 'cooldown': '⏱ Cooldown (sec)', 'radius': '📡 Radius (m)', 'lang': '🌐 Language',
-                'tab_map': 'Map', 'tab_list': 'List', 'tab_settings': 'Settings', 'search': 'Search POI...', 'direction': '🧭 Direction',
-                'cancel_route': '✕ Cancel Route', 'detail': 'Detail', 'audio': '🎧 Audio', 'distance': '📏 Away', 'start': '▶ Start', 'stop': '⏹ Stop'
-            },
-            'zh': {
-                'settings_title': '⚙️ 设置', 'repeat': '🔁 重复次数', 'cooldown': '⏱ 冷却时间 (秒)', 'radius': '📡 激活半径 (米)', 'lang': '🌐 语言',
-                'tab_map': '地图', 'tab_list': '列表', 'tab_settings': '设置', 'search': '搜索景点...', 'direction': '🧭 导航',
-                'cancel_route': '✕ 取消导航', 'detail': '详情', 'audio': '🎧 语音讲解', 'distance': '📏 距离', 'start': '▶ 开始', 'stop': '⏹ 停止'
-            },
-            'ja': {
-                'settings_title': '⚙️ 設定', 'repeat': '🔁 繰り返し回数', 'cooldown': '⏱ 待機時間 (秒)', 'radius': '📡 起動エリア (m)', 'lang': '🌐 言語',
-                'tab_map': '地図', 'tab_list': '一覧', 'tab_settings': '設定', 'search': 'スポットを検索...', 'direction': '🧭 ナビ',
-                'cancel_route': '✕ ナビをキャンセル', 'detail': '詳細', 'audio': '🎧 音声案内', 'distance': '📏 距離', 'start': '▶ 開始', 'stop': '⏹ 停止'
-            },
-            'ko': {
-                'settings_title': '⚙️ 설정', 'repeat': '🔁 반복 횟수', 'cooldown': '⏱ 대기 시간 (초)', 'radius': '📡 활성화 반경 (m)', 'lang': '🌐 언어',
-                'tab_map': '지도', 'tab_list': '목록', 'tab_settings': '설정', 'search': '명소 검색...', 'direction': '🧭 길안내',
-                'cancel_route': '✕ 길안내 취소', 'detail': '상세 정보', 'audio': '🎧 내레이션', 'distance': '📏 거리', 'start': '▶ 시작', 'stop': '⏹ 정지'
-            }
-        };
-
-        async function sendHistory(action, pId, pName, duration = 0) {
-            const body = { 
-                Action: action, 
-                PoiId: pId || '', 
-                PoiName: pName || 'System', 
-                Language: currentLang.toUpperCase(), 
-                Device: deviceName, 
-                Duration: duration, 
-                Lat: vLat, 
-                Lng: vLng, 
-                Timestamp: new Date().toISOString() 
-            };
-            fetch(`${API}/api/history`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).catch(()=>{});
-        }
-        async function sendAnalytics(ev, pId, duration = 0) {
-            const body = { 
-                EventType: ev, 
-                PoiId: pId, 
-                Language: currentLang.toUpperCase(), 
-                Duration: duration, 
-                Lat: vLat, 
-                Lng: vLng 
-            };
-            fetch(`${API}/api/analytics`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).catch(()=>{});
-        }
-        async function sendTrace(la, ln) {
-            fetch(`${API}/api/trace`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ DeviceId: deviceName, Lat: la, Lng: ln, Timestamp: new Date().toISOString() }) }).catch(()=>{});
-        }
-
-        function translateUI() {
-            const loc = LOCALES[currentLang] || LOCALES['vi'];
-            document.getElementById('lbl-settings-title').innerText = loc.settings_title;
-            document.getElementById('lbl-repeat').innerText = loc.repeat;
-            document.getElementById('lbl-cooldown').innerText = loc.cooldown;
-            document.getElementById('lbl-radius').innerText = loc.radius;
-            document.getElementById('lbl-lang').innerText = loc.lang;
-            document.getElementById('lbl-tab-map').innerText = loc.tab_map;
-            document.getElementById('lbl-tab-list').innerText = loc.tab_list;
-            document.getElementById('lbl-tab-settings').innerText = loc.tab_settings;
-            if(document.getElementById('poi-search')) document.getElementById('poi-search').placeholder = loc.search;
-            const btnDir = document.querySelector('.btn-blue'); if(btnDir) btnDir.innerHTML = `<i>🧭</i> ${loc.direction}`;
-            const btnCancel = document.getElementById('btn-cancel-route'); if(btnCancel) btnCancel.innerText = loc.cancel_route;
-            const sheetButtons = document.querySelectorAll('.btn-gray'); if(sheetButtons[0]) sheetButtons[0].innerText = loc.detail; if(sheetButtons[1]) sheetButtons[1].innerText = loc.audio;
-            if(document.getElementById('lbl-dist-prefix')) document.getElementById('lbl-dist-prefix').innerText = loc.distance + ': ';
-        }
-
-        function showTab(tab) {
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            document.getElementById('nav-' + tab).classList.add('active');
-            document.getElementById('map').style.visibility = (tab === 'map' ? 'visible' : 'hidden');
-            document.getElementById('settings-view').style.display = (tab === 'settings' ? 'block' : 'none');
-            document.getElementById('list-view').style.display = (tab === 'list' ? 'block' : 'none');
-            if(tab !== 'map') document.getElementById('poi-sheet').style.display='none';
-        }
-
-        function updateSettingsUI() {
-            document.querySelectorAll('#seg-repeat .seg-btn').forEach(btn => { btn.classList.toggle('active', parseInt(btn.innerText) === configRepeat); });
-            document.querySelectorAll('#seg-cooldown .seg-btn').forEach(btn => { btn.classList.toggle('active', parseInt(btn.innerText) === configCooldown); });
-            document.querySelectorAll('#seg-radius .seg-btn').forEach(btn => { btn.classList.toggle('active', parseInt(btn.innerText) === configRadius); });
-            ['vi','en','zh','ja','ko'].forEach(l => { const b = document.getElementById('lang-' + l); if(b) b.classList.toggle('active', currentLang === l); });
-            const topBtn = document.getElementById('top-lang-btn');
-            const lConf = { 'vi': '🇻🇳 Việt', 'en': '🇬🇧 En', 'zh': '🇨🇳 中', 'ja': '🇯🇵 日', 'ko': '🇰🇷 한' };
-            if(topBtn) topBtn.innerText = lConf[currentLang] || '🇻🇳 Việt';
-            translateUI();
-        }
-
-        function setRepeat(val) { configRepeat = val; localStorage.setItem('vk_rpt', val); updateSettingsUI(); }
-        function setCooldown(val) { configCooldown = val; localStorage.setItem('vk_cool', val); updateSettingsUI(); }
-        function setRadius(val) { configRadius = val; localStorage.setItem('vk_rad', val); updateSettingsUI(); circles.forEach(c => c.setRadius(val)); }
-        function setLang(l) { currentLang = l; localStorage.setItem('vk_lang', l); sendHistory('language_change', '', 'System'); renderPoiList(); updateSettingsUI(); if(selectedId) selectPoi(pois.find(x=>(x.Id||x.id)===selectedId)); }
-
-        async function loadData() {
-            try {
-                const urlParams = new URLSearchParams(window.location.search);
-                const tourId = urlParams.get('t');
-                const res = await fetch(`${API}/api/pois`); 
-                let allPois = await res.json();
-
-                if (tourId) {
-                    try {
-                        const tRes = await fetch(`${API}/api/tours/${tourId}`);
-                        if (tRes.ok) {
-                            tourData = await tRes.json();
-                            isTourMode = true;
-                            const tourPoiIds = tourData.poiIds || tourData.PoiIds || [];
-                            pois = allPois.filter(p => tourPoiIds.includes(p.id || p.Id));
-                            
-                            document.getElementById('tour-info-bar').style.display = 'block';
-                            document.getElementById('tour-title-display').innerText = tourData.name || tourData.Name;
-                            document.getElementById('tour-step-display').innerText = `01/${pois.length}`;
-                            document.getElementById('tour-nav-btns').style.display = 'grid';
-                            
-                            if (tourData.qrType === 'play' || tourData.QrType === 'play') {
-                                setTimeout(() => { if(pois[0]) { selectPoi(pois[0]); speakPoi(pois[0]); } }, 1500);
-                            }
-                        } else { pois = allPois; }
-                    } catch (e) { console.error("Tour error", e); pois = allPois; }
-                } else {
-                    pois = allPois;
-                }
-                
-                // Luôn hiện D-Pad để test như máy ảo
-                document.getElementById('virtual-controls').style.display = 'flex';
-                
-                // --- Khởi tạo: Ưu tiên GPS thực tế > Fallback Cổng chào ---
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(
-                        p => {
-                            vLat = p.coords.latitude; vLng = p.coords.longitude;
-                            updatePosMarker(vLat, vLng, p.coords.accuracy);
-                            map.setView([vLat, vLng], 18);
-                            renderMapElements(); renderPoiList(); updateSettingsUI();
-                            checkGeofences();
-                        },
-                        err => {
-                            const ent = pois.find(p => (p.Id || p.id) === 'poi_01') || pois[0];
-                            if (ent) { vLat = ent.Latitude || ent.latitude; vLng = ent.Longitude || ent.longitude; map.setView([vLat, vLng], 18); updatePosMarker(vLat, vLng, 5); }
-                            renderMapElements(); renderPoiList(); updateSettingsUI();
-                        }
-                    );
-                } else {
-                    const ent = pois.find(p => (p.Id || p.id) === 'poi_01') || pois[0];
-                    if (ent) { vLat = ent.Latitude || ent.latitude; vLng = ent.Longitude || ent.longitude; map.setView([vLat, vLng], 18); updatePosMarker(vLat, vLng, 5); }
-                    renderMapElements(); renderPoiList(); updateSettingsUI();
-                }
-            } catch(e) { console.error("Data fail:", e); }
-        }
-
-        function renderMapElements() {
-            markers.forEach(m => map.removeLayer(m)); circles.forEach(c => map.removeLayer(c));
-            markers = []; circles = [];
-            pois.forEach(p => {
-                const lid = p.Id || p.id, lat = p.Latitude||p.latitude, lng = p.Longitude||p.longitude;
-                const c = L.circle([lat, lng], { radius: configRadius, color: '#fb923c', weight: 1, fillOpacity: 0.05, dashArray: '5,5' }).addTo(map);
-                circles.push(c);
-                const html = `<div class="pin-poi-${lid}" style="position:relative; width:32px; height:32px;"><div style="position:absolute; width:100%; height:100%; border-radius:50% 50% 50% 0; background:#fb923c; transform:rotate(-45deg); border:2px solid white;"></div><div style="position:absolute; inset:10%; background:white; border-radius:50%; display:flex; align-items:center; justify-content:center; transform:rotate(45deg); font-size:14px;">${(p.Category||p.category)==='food'?'🍜':'🏛'}</div></div>`;
-                const m = L.marker([lat, lng], { icon: L.divIcon({ className: '', html, iconSize:[32,32], iconAnchor:[16,32] }) }).addTo(map).on('click', () => selectPoi(p));
-                markers.push(m);
-            });
-        }
-
-        function renderPoiList() {
-            const query = document.getElementById('poi-search')?.value.toLowerCase() || '';
-            const listEl = document.getElementById('poi-list'); listEl.innerHTML = '';
-            pois.filter(p => {
-                const nameVi = (p.Name || p.name || '').toLowerCase();
-                const content = p.Content || p.content || {};
-                const nameOther = (content[currentLang] || '').toLowerCase();
-                const cat = (p.Category || p.category || '').toLowerCase();
-                return nameVi.includes(query) || nameOther.includes(query) || cat.includes(query);
-            }).forEach(p => {
-                const name = (p.Content?.[currentLang] || p.Name || p.name).split('.')[0];
-                const desc = (p.Content?.[currentLang] || p.Content?.['vi'] || '...').substring(0, 60) + '...';
-                const img = p.ImageUrl || p.imageUrl || 'favicon.png';
-                const card = document.createElement('div'); card.className = 'poi-card';
-                card.innerHTML = `<div class="cat-badge">THAM QUAN</div><img src="${img}" style="width:100%; height:160px; object-fit:cover;" onerror="this.src='favicon.png'"><div class="poi-card-content"><h4 style="font-size:15px; margin-bottom:5px;">${name}</h4><p style="font-size:11px; color:rgba(255,255,255,0.4); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${desc}</p></div>`;
-                card.onclick = () => { showTab('map'); selectPoi(p); };
-                listEl.appendChild(card);
-            });
-        }
-
-        function selectPoi(p) {
-            selectedId = p.Id || p.id;
-            if (isTourMode) {
-                currentTourIndex = pois.findIndex(x => (x.Id || x.id) === selectedId);
-                document.getElementById('tour-step-display').innerText = `${String(currentTourIndex + 1).padStart(2, '0')}/${pois.length}`;
-            }
-            const name = (p.Content?.[currentLang] || p.Name || p.name || '').split('.')[0];
-            document.getElementById('poi-title').innerText = name;
-            document.getElementById('poi-desc').innerText = p.Content?.[currentLang] || p.Content?.['vi'] || '...';
-            document.getElementById('poi-img').src = p.ImageUrl || p.imageUrl || 'favicon.png';
-            const d = getDist(vLat, vLng, p.Latitude || p.latitude, p.Longitude || p.longitude);
-            document.getElementById('dist-val').innerText = Math.round(d) + 'm';
-            document.getElementById('poi-sheet').style.display = 'block';
-            const btnCancel = document.getElementById('btn-cancel-route'); if(btnCancel) btnCancel.style.display = routeLine ? 'block' : 'none';
-            map.flyTo([p.Latitude || p.latitude, p.Longitude || p.longitude], 18);
-        }
-
-        function speakPoi(p) {
-            if (!('speechSynthesis' in window)) return;
-            window.speechSynthesis.cancel();
-            const text = p.Content?.[currentLang] || p.Name || p.name;
-            const pId = p.Id || p.id;
-            sendHistory('play_poi', pId, p.Name || p.name);
-            sendAnalytics('poi_play', pId);
-            speechStartTime = Date.now();
-            const speakOnce = (count) => {
-                if (count <= 0 || currentSpeakingPoiId !== pId) {
-                    if (currentSpeakingPoiId === pId) {
-                        const duration = Math.round((Date.now() - speechStartTime) / 1000);
-                        sendHistory('listen_poi', pId, p.Name || p.name, duration);
-                    }
-                    return;
-                }
-                const msg = new SpeechSynthesisUtterance(text);
-                msg.lang = voiceLangs[currentLang] || 'vi-VN';
-                msg.onend = () => speakOnce(count - 1);
-                window.speechSynthesis.speak(msg);
-            };
-            currentSpeakingPoiId = pId; speakOnce(configRepeat);
-        }
-
-        function getDirection() {
-            if(!selectedId) return;
-            const p = pois.find(x => (x.Id || x.id) === selectedId);
-            sendHistory('route_start', p.Id||p.id, p.Name||p.name);
-            if(routeLine) map.removeLayer(routeLine);
-            routeLine = L.polyline([[vLat, vLng], [p.Latitude||p.latitude, p.Longitude||p.longitude]], { color: '#3b82f6', weight: 5, dashArray: '10, 10' }).addTo(map);
-            const btnCancel = document.getElementById('btn-cancel-route'); if(btnCancel) btnCancel.style.display = 'block';
-        }
-
-        function cancelRoute() { if(routeLine) { map.removeLayer(routeLine); routeLine = null; } const btnCancel = document.getElementById('btn-cancel-route'); if(btnCancel) btnCancel.style.display = 'none'; }
-        function closeSheet() { document.getElementById('poi-sheet').style.display = 'none'; }
-        function nextPoi() {
-            if (!isTourMode || pois.length === 0) return;
-            currentTourIndex = (currentTourIndex + 1) % pois.length;
-            selectPoi(pois[currentTourIndex]);
-        }
-        function prevPoi() {
-            if (!isTourMode || pois.length === 0) return;
-            currentTourIndex = (currentTourIndex - 1 + pois.length) % pois.length;
-            selectPoi(pois[currentTourIndex]);
-        }
-
-        function speakManual() { const p = pois.find(x => (x.Id || x.id) === selectedId); if(p) speakPoi(p); }
-        function stopSpeak() { window.speechSynthesis.cancel(); currentSpeakingPoiId = null; }
-
-        function checkGeofences() {
-            const inRadius = pois.filter(p => getDist(vLat, vLng, p.Latitude || p.latitude, p.Longitude || p.longitude) <= configRadius)
-                                 .sort((a,b) => getDist(vLat, vLng, a.Latitude, a.Longitude) - getDist(vLat, vLng, b.Latitude, b.Longitude));
-            const inIds = new Set(inRadius.map(p => p.Id || p.id));
-            inRadius.forEach(poi => { if (!currentlyInside.has(poi.Id||poi.id)) { currentlyInside.add(poi.Id||poi.id); if ((poi.Id||poi.id) === (inRadius[0].Id||inRadius[0].id)) triggerPoi(poi); } });
-            currentlyInside.forEach(id => { if (!inIds.has(id)) { currentlyInside.delete(id); if(currentSpeakingPoiId === id) stopSpeak(); } });
-        }
-
-        function triggerPoi(p) {
-            const id = p.Id || p.id; const now = Date.now();
-            if (now - (lastTriggerTimes.get(id) || 0) > (configCooldown * 1000)) {
-                if (id !== lastNearestPoiId) { lastNearestPoiId = id; lastTriggerTimes.set(id, now); selectPoi(p); speakPoi(p); }
-            }
-        }
-
-        function updatePosMarker(lat, lng, acc) {
-            const html = `<div style="width:20px;height:20px;background:#3b82f6;border:3px solid white;border-radius:50%;"></div>`;
-            if(!userMarker) userMarker = L.marker([lat, lng], { icon: L.divIcon({ className: '', html, iconSize:[20,20], iconAnchor:[10,10] }) }).addTo(map); else userMarker.setLatLng([lat, lng]);
-            if(!userCircle) userCircle = L.circle([lat, lng], { radius: acc, color: '#3b82f6', weight: 1, fillOpacity: 0.1 }).addTo(map); else userCircle.setLatLng([lat, lng]).setRadius(acc);
-            document.getElementById('pos-display').innerText = `📍 ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-        }
-
-        function moveVirtual(dLat, dLng) { vLat += dLat; vLng += dLng; updatePosMarker(vLat, vLng, 5); map.panTo([vLat, vLng]); checkGeofences(); sendTrace(vLat, vLng); }
-        function resetVirtual() { if(navigator.geolocation) { navigator.geolocation.getCurrentPosition(p => { vLat = p.coords.latitude; vLng = p.coords.longitude; updatePosMarker(vLat, vLng, p.coords.accuracy); map.flyTo([vLat, vLng], 18); }); } }
-        function getDist(l1, n1, l2, n2) { const R = 6371e3, dL = (l2-l1)*Math.PI/180, dN = (n2-n1)*Math.PI/180, a = Math.sin(dL/2)*Math.sin(dL/2)+Math.cos(l1*Math.PI/180)*Math.cos(l2*Math.PI/180)*Math.sin(dN / 2) * Math.sin(dN / 2); return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a)); }
-
-        window.onload = () => {
-            map = L.map('map', { zoomControl: false }).setView([vLat, vLng], 18);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-            map.on('click', () => closeSheet());
-            document.getElementById('virtual-controls').style.display = 'grid';
-            loadData();
-            setInterval(() => sendTrace(vLat,vLng), 10000);
-            setTimeout(() => document.getElementById('loader').style.display='none', 600);
-        };
-    </script>
+    <script src="visitor-map.js"></script>
 </body>
 </html>

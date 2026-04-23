@@ -485,13 +485,13 @@
             });
         }
 
-        // 2. Nạp Analytics Event (Play Audio)
+        // 2. Nạp Analytics Event (Play Audio, Scan QR, etc.)
         foreach (var e in _events)
         {
             list.Add(new UnifiedEvent
             {
                 Timestamp = e.Timestamp,
-                EventType = "play_poi",
+                EventType = e.EventType, // Sửa: Dùng EventType thực tế thay vì hardcode
                 PoiId = e.PoiId,
                 PoiName = _pois.FirstOrDefault(p => p.Id == e.PoiId)?.Name ?? e.PoiId,
                 Language = e.Language,
