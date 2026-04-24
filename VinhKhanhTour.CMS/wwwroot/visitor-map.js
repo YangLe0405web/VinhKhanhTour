@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════════════════════════
-   VinhKhanhTour Web App — JS (V10.3: Audio per-lang, Virtual GPS, QR Fix)
+   VinhKhanhTour Web App — JS (V10.7: Repeat + Cooldown + Audio Fix)
    ══════════════════════════════════════════════════════════════ */
 
 const API = 'https://vinhkhanh-api.onrender.com';
@@ -14,7 +14,8 @@ const LOCALES = {
 let config = { speed: 1.0, repeat: 1, cooldown: 3, radius: 25, lang: localStorage.getItem('vk_lang') || 'vi' };
 let state = {
     deviceId: getDeviceId(), isTracking: false, userPos: [START_LAT, START_LNG],
-    allPoi: [], currentPoi: null, entryTime: null, selectedPoi: null
+    allPoi: [], currentPoi: null, entryTime: null, selectedPoi: null,
+    poiLastPlayed: {}  // { poiId: timestamp } — dùng để kiểm tra cooldown
 };
 let map, userMarker, userCircle, poiMarkers = {}, poiCircles = {}, audioPlayer = new Audio();
 
@@ -63,20 +64,20 @@ async function logAction(type, poi, note = '', duration = 0) {
         method: 'POST', mode: 'cors',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
-    }).catch(() => {});
+    }).catch(() => { });
 }
 
 async function logTourScan(tourId) {
     if (!tourId) return;
     const devId = getDeviceId();
-    fetch(`${API}/api/tours/${tourId}/scan?deviceId=${devId}&lang=${config.lang}`, { method: 'POST', mode: 'cors' }).catch(() => {});
+    fetch(`${API}/api/tours/${tourId}/scan?deviceId=${devId}&lang=${config.lang}`, { method: 'POST', mode: 'cors' }).catch(() => { });
     logAction('scan_qr', null, `Tour Scan: ${tourId}`);
 }
 
 async function sendTrace() {
     const devId = getDeviceId();
     const payload = { DeviceId: devId, Lat: state.userPos[0], Lng: state.userPos[1], Timestamp: new Date().toISOString() };
-    fetch(`${API}/api/trace`, { method: 'POST', mode: 'cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }).catch(() => {});
+    fetch(`${API}/api/trace`, { method: 'POST', mode: 'cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }).catch(() => { });
 }
 
 // ── LOAD POI DATA ──────────────────────────────────────────
@@ -134,8 +135,6 @@ function checkProximity() {
 
     // Rời khỏi POI
     if (state.currentPoi && !inRange.find(r => r.poi.Id === state.currentPoi.Id)) {
-        const dur = Math.round((Date.now() - state.entryTime) / 1000);
-        logAction('play_audio_end', state.currentPoi, '', dur);
         stopAllAudio();
         hideBottomSheet();
         state.currentPoi = null;
@@ -148,28 +147,77 @@ function checkProximity() {
         state.currentPoi = nearest;
         state.entryTime = Date.now();
         showBottomSheet(nearest);
-        playMedia(nearest);
-        logAction('play_audio', nearest);
+
+        // Kiểm tra cooldown: không phát lại nếu chưa đủ X phút kể từ lần phát trước
+        const lastPlayed = state.poiLastPlayed[nearest.Id] || 0;
+        const cooldownMs = config.cooldown * 60 * 1000; // cooldown tính bằng phút
+        if (Date.now() - lastPlayed >= cooldownMs) {
+            playMedia(nearest);
+            logAction('play_audio', nearest); // Chỉ log khi thực sự phát
+        } else {
+            const waitMin = Math.ceil((cooldownMs - (Date.now() - lastPlayed)) / 60000);
+            console.log(`⏳ Cooldown: POI "${nearest.Name}" còn ${waitMin} phút mới phát lại`);
+        }
     }
 }
 
 // ── AUDIO ENGINE ───────────────────────────────────────────
+let _repeatCount = 0; // Đếm số lần đã phát lại
+
 function playMedia(poi) {
     stopAllAudio();
-    console.log(`🎵 POI: ${poi.Name} | Lang: ${config.lang} | AudioUrl: ${poi.AudioUrl || 'NONE → TTS'}`);
-    if (poi.AudioUrl && poi.AudioUrl.startsWith('http')) {
-        audioPlayer.src = poi.AudioUrl;
-        audioPlayer.playbackRate = config.speed;
-        audioPlayer.play().then(() => {
-            console.log('✅ Đang phát Audio file');
-        }).catch(e => {
-            console.warn('⚠️ Audio bị chặn, chuyển TTS:', e.message);
-            playTts(poi.Description);
-        });
+    _repeatCount = 0; // Reset đếm lặp
+    // Ghi nhận thời điểm phát để tính cooldown
+    state.poiLastPlayed[poi.Id] = Date.now();
+
+    // Luôn kiểm tra AudioUrls trực tiếp theo ngôn ngữ hiện tại
+    const audioUrls = poi.AudioUrls || {};
+    const audioUrl = audioUrls[config.lang] || '';
+    console.log(`🎵 POI: ${poi.Name} | Lang: ${config.lang} | Audio: ${audioUrl || 'NONE→TTS'} | Repeat: ${config.repeat}x | Cooldown: ${config.cooldown}ph`);
+
+    if (audioUrl && audioUrl.startsWith('http')) {
+        _playAudioFile(audioUrl, poi);
     } else {
-        console.log('📢 Không có audio file cho ngôn ngữ ' + config.lang + ' → Phát TTS');
-        playTts(poi.Description);
+        console.log('📢 Không có audio [' + config.lang + '] → TTS');
+        _playTtsWithRepeat(poi.Description);
     }
+}
+
+function _playAudioFile(url, poi) {
+    audioPlayer.src = url;
+    audioPlayer.playbackRate = config.speed;
+    audioPlayer.onended = () => {
+        _repeatCount++;
+        if (_repeatCount < config.repeat) {
+            console.log(`🔁 Phát lại lần ${_repeatCount + 1}/${config.repeat}`);
+            audioPlayer.currentTime = 0;
+            audioPlayer.play().catch(() => {});
+        } else {
+            console.log('✅ Đã phát đủ số lần:', config.repeat);
+            audioPlayer.onended = null;
+        }
+    };
+    audioPlayer.play().then(() => {
+        console.log('✅ Đang phát Audio file:', url);
+    }).catch(e => {
+        console.warn('⚠️ Audio bị chặn, chuyển TTS:', e.message);
+        audioPlayer.onended = null;
+        _playTtsWithRepeat(poi ? (poi.AudioUrls && poi.AudioUrls[config.lang] ? '' : poi.Description) : '');
+    });
+}
+
+function _playTtsWithRepeat(text) {
+    if (!text) return;
+    let played = 0;
+    function speakOnce() {
+        if (played >= config.repeat) return;
+        const ut = new SpeechSynthesisUtterance(text);
+        ut.lang = config.lang === 'vi' ? 'vi-VN' : config.lang === 'en' ? 'en-US' : config.lang === 'zh' ? 'zh-CN' : config.lang === 'ja' ? 'ja-JP' : config.lang === 'ko' ? 'ko-KR' : 'vi-VN';
+        ut.rate = config.speed;
+        ut.onend = () => { played++; if (played < config.repeat) { console.log(`🔁 TTS lần ${played + 1}/${config.repeat}`); speakOnce(); } };
+        window.speechSynthesis.speak(ut);
+    }
+    speakOnce();
 }
 
 function stopAllAudio() {
@@ -308,7 +356,7 @@ function showBottomSheet(poi) {
 }
 function hideBottomSheet() { document.querySelector('.bottom-sheet').style.display = 'none'; }
 
-// ── DEEP LINK (QR Scan) ───────────────────────────────────
+// ── DEEP LINK (QR Scan) ──────────────────────────────────────────
 function handleDeepLink() {
     const params = new URLSearchParams(location.search);
     const poiId = params.get('poiId');
@@ -319,13 +367,26 @@ function handleDeepLink() {
             map.setView([poi.Latitude, poi.Longitude], 18);
             showBottomSheet(poi);
             playMedia(poi);
+            // Ghi lịch sử scan
             logAction('scan_qr', poi);
-            // Gọi API tăng counter QR
+            // Tăng counter QR cho TOUR có poiId trùng (tìm tour match)
             const devId = getDeviceId();
-            fetch(`${API}/api/tours/${poiId}/scan?deviceId=${devId}&lang=${config.lang}`, { method: 'POST', mode: 'cors' }).catch(() => {});
+            fetch(`${API}/api/analytics`, {
+                method: 'POST', mode: 'cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    DeviceId: devId, EventType: 'scan_qr', PoiId: poiId,
+                    Language: config.lang, Lat: state.userPos[0], Lng: state.userPos[1],
+                    Duration: 0, Timestamp: new Date().toISOString()
+                })
+            }).catch(() => {});
+            // Gọi đúng endpoint tour/scan nếu có tourId riêng
+            if (tourId) {
+                fetch(`${API}/api/tours/${tourId}/scan?deviceId=${devId}&lang=${config.lang}`, { method: 'POST', mode: 'cors' }).catch(() => {});
+            }
         }
     }
-    if (tourId) { logTourScan(tourId); }
+    if (tourId && !poiId) { logTourScan(tourId); }
 }
 
 // ── GPS ẢO (D-pad) ────────────────────────────────────────

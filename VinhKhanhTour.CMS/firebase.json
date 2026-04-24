@@ -1,15 +1,35 @@
 {
     "hosting": {
-        "public": "publish/wwwroot",
+        "public": "publish",
         "ignore": [
             "firebase.json",
-            "**/.*",
             "**/node_modules/**"
+        ],
+        "cleanUrls": false,
+        "trailingSlash": false,
+        "headers": [
+            {
+                "source": "**/_framework/**",
+                "headers": [
+                    {
+                        "key": "Cache-Control",
+                        "value": "no-cache"
+                    },
+                    {
+                        "key": "Content-Encoding",
+                        "value": "identity"
+                    }
+                ]
+            }
         ],
         "rewrites": [
             {
                 "source": "/poi/**",
                 "destination": "/poi.html"
+            },
+            {
+                "source": "/visitor-map",
+                "destination": "/visitor-map.html"
             },
             {
                 "source": "**",

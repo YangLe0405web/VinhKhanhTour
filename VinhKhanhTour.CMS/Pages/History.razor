@@ -47,16 +47,16 @@
                             Editable="true" Clearable="true" Variant="Variant.Outlined" Margin="Margin.Dense"
                             DateFormat="dd/MM/yyyy" Placeholder="Chọn ngày..." />
         </MudItem>
-        <MudItem xs="12" sm="3">
+        <MudItem xs="12" sm="2">
             <MudText Typo="Typo.caption" Class="ml-1 mb-1" Style="color:rgba(255,255,255,0.5)">ID Thiết bị</MudText>
-            <MudTextField T="string" Value="_filterDevice" ValueChanged="@(v => { _filterDevice = v; RefreshFilter(); })" Placeholder="Nhập ID thiết bị..." 
+            <MudTextField T="string" Value="_filterDevice" ValueChanged="@(v => { _filterDevice = v; RefreshFilter(); })" Placeholder="ID..." 
                           Variant="Variant.Outlined" Margin="Margin.Dense" Clearable="true" />
         </MudItem>
         <MudItem xs="12" sm="3" Class="d-flex flex-column justify-end">
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true"
+            <MudButton Variant="Variant.Filled" Color="Color.Success" FullWidth="true"
                         OnClick="@(() => LoadData(true))" StartIcon="@Icons.Material.Filled.Refresh" 
                         Disabled="_loading" Style="height:40px; text-transform:none;">
-                @(_loading ? "Đang tải..." : "TẢI LẠI")
+                @(_loading ? "Đang tải..." : "TẢI LẠI (SMART CACHE)")
             </MudButton>
         </MudItem>
     </MudGrid>

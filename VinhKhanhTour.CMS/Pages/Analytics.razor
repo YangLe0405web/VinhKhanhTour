@@ -11,13 +11,17 @@
     <MudTabPanel Text="📊 Thống kê tổng hợp" Icon="@Icons.Material.Filled.BarChart">
         <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
             <MudText Typo="Typo.h5" Style="font-weight: 700; color: #fff;">📊 Thống kê khách</MudText>
-            <MudMenu StartIcon="@Icons.Material.Filled.FilterList" EndIcon="@Icons.Material.Filled.KeyboardArrowDown" 
-                     Label="@(_selectedDays == 1 ? "Hôm nay" : _selectedDays == 7 ? "7 ngày qua" : "30 ngày qua")" 
-                     Color="Color.Info" Variant="Variant.Outlined" Dense="true" Style="border-radius: 8px; background: rgba(255,255,255,0.05);">
-                <MudMenuItem OnClick="@(() => OnPeriodChanged(1))">Hôm nay</MudMenuItem>
-                <MudMenuItem OnClick="@(() => OnPeriodChanged(7))">7 ngày qua</MudMenuItem>
-                <MudMenuItem OnClick="@(() => OnPeriodChanged(30))">30 ngày qua</MudMenuItem>
-            </MudMenu>
+            <MudStack Row="true" Spacing="2">
+                <MudIconButton Icon="@Icons.Material.Filled.Refresh" Color="Color.Success" Variant="Variant.Outlined" 
+                               OnClick="@(() => LoadAllData(true))" Title="Tải lại dữ liệu mới nhất (Xóa cache)" />
+                <MudMenu StartIcon="@Icons.Material.Filled.FilterList" EndIcon="@Icons.Material.Filled.KeyboardArrowDown" 
+                         Label="@(_selectedDays == 1 ? "Hôm nay" : _selectedDays == 7 ? "7 ngày qua" : "30 ngày qua")" 
+                         Color="Color.Info" Variant="Variant.Outlined" Dense="true" Style="border-radius: 8px; background: rgba(255,255,255,0.05);">
+                    <MudMenuItem OnClick="@(() => OnPeriodChanged(1))">Hôm nay</MudMenuItem>
+                    <MudMenuItem OnClick="@(() => OnPeriodChanged(7))">7 ngày qua</MudMenuItem>
+                    <MudMenuItem OnClick="@(() => OnPeriodChanged(30))">30 ngày qua</MudMenuItem>
+                </MudMenu>
+            </MudStack>
         </MudStack>
 
         <MudGrid Class="mb-6">
@@ -468,7 +472,7 @@
     {
         var list = new List<UnifiedEvent>();
 
-        // 1. Nạp History
+        // 1. Nạp History (nguồn chính — webapp ghi đầy đủ vào đây)
         foreach (var h in _history)
         {
             if (!_isAdmin && h.Action == "pay_audio") continue;
@@ -487,13 +491,21 @@
             });
         }
 
-        // 2. Nạp Analytics Event (Play Audio, Scan QR, etc.)
+        // Tạo HashSet để kiểm tra duplicate (cùng Device + EventType + PoiId trong ±10 giây)
+        var historyKeys = new HashSet<string>(
+            list.Select(e => $"{e.Device}|{e.EventType}|{e.PoiId}|{e.Timestamp:yyyyMMddHHmm}")
+        );
+
+        // 2. Nạp Analytics Event — CHỈ thêm nếu KHÔNG trùng với History
         foreach (var e in _events)
         {
+            var key = $"{e.DeviceId}|{e.EventType}|{e.PoiId}|{e.Timestamp:yyyyMMddHHmm}";
+            if (historyKeys.Contains(key)) continue; // Bỏ qua duplicate
+
             list.Add(new UnifiedEvent
             {
                 Timestamp = e.Timestamp,
-                EventType = e.EventType, // Sửa: Dùng EventType thực tế thay vì hardcode
+                EventType = e.EventType,
                 PoiId = e.PoiId,
                 PoiName = _pois.FirstOrDefault(p => p.Id == e.PoiId)?.Name ?? e.PoiId,
                 Language = e.Language,
