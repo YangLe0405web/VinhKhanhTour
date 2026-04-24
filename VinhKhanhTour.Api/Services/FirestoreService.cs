@@ -109,8 +109,7 @@ public class FirestoreService
             };
 
             await _db.Collection("analytics").AddAsync(data);
-            // Invalidate cache để CMS thấy data mới khi Tải lại
-            _cache.Remove(CACHE_ANALYTICS);
+            // KHÔNG xóa cache khi write — tiết kiệm reads. Cache tự hết hạn sau 5 phút.
         }
         catch (Exception ex)
         {
@@ -123,7 +122,7 @@ public class FirestoreService
     {
         return await _cache.GetOrCreateAsync(CACHE_ANALYTICS, async entry =>
         {
-            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30);
+            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5);
             var snap = await _db.Collection("analytics")
                 .OrderByDescending("Timestamp")
                 .Limit(500)
@@ -160,7 +159,7 @@ public class FirestoreService
         var key = $"{CACHE_HISTORY}_{limit}";
         return await _cache.GetOrCreateAsync(key, async entry =>
         {
-            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30);
+            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5);
             var snap = await _db.Collection("history")
                 .OrderByDescending("Timestamp")
                 .Limit(500)
@@ -175,8 +174,7 @@ public class FirestoreService
     {
         history.Id = Guid.NewGuid().ToString("N")[..8];
         await _db.Collection("history").Document(history.Id).SetAsync(history);
-        // Invalidate cache để CMS thấy data mới khi Tải lại
-        ClearAllCache();
+        // KHÔNG xóa cache khi write — tiết kiệm reads. CMS bấm TẢI LẠI (force=true) để thấy data mới
     }
 
     public async Task<bool> CheckPoiAccessAsync(string deviceId, string poiId)
