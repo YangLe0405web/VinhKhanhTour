@@ -96,6 +96,7 @@ public class FirestoreService
     {
         try
         {
+            ev.Timestamp = DateTime.UtcNow;
             var data = new Dictionary<string, object>
             {
                 { "DeviceId", ev.DeviceId ?? "" },
@@ -109,7 +110,12 @@ public class FirestoreService
             };
 
             await _db.Collection("analytics").AddAsync(data);
-            // KHÔNG xóa cache khi write — tiết kiệm reads. Cache tự hết hạn sau 5 phút.
+            
+            // Write-through: thêm vào cache NGAY (0 reads thêm)
+            if (_cache.TryGetValue(CACHE_ANALYTICS, out List<AnalyticsEvent>? cached) && cached != null)
+            {
+                cached.Insert(0, ev);
+            }
         }
         catch (Exception ex)
         {
@@ -122,7 +128,7 @@ public class FirestoreService
     {
         return await _cache.GetOrCreateAsync(CACHE_ANALYTICS, async entry =>
         {
-            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5);
+            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30);
             var snap = await _db.Collection("analytics")
                 .OrderByDescending("Timestamp")
                 .Limit(500)
@@ -155,11 +161,10 @@ public class FirestoreService
     // ── App History ───────────────────────────────────
     public async Task<List<AppHistory>> GetHistoryAsync(int limit = 2000)
     {
-        // History cache key includes limit to be safe
         var key = $"{CACHE_HISTORY}_{limit}";
         return await _cache.GetOrCreateAsync(key, async entry =>
         {
-            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5);
+            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30);
             var snap = await _db.Collection("history")
                 .OrderByDescending("Timestamp")
                 .Limit(500)
@@ -173,8 +178,18 @@ public class FirestoreService
     public async Task LogHistoryAsync(AppHistory history)
     {
         history.Id = Guid.NewGuid().ToString("N")[..8];
+        history.Timestamp = DateTime.UtcNow;
         await _db.Collection("history").Document(history.Id).SetAsync(history);
-        // KHÔNG xóa cache khi write — tiết kiệm reads. CMS bấm TẢI LẠI (force=true) để thấy data mới
+        
+        // Write-through: thêm vào TẤT CẢ history cache variants (0 reads thêm)
+        foreach (var limit in new[] { 50, 100, 200, 500, 1000, 2000 })
+        {
+            var key = $"{CACHE_HISTORY}_{limit}";
+            if (_cache.TryGetValue(key, out List<AppHistory>? cached) && cached != null)
+            {
+                cached.Insert(0, history);
+            }
+        }
     }
 
     public async Task<bool> CheckPoiAccessAsync(string deviceId, string poiId)
