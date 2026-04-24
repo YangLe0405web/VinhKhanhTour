@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════════════════════════
-   VinhKhanhTour Web App — JS (V10.9: Fix ALL — Cooldown + Scan + Count)
+   VinhKhanhTour Web App — JS (V11.0: Fix QR Scan + Persistent Cooldown)
    ══════════════════════════════════════════════════════════════ */
 
 const API = 'https://vinhkhanh-api.onrender.com';
@@ -14,7 +14,7 @@ let config = { speed: 1.0, repeat: 1, cooldown: 3, radius: 25, lang: localStorag
 let state = {
     deviceId: getDeviceId(), isTracking: false, userPos: [START_LAT, START_LNG],
     allPoi: [], currentPoi: null, entryTime: null, selectedPoi: null,
-    poiLastPlayed: {}  // { poiId: timestamp } — cooldown tracking
+    poiLastPlayed: loadCooldownState()  // Persist qua localStorage
 };
 let map, userMarker, userCircle, poiMarkers = {}, poiCircles = {}, audioPlayer = new Audio();
 
@@ -117,15 +117,23 @@ function reloadPoiLanguage() {
     renderPoiList();
 }
 
-// ── COOLDOWN CHECK (DÙNG MỌI NƠI) ─────────────────────────
-// Trả về true nếu được phép phát, false nếu đang cooldown
+// ── COOLDOWN (PERSIST QUA LOCALSTORAGE) ─────────────────────
+function loadCooldownState() {
+    try {
+        const saved = localStorage.getItem('vk_cooldown');
+        return saved ? JSON.parse(saved) : {};
+    } catch { return {}; }
+}
+
+function saveCooldownState() {
+    try { localStorage.setItem('vk_cooldown', JSON.stringify(state.poiLastPlayed)); } catch {}
+}
+
 function canPlay(poiId) {
     const lastPlayed = state.poiLastPlayed[poiId] || 0;
-    const cooldownMs = config.cooldown * 1000; // Tính bằng GIÂY (UI: 3s, 10s, 30s, 60s)
+    const cooldownMs = config.cooldown * 1000; // GIÂY (UI: 3s, 10s, 30s, 60s)
     const elapsed = Date.now() - lastPlayed;
-    if (elapsed >= cooldownMs) {
-        return true;
-    }
+    if (elapsed >= cooldownMs) return true;
     const waitSec = Math.ceil((cooldownMs - elapsed) / 1000);
     console.log(`⏳ Cooldown: "${poiId}" còn ${waitSec}s`);
     return false;
@@ -166,7 +174,8 @@ let _repeatCount = 0;
 function playMedia(poi) {
     stopAllAudio();
     _repeatCount = 0;
-    state.poiLastPlayed[poi.Id] = Date.now(); // Ghi cooldown
+    state.poiLastPlayed[poi.Id] = Date.now();
+    saveCooldownState(); // Persist cooldown vào localStorage
 
     const audioUrls = poi.AudioUrls || {};
     const audioUrl = audioUrls[config.lang] || '';
@@ -363,13 +372,40 @@ function handleDeepLink() {
     const poiId = params.get('poiId');
     const tourId = params.get('tourId');
     if (poiId) {
+        // LOG SCAN NGAY LẬP TỨC — không phụ thuộc allPoi đã load xong chưa
+        const devId = getDeviceId();
         const poi = state.allPoi.find(p => p && p.Id === poiId);
+        const poiName = poi ? poi.Name : poiId;
+        console.log(`📱 QR SCAN: poiId=${poiId}, name=${poiName}, device=${devId}`);
+        
+        // Ghi scan_qr vào history NGAY (dùng poiId trực tiếp)
+        fetch(`${API}/api/history`, {
+            method: 'POST', mode: 'cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                Action: 'scan_qr', PoiId: poiId, PoiName: poiName,
+                Device: devId, Language: config.lang, Duration: 0,
+                Lat: state.userPos[0], Lng: state.userPos[1],
+                Timestamp: new Date().toISOString()
+            })
+        }).then(() => console.log('✅ scan_qr logged!')).catch(e => console.warn('❌ scan_qr fail:', e));
+
+        // Nếu POI đã load → hiện trên bản đồ + phát audio
         if (poi) {
             map.setView([poi.Latitude, poi.Longitude], 18);
             showBottomSheet(poi);
-            playMedia(poi); // QR scan luôn phát (không cooldown)
-            // CHỈ log 1 lần vào history — không gửi analytics riêng
-            logAction('scan_qr', poi);
+            playMedia(poi);
+        } else {
+            // POI chưa load (API chậm) → retry sau 3 giây
+            console.log('⏳ POI chưa load, retry sau 3s...');
+            setTimeout(() => {
+                const retryPoi = state.allPoi.find(p => p && p.Id === poiId);
+                if (retryPoi) {
+                    map.setView([retryPoi.Latitude, retryPoi.Longitude], 18);
+                    showBottomSheet(retryPoi);
+                    playMedia(retryPoi);
+                }
+            }, 3000);
         }
     }
     if (tourId) { logTourScan(tourId); }
