@@ -629,7 +629,7 @@
                     DeviceId = g.Key,
                     LastActive = latest.Timestamp,
                     LastPoiName = latest.PoiName,
-                    ScanCount = g.Count(x => IsScanAction(x.EventType))
+                    ScanCount = g.Count(x => IsPlayAction(x.EventType) || IsScanAction(x.EventType))
                 };
             })
             // Hiển thị TẤT CẢ thiết bị có tương tác (để dễ dàng test cả máy ảo và máy thật)

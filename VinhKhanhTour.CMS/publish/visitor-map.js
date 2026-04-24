@@ -1,9 +1,8 @@
 /* ══════════════════════════════════════════════════════════════
-   VinhKhanhTour Web App — JS (V10.8: Fix Cooldown + PlayPoiAudio)
+   VinhKhanhTour Web App — JS (V10.9: Fix ALL — Cooldown + Scan + Count)
    ══════════════════════════════════════════════════════════════ */
 
 const API = 'https://vinhkhanh-api.onrender.com';
-// Cổng Vào Phố Vĩnh Khánh (poi_01) — luôn bắt đầu tại đây
 const START_LAT = 10.7595, START_LNG = 106.7048;
 
 const LOCALES = {
@@ -15,11 +14,11 @@ let config = { speed: 1.0, repeat: 1, cooldown: 3, radius: 25, lang: localStorag
 let state = {
     deviceId: getDeviceId(), isTracking: false, userPos: [START_LAT, START_LNG],
     allPoi: [], currentPoi: null, entryTime: null, selectedPoi: null,
-    poiLastPlayed: {}  // { poiId: timestamp } — dùng để kiểm tra cooldown
+    poiLastPlayed: {}  // { poiId: timestamp } — cooldown tracking
 };
 let map, userMarker, userCircle, poiMarkers = {}, poiCircles = {}, audioPlayer = new Audio();
 
-// ── Device ID (KHÔNG BAO GIỜ dùng "Web Browser") ──────────
+// ── Device ID ──────────────────────────────────────────────
 function getDeviceId() {
     let id = localStorage.getItem('vk_device_id');
     if (!id || id === 'undefined' || id === 'Web Browser') {
@@ -41,19 +40,16 @@ window.onload = async () => {
     renderMarkers();
     await loadData();
     handleDeepLink();
-    // Chỉ log 1 lần duy nhất khi mở trang (tiết kiệm writes)
     if (!sessionStorage.getItem('vk_visited')) {
         logAction('log_visit', null, 'Web Visitor Online');
         sessionStorage.setItem('vk_visited', '1');
     }
-    // GPS trace mỗi 60 giây thay vì 3 giây (giảm 20x writes)
     setInterval(() => { if (state.isTracking) sendTrace(); }, 60000);
 };
 
-// ── SYNC FIREBASE CMS ──────────────────────────────────────
+// ── API LOGGING ────────────────────────────────────────────
 async function logAction(type, poi, note = '', duration = 0) {
     const devId = getDeviceId();
-    // CHỈ gửi 1 endpoint (history) thay vì 2 — tiết kiệm 50% writes
     const payload = {
         Action: type, PoiId: poi ? poi.Id : '', PoiName: poi ? poi.Name : note,
         Device: devId, Language: config.lang, Duration: parseInt(duration),
@@ -107,14 +103,11 @@ function normalizePoi(p) {
         Content: p.Content || p.content || {},
         AudioUrls: p.AudioUrls || p.audioUrls || {}
     };
-    // Mô tả: ưu tiên ngôn ngữ hiện tại, fallback vi -> en -> bất kỳ
     poi.Description = poi.Content[config.lang] || poi.Content['vi'] || poi.Content['en'] || Object.values(poi.Content)[0] || "";
-    // Audio: CHỈ lấy đúng ngôn ngữ hiện tại — không có thì để trống (sẽ phát TTS)
     poi.AudioUrl = (poi.AudioUrls || {})[config.lang] || "";
     return poi;
 }
 
-// Re-normalize khi đổi ngôn ngữ — cập nhật AudioUrl + Description cho tất cả POI
 function reloadPoiLanguage() {
     state.allPoi = state.allPoi.map(poi => {
         poi.Description = poi.Content[config.lang] || poi.Content['vi'] || poi.Content['en'] || Object.values(poi.Content)[0] || "";
@@ -122,6 +115,20 @@ function reloadPoiLanguage() {
         return poi;
     });
     renderPoiList();
+}
+
+// ── COOLDOWN CHECK (DÙNG MỌI NƠI) ─────────────────────────
+// Trả về true nếu được phép phát, false nếu đang cooldown
+function canPlay(poiId) {
+    const lastPlayed = state.poiLastPlayed[poiId] || 0;
+    const cooldownMs = config.cooldown * 1000; // Tính bằng GIÂY (UI: 3s, 10s, 30s, 60s)
+    const elapsed = Date.now() - lastPlayed;
+    if (elapsed >= cooldownMs) {
+        return true;
+    }
+    const waitSec = Math.ceil((cooldownMs - elapsed) / 1000);
+    console.log(`⏳ Cooldown: "${poiId}" còn ${waitSec}s`);
+    return false;
 }
 
 // ── PROXIMITY CHECK ────────────────────────────────────────
@@ -133,7 +140,6 @@ function checkProximity() {
         if (dist <= poi.RadiusMeters) inRange.push({ poi, dist });
     });
 
-    // Rời khỏi POI
     if (state.currentPoi && !inRange.find(r => r.poi.Id === state.currentPoi.Id)) {
         stopAllAudio();
         hideBottomSheet();
@@ -147,38 +153,28 @@ function checkProximity() {
         state.currentPoi = nearest;
         state.entryTime = Date.now();
         showBottomSheet(nearest);
-
-        // Kiểm tra cooldown: không phát lại nếu chưa đủ X phút kể từ lần phát trước
-        const lastPlayed = state.poiLastPlayed[nearest.Id] || 0;
-        const cooldownMs = config.cooldown * 1000; // cooldown tính bằng GIÂY (UI: 3s, 10s, 30s, 60s)
-        if (Date.now() - lastPlayed >= cooldownMs) {
+        if (canPlay(nearest.Id)) {
             playMedia(nearest);
-            logAction('play_audio', nearest); // Chỉ log khi thực sự phát
-        } else {
-            const waitSec = Math.ceil((cooldownMs - (Date.now() - lastPlayed)) / 1000);
-            console.log(`⏳ Cooldown: POI "${nearest.Name}" còn ${waitSec}s mới phát lại`);
+            logAction('play_audio', nearest);
         }
     }
 }
 
 // ── AUDIO ENGINE ───────────────────────────────────────────
-let _repeatCount = 0; // Đếm số lần đã phát lại
+let _repeatCount = 0;
 
 function playMedia(poi) {
     stopAllAudio();
-    _repeatCount = 0; // Reset đếm lặp
-    // Ghi nhận thời điểm phát để tính cooldown
-    state.poiLastPlayed[poi.Id] = Date.now();
+    _repeatCount = 0;
+    state.poiLastPlayed[poi.Id] = Date.now(); // Ghi cooldown
 
-    // Luôn kiểm tra AudioUrls trực tiếp theo ngôn ngữ hiện tại
     const audioUrls = poi.AudioUrls || {};
     const audioUrl = audioUrls[config.lang] || '';
-    console.log(`🎵 POI: ${poi.Name} | Lang: ${config.lang} | Audio: ${audioUrl || 'NONE→TTS'} | Repeat: ${config.repeat}x | Cooldown: ${config.cooldown}ph`);
+    console.log(`🎵 POI: ${poi.Name} | Lang: ${config.lang} | Audio: ${audioUrl || 'TTS'} | Repeat: ${config.repeat}x | CD: ${config.cooldown}s`);
 
     if (audioUrl && audioUrl.startsWith('http')) {
         _playAudioFile(audioUrl, poi);
     } else {
-        console.log('📢 Không có audio [' + config.lang + '] → TTS');
         _playTtsWithRepeat(poi.Description);
     }
 }
@@ -189,20 +185,19 @@ function _playAudioFile(url, poi) {
     audioPlayer.onended = () => {
         _repeatCount++;
         if (_repeatCount < config.repeat) {
-            console.log(`🔁 Phát lại lần ${_repeatCount + 1}/${config.repeat}`);
+            console.log(`🔁 Lần ${_repeatCount + 1}/${config.repeat}`);
             audioPlayer.currentTime = 0;
             audioPlayer.play().catch(() => {});
         } else {
-            console.log('✅ Đã phát đủ số lần:', config.repeat);
             audioPlayer.onended = null;
         }
     };
     audioPlayer.play().then(() => {
-        console.log('✅ Đang phát Audio file:', url);
+        console.log('✅ Playing:', url);
     }).catch(e => {
-        console.warn('⚠️ Audio bị chặn, chuyển TTS:', e.message);
+        console.warn('⚠️ Audio blocked → TTS:', e.message);
         audioPlayer.onended = null;
-        _playTtsWithRepeat(poi ? (poi.AudioUrls && poi.AudioUrls[config.lang] ? '' : poi.Description) : '');
+        _playTtsWithRepeat(poi.Description);
     });
 }
 
@@ -214,7 +209,7 @@ function _playTtsWithRepeat(text) {
         const ut = new SpeechSynthesisUtterance(text);
         ut.lang = config.lang === 'vi' ? 'vi-VN' : config.lang === 'en' ? 'en-US' : config.lang === 'zh' ? 'zh-CN' : config.lang === 'ja' ? 'ja-JP' : config.lang === 'ko' ? 'ko-KR' : 'vi-VN';
         ut.rate = config.speed;
-        ut.onend = () => { played++; if (played < config.repeat) { console.log(`🔁 TTS lần ${played + 1}/${config.repeat}`); speakOnce(); } };
+        ut.onend = () => { played++; if (played < config.repeat) speakOnce(); };
         window.speechSynthesis.speak(ut);
     }
     speakOnce();
@@ -228,11 +223,13 @@ function stopAllAudio() {
     window.speechSynthesis.cancel();
 }
 
-// Hàm này được gọi từ nút "🔊 Nghe thuyết minh" trong trang chi tiết
+// Nút "Nghe thuyết minh" trong trang chi tiết — có cooldown
 function playPoiAudio(poi) {
     if (!poi) return;
-    playMedia(poi);
-    logAction('play_audio', poi);
+    if (canPlay(poi.Id)) {
+        playMedia(poi);
+        logAction('play_audio', poi);
+    }
 }
 
 function playTts(text) {
@@ -251,8 +248,6 @@ function updateUserPos(lat, lng) {
     if (state.isTracking) checkProximity();
 }
 
-let proxInterval = null; // KHÔNG dùng interval riêng nữa — gọi checkProximity trực tiếp trong updateUserPos
-
 function toggleTracking() {
     state.isTracking = !state.isTracking;
     if (state.isTracking) unlockAudio();
@@ -263,13 +258,9 @@ function setSettings(key, val) {
     config[key] = val;
     if (key === 'lang') {
         localStorage.setItem('vk_lang', val);
-        // Dừng audio hiện tại và re-normalize tất cả POI
         stopAllAudio();
         reloadPoiLanguage();
-        // Nếu đang trong POI, phát lại với ngôn ngữ mới
-        if (state.currentPoi) {
-            playMedia(state.currentPoi);
-        }
+        if (state.currentPoi) playMedia(state.currentPoi);
         updateTexts();
     }
     document.querySelectorAll(`.seg-btn[data-key="${key}"]`).forEach(b => b.classList.toggle('active', b.dataset.val == val));
@@ -318,10 +309,13 @@ function renderMarkers() {
             html: `<div class="pin-body"><div class="pin-inner">${poi.Category === 'food' ? '🍲' : poi.Category === 'drink' ? '🧋' : '🏛️'}</div></div>`,
             iconSize: [30, 30], iconAnchor: [15, 30]
         });
+        // Click marker: cooldown + log play_audio
         poiMarkers[poi.Id] = L.marker([poi.Latitude, poi.Longitude], { icon }).addTo(map).on('click', () => {
             showBottomSheet(poi);
-            playMedia(poi);
-            logAction('play_audio', poi);
+            if (canPlay(poi.Id)) {
+                playMedia(poi);
+                logAction('play_audio', poi);
+            }
         });
         poiCircles[poi.Id] = L.circle([poi.Latitude, poi.Longitude], {
             radius: poi.RadiusMeters, color: '#FF5252', weight: 1, fillOpacity: 0.1
@@ -350,7 +344,6 @@ function flyToPoi(poiId) {
     if (poi) {
         map.setView([poi.Latitude, poi.Longitude], 18);
         showBottomSheet(poi);
-        // Chuyển sang tab bản đồ
         document.querySelectorAll('.view').forEach(v => v.style.display = 'none');
         document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
         document.querySelector('[data-page="map"]').classList.add('active');
@@ -364,7 +357,7 @@ function showBottomSheet(poi) {
 }
 function hideBottomSheet() { document.querySelector('.bottom-sheet').style.display = 'none'; }
 
-// ── DEEP LINK (QR Scan) ──────────────────────────────────────────
+// ── DEEP LINK (QR Scan) ─────────────────────────────────────
 function handleDeepLink() {
     const params = new URLSearchParams(location.search);
     const poiId = params.get('poiId');
@@ -374,27 +367,12 @@ function handleDeepLink() {
         if (poi) {
             map.setView([poi.Latitude, poi.Longitude], 18);
             showBottomSheet(poi);
-            playMedia(poi);
-            // Ghi lịch sử scan
+            playMedia(poi); // QR scan luôn phát (không cooldown)
+            // CHỈ log 1 lần vào history — không gửi analytics riêng
             logAction('scan_qr', poi);
-            // Tăng counter QR cho TOUR có poiId trùng (tìm tour match)
-            const devId = getDeviceId();
-            fetch(`${API}/api/analytics`, {
-                method: 'POST', mode: 'cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    DeviceId: devId, EventType: 'scan_qr', PoiId: poiId,
-                    Language: config.lang, Lat: state.userPos[0], Lng: state.userPos[1],
-                    Duration: 0, Timestamp: new Date().toISOString()
-                })
-            }).catch(() => {});
-            // Gọi đúng endpoint tour/scan nếu có tourId riêng
-            if (tourId) {
-                fetch(`${API}/api/tours/${tourId}/scan?deviceId=${devId}&lang=${config.lang}`, { method: 'POST', mode: 'cors' }).catch(() => {});
-            }
         }
     }
-    if (tourId && !poiId) { logTourScan(tourId); }
+    if (tourId) { logTourScan(tourId); }
 }
 
 // ── GPS ẢO (D-pad) ────────────────────────────────────────
