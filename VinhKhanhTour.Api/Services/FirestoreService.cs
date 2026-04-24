@@ -25,7 +25,11 @@ public class FirestoreService
         _cache.Remove(CACHE_POIS);
         _cache.Remove(CACHE_ANALYTICS);
         _cache.Remove(CACHE_HISTORY);
-        _cache.Remove($"{CACHE_HISTORY}_500");
+        // Xóa tất cả variant cache keys có thể
+        foreach (var limit in new[] { 50, 100, 200, 500, 1000, 2000 })
+        {
+            _cache.Remove($"{CACHE_HISTORY}_{limit}");
+        }
         _cache.Remove(CACHE_TRACES);
     }
 
@@ -105,8 +109,8 @@ public class FirestoreService
             };
 
             await _db.Collection("analytics").AddAsync(data);
-            // KHÔNG invalidate cache mỗi lần write để tiết kiệm reads
-            // Cache tự hết hạn sau 30 phút
+            // Invalidate cache để CMS thấy data mới khi Tải lại
+            _cache.Remove(CACHE_ANALYTICS);
         }
         catch (Exception ex)
         {
@@ -171,7 +175,8 @@ public class FirestoreService
     {
         history.Id = Guid.NewGuid().ToString("N")[..8];
         await _db.Collection("history").Document(history.Id).SetAsync(history);
-        // KHÔNG invalidate cache để tiết kiệm reads
+        // Invalidate cache để CMS thấy data mới khi Tải lại
+        ClearAllCache();
     }
 
     public async Task<bool> CheckPoiAccessAsync(string deviceId, string poiId)

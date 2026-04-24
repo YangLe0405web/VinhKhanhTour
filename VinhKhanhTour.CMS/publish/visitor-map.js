@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════════════════════════
-   VinhKhanhTour Web App — JS (V10.7: Repeat + Cooldown + Audio Fix)
+   VinhKhanhTour Web App — JS (V10.8: Fix Cooldown + PlayPoiAudio)
    ══════════════════════════════════════════════════════════════ */
 
 const API = 'https://vinhkhanh-api.onrender.com';
@@ -150,13 +150,13 @@ function checkProximity() {
 
         // Kiểm tra cooldown: không phát lại nếu chưa đủ X phút kể từ lần phát trước
         const lastPlayed = state.poiLastPlayed[nearest.Id] || 0;
-        const cooldownMs = config.cooldown * 60 * 1000; // cooldown tính bằng phút
+        const cooldownMs = config.cooldown * 1000; // cooldown tính bằng GIÂY (UI: 3s, 10s, 30s, 60s)
         if (Date.now() - lastPlayed >= cooldownMs) {
             playMedia(nearest);
             logAction('play_audio', nearest); // Chỉ log khi thực sự phát
         } else {
-            const waitMin = Math.ceil((cooldownMs - (Date.now() - lastPlayed)) / 60000);
-            console.log(`⏳ Cooldown: POI "${nearest.Name}" còn ${waitMin} phút mới phát lại`);
+            const waitSec = Math.ceil((cooldownMs - (Date.now() - lastPlayed)) / 1000);
+            console.log(`⏳ Cooldown: POI "${nearest.Name}" còn ${waitSec}s mới phát lại`);
         }
     }
 }
@@ -224,7 +224,15 @@ function stopAllAudio() {
     audioPlayer.pause();
     audioPlayer.currentTime = 0;
     audioPlayer.src = '';
+    audioPlayer.onended = null;
     window.speechSynthesis.cancel();
+}
+
+// Hàm này được gọi từ nút "🔊 Nghe thuyết minh" trong trang chi tiết
+function playPoiAudio(poi) {
+    if (!poi) return;
+    playMedia(poi);
+    logAction('play_audio', poi);
 }
 
 function playTts(text) {
