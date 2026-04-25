@@ -418,9 +418,9 @@ public class FirestoreService
     {
         var history = await GetHistoryAsync();
         var analytics = await GetAnalyticsAsync();
-        long totalQr = analytics.Count(e => string.Equals(e.EventType, 'scan_qr', System.StringComparison.OrdinalIgnoreCase) || string.Equals(e.EventType, 'tour_scan', System.StringComparison.OrdinalIgnoreCase));
-        long totalPlay = history.Count(h => string.Equals(h.EventType, 'play_audio', System.StringComparison.OrdinalIgnoreCase) || string.Equals(h.EventType, 'poi_play', System.StringComparison.OrdinalIgnoreCase));
-        var doc = _db.Collection('stats').Document('global');
-        await doc.SetAsync(new System.Collections.Generic.Dictionary<string, object> { { 'TotalQr', totalQr }, { 'TotalPlay', totalPlay } }, Google.Cloud.Firestore.SetOptions.Overwrite);
+        long totalQr = analytics.Count(e => string.Equals(e.EventType, "scan_qr", System.StringComparison.OrdinalIgnoreCase) || string.Equals(e.EventType, "tour_scan", System.StringComparison.OrdinalIgnoreCase));
+        long totalPlay = history.Count(h => string.Equals(h.EventType, "play_audio", System.StringComparison.OrdinalIgnoreCase) || string.Equals(h.EventType, "poi_play", System.StringComparison.OrdinalIgnoreCase));
+        var doc = _db.Collection("stats").Document("global");
+        await doc.SetAsync(new System.Collections.Generic.Dictionary<string, object> { { "TotalQr", totalQr }, { "TotalPlay", totalPlay } }, Google.Cloud.Firestore.SetOptions.Overwrite);
     }
 }

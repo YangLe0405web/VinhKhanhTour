@@ -435,8 +435,8 @@
             
             var allPois = t4.Result ?? new();
             var stats = t5.Result ?? new();
-            _totalPlay = (int)(stats.ContainsKey("TotalPlay") ? stats["TotalPlay"] : 0);
-            _totalQr = (int)(stats.ContainsKey("TotalQr") ? stats["TotalQr"] : 0);
+            _totalPlay = (int)(stats.ContainsKey("TotalPlay") ? Convert.ToInt32(stats["TotalPlay"]) : 0);
+            _totalQr = (int)(stats.ContainsKey("TotalQr") ? Convert.ToInt32(stats["TotalQr"]) : 0);
 
             // Filter data based on Role và OwnerId
             if (_isAdmin)
