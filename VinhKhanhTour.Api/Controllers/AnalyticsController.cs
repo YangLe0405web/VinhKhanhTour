@@ -55,7 +55,14 @@ public class AnalyticsController : ControllerBase
     [HttpGet("reset-all-data-today")]
     public async Task<IActionResult> ResetAllData()
     {
-        await _db.ResetAllDataAsync();
-        return Ok("All analytics and history data has been reset to 0.");
+        try 
+        {
+            await _db.ResetAllDataAsync();
+            return Ok("All analytics and history data has been reset to 0.");
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex.ToString());
+        }
     }
 }
