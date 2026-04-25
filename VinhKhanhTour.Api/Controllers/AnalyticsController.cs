@@ -45,4 +45,10 @@ public class AnalyticsController : ControllerBase
             return StatusCode(500, ex.ToString());
         }
     }
+    [HttpGet("sync")]
+    public async Task<IActionResult> Sync()
+    {
+        await _db.SyncGlobalStatsAsync();
+        return Ok("Synced lifetime totals from history/analytics records.");
+    }
 }

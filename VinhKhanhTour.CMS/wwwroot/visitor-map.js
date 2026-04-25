@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════════════════════════
-   VinhKhanhTour Web App — JS (V11.3: Fix QR Scan + Persistent Cooldown)
+   VinhKhanhTour Web App — JS (V11.10: Fix QR Scan + Persistent Cooldown)
    ══════════════════════════════════════════════════════════════ */
 
 const API = 'https://vinhkhanh-api.onrender.com';
@@ -14,7 +14,8 @@ let config = { speed: 1.0, repeat: 1, cooldown: 3, radius: 25, lang: localStorag
 let state = {
     deviceId: getDeviceId(), isTracking: false, userPos: [START_LAT, START_LNG],
     allPoi: [], currentPoi: null, entryTime: null, selectedPoi: null,
-    poiLastPlayed: loadCooldownState()  // Persist qua localStorage
+    audioStatus: 'Sẵn sàng',
+    poiLastPlayed: loadCooldownState()
 };
 let map, userMarker, userCircle, poiMarkers = {}, poiCircles = {}, audioPlayer = new Audio();
 
@@ -29,7 +30,7 @@ function getDeviceId() {
 }
 
 function unlockAudio() {
-    audioPlayer.play().then(() => { audioPlayer.pause(); audioPlayer.currentTime = 0; console.log("🔊 Audio Unlocked"); }).catch(e => console.warn("Audio unlock blocked", e));
+    audioPlayer.play().then(() => { audioPlayer.volume = 1.0; audioPlayer.pause(); audioPlayer.currentTime = 0; console.log("🔊 Audio Unlocked"); }).catch(e => console.warn("Audio unlock blocked", e));
 }
 
 // ── KHỞI ĐỘNG ──────────────────────────────────────────────
@@ -44,7 +45,12 @@ window.onload = async () => {
         logAction('log_visit', null, 'Web Visitor Online');
         sessionStorage.setItem('vk_visited', '1');
     }
-    setInterval(() => { if (state.isTracking) sendTrace(); }, 60000);
+    setInterval(() => sendTrace(), 30000);
+
+    // Mở khóa âm thanh khi chạm bất kỳ đâu (Fix cho điện thoại)
+    document.addEventListener('click', () => {
+        unlockAudio();
+    }, { once: true });
 };
 
 // ── API LOGGING ────────────────────────────────────────────
@@ -160,6 +166,7 @@ function checkProximity() {
     if (!state.currentPoi || state.currentPoi.Id !== nearest.Id) {
         state.currentPoi = nearest;
         state.entryTime = Date.now();
+        highlightMarker(nearest.Id); // Nổi bật POI gần nhất
         showBottomSheet(nearest);
         if (canPlay(nearest.Id)) {
             playMedia(nearest);
@@ -172,74 +179,123 @@ function checkProximity() {
 let _repeatCount = 0;
 let _playTimeout = null;
 
-function playMedia(poi) {
+function playMedia(poi, immediate = false) {
     stopAllAudio();
     _repeatCount = 0;
-    
-    const delayMs = config.cooldown * 1000;
-    console.log(`⏳ Sắp phát: ${poi.Name}. Chờ ${config.cooldown}s mới bắt đầu...`);
+    highlightMarker(poi.Id);
+    sendTrace();
 
-    // Chờ đúng số giây cooldown mới phát lần đầu
-    _playTimeout = setTimeout(() => {
+    const playNow = () => {
         state.poiLastPlayed[poi.Id] = Date.now();
         saveCooldownState();
-
         const audioUrls = poi.AudioUrls || {};
         const audioUrl = audioUrls[config.lang] || '';
         
+        updateStatus(`🔊 Đang phát: ${poi.Name}`);
+
         if (audioUrl && audioUrl.startsWith('http')) {
             _playAudioFile(audioUrl, poi);
         } else {
-            _playTtsWithRepeat(poi.Description);
+            const desc = poi.Description || poi.Name;
+            updateStatus(`🗣️ Đang đọc (TTS): ${poi.Name}`);
+            _playTtsWithRepeat(desc);
         }
-    }, delayMs);
+    };
+
+    if (immediate) {
+        playNow();
+    } else {
+        const delayMs = config.cooldown * 1000;
+        console.log(`⏳ Chờ ${config.cooldown}s...`);
+        _playTimeout = setTimeout(playNow, delayMs);
+    }
 }
 
 function _playAudioFile(url, poi) {
+    updateStatus(`🔊 Đang nạp nhạc: ${poi.Name}...`);
     audioPlayer.src = url;
     audioPlayer.playbackRate = config.speed;
     audioPlayer.onended = () => {
         _repeatCount++;
         if (_repeatCount < config.repeat) {
-            console.log(`🔁 Lần ${_repeatCount + 1}/${config.repeat}. Chờ ${config.cooldown}s...`);
-            // Chờ giữa các lần lặp
+            updateStatus(`🔁 Lặp lại lần ${_repeatCount + 1}...`);
             _playTimeout = setTimeout(() => {
                 audioPlayer.currentTime = 0;
                 audioPlayer.play().catch(() => {});
             }, config.cooldown * 1000);
         } else {
+            updateStatus(`✅ Đã phát xong: ${poi.Name}`);
             audioPlayer.onended = null;
         }
     };
-    audioPlayer.play().catch(e => {
+    audioPlayer.play().then(() => { audioPlayer.volume = 1.0;
+        updateStatus(`▶️ Đang phát: ${poi.Name}`);
+    }).catch(e => {
         console.warn('⚠️ Audio blocked → TTS');
+        updateStatus(`⚠️ Bị chặn → Đang dùng giọng nói...`);
         _playTtsWithRepeat(poi.Description);
     });
 }
 
 function _playTtsWithRepeat(text) {
-    if (!text) return;
+    if (!text) {
+        updateStatus("❌ Không có nội dung để đọc");
+        return;
+    }
+    window.speechSynthesis.cancel(); // Dừng các giọng cũ
     let played = 0;
     function speakOnce() {
-        if (played >= config.repeat) return;
+        if (played >= config.repeat) {
+            updateStatus("✅ Đọc xong");
+            return;
+        }
         const ut = new SpeechSynthesisUtterance(text);
-        ut.lang = config.lang === 'vi' ? 'vi-VN' : config.lang === 'en' ? 'en-US' : config.lang === 'zh' ? 'zh-CN' : config.lang === 'ja' ? 'ja-JP' : config.lang === 'ko' ? 'ko-KR' : 'vi-VN';
+        ut.lang = config.lang === 'vi' ? 'vi-VN' : 'en-US';
         ut.rate = config.speed;
+        ut.onstart = () => updateStatus("🗣️ Đang đọc thuyết minh...");
         ut.onend = () => { 
             played++; 
             if (played < config.repeat) {
-                // Chờ giữa các lần TTS
                 _playTimeout = setTimeout(speakOnce, config.cooldown * 1000);
             }
         };
+        ut.onerror = (e) => updateStatus(`❌ Lỗi đọc: ${e.error}`);
         window.speechSynthesis.speak(ut);
     }
-    
-    // Phát lần đầu (vẫn nằm trong playMedia delay nên speak ngay)
     speakOnce();
 }
 
+function updateStatus(msg) {
+    const el = document.querySelector('.status');
+    if (el) el.innerText = msg;
+    console.log(`[STATUS] ${msg}`);
+}
+
+function highlightMarker(poiId) {
+    // 1. Highlight Pin Marker
+    Object.keys(poiMarkers).forEach(id => {
+        const marker = poiMarkers[id];
+        if (marker && marker.getElement()) {
+            marker.getElement().classList.remove('active-poi-marker');
+            if (id === poiId) marker.getElement().classList.add('active-poi-marker');
+        }
+    });
+    // 2. Highlight Vòng tròn (Circle)
+    Object.keys(poiCircles).forEach(id => {
+        const circle = poiCircles[id];
+        if (circle) {
+            if (id === poiId) {
+                circle.setStyle({ color: '#2196F3', fillColor: '#2196F3', fillOpacity: 0.3, weight: 3 });
+                circle.bringToFront();
+            } else {
+                circle.setStyle({ color: '#FF5252', fillColor: '#FF5252', fillOpacity: 0.1, weight: 1 });
+            }
+        }
+    });
+}
+
 function stopAllAudio() {
+    highlightMarker(null); // Bỏ highlight khi dừng
     if (_playTimeout) {
         clearTimeout(_playTimeout);
         _playTimeout = null;
@@ -254,10 +310,9 @@ function stopAllAudio() {
 // Nút "Nghe thuyết minh" trong trang chi tiết — có cooldown
 function playPoiAudio(poi) {
     if (!poi) return;
-    if (canPlay(poi.Id)) {
-        playMedia(poi);
-        logAction('play_audio', poi);
-    }
+    unlockAudio();
+    playMedia(poi, true); // Manual click -> Phát ngay
+    logAction('play_audio', poi);
 }
 
 function playTts(text) {
@@ -337,13 +392,11 @@ function renderMarkers() {
             html: `<div class="pin-body"><div class="pin-inner">${poi.Category === 'food' ? '🍲' : poi.Category === 'drink' ? '🧋' : '🏛️'}</div></div>`,
             iconSize: [30, 30], iconAnchor: [15, 30]
         });
-        // Click marker: cooldown + log play_audio
+        // Click marker: CHỈ XEM, không tự đọc
         poiMarkers[poi.Id] = L.marker([poi.Latitude, poi.Longitude], { icon }).addTo(map).on('click', () => {
+            sendTrace(); 
+            highlightMarker(poi.Id); // Highlight để biết đang xem cái nào
             showBottomSheet(poi);
-            if (canPlay(poi.Id)) {
-                playMedia(poi);
-                logAction('play_audio', poi);
-            }
         });
         poiCircles[poi.Id] = L.circle([poi.Latitude, poi.Longitude], {
             radius: poi.RadiusMeters, color: '#FF5252', weight: 1, fillOpacity: 0.1
@@ -421,11 +474,8 @@ function handleDeepLink() {
         if (poi) {
             map.setView([poi.Latitude, poi.Longitude], 18);
             showBottomSheet(poi);
-            if (canPlay(poi.Id)) {
-                playMedia(poi);
-            } else {
-                console.log(`⏳ Cooldown active for QR scan: ${poi.Id}`);
-            }
+            // Quét QR thì phát NGAY (immediate = true)
+            playMedia(poi, true);
         } else {
             console.log('⏳ POI chưa load, retry sau 3s...');
             setTimeout(() => {
@@ -462,3 +512,11 @@ function getOfflinePois() {
         RadiusMeters: 25, Category: 'landmark', Content: { vi: "Chào mừng đến Phố Vĩnh Khánh!" }, AudioUrls: {}
     }].map(normalizePoi);
 }
+
+function testSound() {
+    updateStatus('?? �ang ki?m tra �m thanh...');
+    unlockAudio();
+    const testPoi = { Name: 'Ki?m tra', Description: '�m thanh ho?t �?ng t?t. Ch�c b?n c� m?t chuy?n tham quan vui v?!', AudioUrls: {} };
+    playMedia(testPoi, true);
+}
+

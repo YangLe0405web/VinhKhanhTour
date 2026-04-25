@@ -384,7 +384,7 @@
         public DateTime LastActive { get; set; }
         public string LastPoiName { get; set; } = "";
         public int ScanCount { get; set; }
-        public bool IsOnline => (DateTime.UtcNow - LastActive).TotalSeconds < 30;
+        public bool IsOnline => (DateTime.UtcNow - LastActive).TotalSeconds < 60; // 1 phút là Offline (Dành cho Demo)
     }
     private List<DeviceSession> _activeDevices = new();
     private string _searchString = "";
@@ -540,8 +540,8 @@
     {
         // _totalPlay và _totalQr đã được nạp từ Stats Counter phía trên
         
-        // --- NEW: Unique Devices ---
-        _uniqueDevicesCount = _unified.Where(e => !string.IsNullOrEmpty(e.Device))
+        // --- NEW: Unique Devices (Chỉ tính khách đã quét QR) ---
+        _uniqueDevicesCount = _unified.Where(e => IsScanAction(e.EventType))
                                      .Select(e => e.Device).Distinct().Count();
 
         _avgDuration = _unified.Any(e => e.Duration > 0)
@@ -651,16 +651,15 @@
         return false;
     }
 
+    bool IsScanAction(string action) => 
+        string.Equals(action, "scan_qr", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(action, "tour_scan", StringComparison.OrdinalIgnoreCase);
+
     bool IsPlayAction(string action) => 
         string.Equals(action, "poi_play", StringComparison.OrdinalIgnoreCase) || 
         string.Equals(action, "play_poi", StringComparison.OrdinalIgnoreCase) || 
         string.Equals(action, "play_audio", StringComparison.OrdinalIgnoreCase) ||
         string.Equals(action, "listen_poi", StringComparison.OrdinalIgnoreCase);
-
-    bool IsScanAction(string action) => 
-        string.Equals(action, "scan_qr", StringComparison.OrdinalIgnoreCase) ||
-        string.Equals(action, "tour_scan", StringComparison.OrdinalIgnoreCase) ||
-        string.Equals(action, "Quét QR", StringComparison.OrdinalIgnoreCase);
 
     Color GetActionColor(string action) => action.ToLower() switch
     {
