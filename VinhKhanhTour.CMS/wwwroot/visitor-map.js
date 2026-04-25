@@ -442,17 +442,19 @@ function hideBottomSheet() { document.querySelector('.bottom-sheet').style.displ
 function handleDeepLink() {
     const params = new URLSearchParams(location.search);
     const poiId = params.get('poiId');
-    const tourId = params.get('tourId') || params.get('t'); // Tour QR dùng ?t=xxx
-    console.log(`🔗 DeepLink: poiId=${poiId}, tourId=${tourId}`);
-
-    // Tour QR scan: gọi api/tours/{id}/scan → IncrementQrScansAsync
+    const tourId = params.get('tourId') || params.get('t'); 
+    
     if (tourId) {
-        console.log(`📱 TOUR SCAN: tourId=${tourId}`);
+        if (sessionStorage.getItem('last_scan') === tourId) return;
+        sessionStorage.setItem('last_scan', tourId);
+        console.log('?? TOUR SCAN: tourId=' + tourId);
         logTourScan(tourId);
     }
 
-    // POI QR scan: log trực tiếp vào history
     if (poiId) {
+        if (sessionStorage.getItem('last_scan') === poiId) return;
+        sessionStorage.setItem('last_scan', poiId);
+        
         const devId = getDeviceId();
         const poi = state.allPoi.find(p => p && p.Id === poiId);
         const poiName = poi ? poi.Name : poiId;
@@ -519,4 +521,6 @@ function testSound() {
     const testPoi = { Name: 'Ki?m tra', Description: '�m thanh ho?t �?ng t?t. Ch�c b?n c� m?t chuy?n tham quan vui v?!', AudioUrls: {} };
     playMedia(testPoi, true);
 }
+
+
 

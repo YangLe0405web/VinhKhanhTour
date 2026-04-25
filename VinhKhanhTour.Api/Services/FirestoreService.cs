@@ -347,16 +347,7 @@ public class FirestoreService
         };
         await LogHistoryAsync(history);
 
-        // 2. Log to Analytics (Counted as 'Scan QR' in Dashboard)
-        var ev = new AnalyticsEvent
-        {
-            DeviceId = device,
-            EventType = "scan_qr",
-            PoiId = tourId,
-            Language = lang,
-            Timestamp = DateTime.UtcNow
-        };
-        await LogEventAsync(ev);
+        
     }
 
     // ── User Management & Auth ────────────────────────
@@ -414,6 +405,26 @@ public class FirestoreService
             Console.WriteLine("✅ Initialized default admin account: admin / admin123");
         }
     }
+        public async Task ResetAllDataAsync()
+    {
+        var historyDocs = await _db.Collection("history").GetSnapshotAsync();
+        foreach (var doc in historyDocs.Documents) await doc.Reference.DeleteAsync();
+
+        var analyticsDocs = await _db.Collection("analytics").GetSnapshotAsync();
+        foreach (var doc in analyticsDocs.Documents) await doc.Reference.DeleteAsync();
+
+        await _db.Collection("stats").Document("global").SetAsync(new Dictionary<string, object>
+        {
+            { "TotalQr", 0 },
+            { "TotalPlay", 0 }
+        });
+
+        var tours = await _db.Collection("tours").GetSnapshotAsync();
+        foreach (var doc in tours.Documents) await doc.Reference.UpdateAsync("QrScans", 0);
+
+        ClearAllCache();
+    }
+
     public async Task SyncGlobalStatsAsync()
     {
         var history = await GetHistoryAsync();
@@ -424,3 +435,5 @@ public class FirestoreService
         await doc.SetAsync(new System.Collections.Generic.Dictionary<string, object> { { "TotalQr", totalQr }, { "TotalPlay", totalPlay } }, Google.Cloud.Firestore.SetOptions.Overwrite);
     }
 }
+
+

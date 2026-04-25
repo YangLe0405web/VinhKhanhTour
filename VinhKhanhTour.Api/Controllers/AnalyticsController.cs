@@ -51,4 +51,11 @@ public class AnalyticsController : ControllerBase
         await _db.SyncGlobalStatsAsync();
         return Ok("Synced lifetime totals from history/analytics records.");
     }
+
+    [HttpGet("reset-all-data-today")]
+    public async Task<IActionResult> ResetAllData()
+    {
+        await _db.ResetAllDataAsync();
+        return Ok("All analytics and history data has been reset to 0.");
+    }
 }
