@@ -15,24 +15,19 @@ public class AnalyticsController : ControllerBase
         _db = db;
     }
 
-    // GET api/analytics?force=true
     [HttpGet]
     public async Task<IActionResult> GetAll([FromQuery] bool force = false)
     {
         if (force) _db.ClearAllCache();
         var data = await _db.GetAnalyticsAsync();
+        return Ok(data);
+    }
 
-        return Ok(data.Select(e => new
-        {
-            e.DeviceId,
-            e.EventType,
-            e.PoiId,
-            e.Language,
-            e.Duration,
-            e.Lat,
-            e.Lng,
-            timestamp = e.Timestamp.ToString("o")
-        }));
+    [HttpGet("stats")]
+    public async Task<IActionResult> GetStats([FromQuery] bool force = false)
+    {
+        var stats = await _db.GetGlobalStatsAsync(force);
+        return Ok(stats);
     }
 
     // POST api/analytics

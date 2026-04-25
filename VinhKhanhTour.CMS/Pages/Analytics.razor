@@ -429,10 +429,14 @@
             var t2 = Api.GetTracesAsync(force);
             var t3 = Api.GetHistoryAsync(force);
             var t4 = Api.GetPoisAsync(force);
+            var t5 = Api.GetGlobalStatsAsync(force);
             
-            await Task.WhenAll(t1, t2, t3, t4);
+            await Task.WhenAll(t1, t2, t3, t4, t5);
             
             var allPois = t4.Result ?? new();
+            var stats = t5.Result ?? new();
+            _totalPlay = (int)(stats.ContainsKey("TotalPlay") ? stats["TotalPlay"] : 0);
+            _totalQr = (int)(stats.ContainsKey("TotalQr") ? stats["TotalQr"] : 0);
 
             // Filter data based on Role và OwnerId
             if (_isAdmin)
@@ -534,8 +538,7 @@
 
     void ComputeStats()
     {
-        _totalPlay = _unified.Count(e => IsPlayAction(e.EventType));
-        _totalQr = _unified.Count(h => IsScanAction(h.EventType));
+        // _totalPlay và _totalQr đã được nạp từ Stats Counter phía trên
         
         // --- NEW: Unique Devices ---
         _uniqueDevicesCount = _unified.Where(e => !string.IsNullOrEmpty(e.Device))

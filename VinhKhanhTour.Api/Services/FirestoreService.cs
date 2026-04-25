@@ -91,6 +91,31 @@ public class FirestoreService
         _cache.Remove(CACHE_POIS);
     }
 
+    private const string CACHE_STATS = "global_stats";
+
+    // ── Global Stats (Siêu tiết kiệm & Chính xác) ──────────
+    public async Task<Dictionary<string, long>> GetGlobalStatsAsync(bool force = false)
+    {
+        if (force) _cache.Remove(CACHE_STATS);
+        return await _cache.GetOrCreateAsync(CACHE_STATS, async entry =>
+        {
+            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
+            var doc = await _db.Collection("stats").Document("global").GetSnapshotAsync();
+            if (!doc.Exists) return new Dictionary<string, long> { { "TotalPlay", 0 }, { "TotalQr", 0 } };
+            return new Dictionary<string, long> 
+            { 
+                { "TotalPlay", doc.ContainsField("TotalPlay") ? doc.GetValue<long>("TotalPlay") : 0 },
+                { "TotalQr", doc.ContainsField("TotalQr") ? doc.GetValue<long>("TotalQr") : 0 }
+            };
+        }) ?? new();
+    }
+
+    private async Task IncrementStatAsync(string field)
+    {
+        var docRef = _db.Collection("stats").Document("global");
+        await docRef.SetAsync(new Dictionary<string, object> { { field, FieldValue.Increment(1) } }, SetOptions.MergeAll);
+    }
+
     // ── Analytics ─────────────────────────────────────
     public async Task LogEventAsync(AnalyticsEvent ev)
     {
@@ -110,6 +135,10 @@ public class FirestoreService
             };
 
             await _db.Collection("analytics").AddAsync(data);
+
+            // Tăng counter tổng
+            if (ev.EventType == "scan_qr" || ev.EventType == "tour_scan") await IncrementStatAsync("TotalQr");
+            else if (ev.EventType == "play_audio" || ev.EventType == "poi_play") await IncrementStatAsync("TotalPlay");
             
             // Write-through: thêm vào cache NGAY (0 reads thêm)
             if (_cache.TryGetValue(CACHE_ANALYTICS, out List<AnalyticsEvent>? cached) && cached != null)
@@ -131,7 +160,7 @@ public class FirestoreService
             entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30);
             var snap = await _db.Collection("analytics")
                 .OrderByDescending("Timestamp")
-                .Limit(2000)
+                .Limit(500) // Giảm xuống 500 cho tiết kiệm vì đã có Stats tổng riêng
                 .GetSnapshotAsync();
 
             return snap.Documents.Select(d =>
@@ -167,7 +196,7 @@ public class FirestoreService
             entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30);
             var snap = await _db.Collection("history")
                 .OrderByDescending("Timestamp")
-                .Limit(2000)
+                .Limit(500) // Giảm xuống 500 cho tiết kiệm
                 .GetSnapshotAsync();
             return snap.Documents
                 .Select(d => d.ConvertTo<AppHistory>())
@@ -180,6 +209,10 @@ public class FirestoreService
         history.Id = Guid.NewGuid().ToString("N")[..8];
         history.Timestamp = DateTime.UtcNow;
         await _db.Collection("history").Document(history.Id).SetAsync(history);
+
+        // Tăng counter tổng
+        if (history.Action == "scan_qr" || history.Action == "tour_scan") await IncrementStatAsync("TotalQr");
+        else if (history.Action == "play_audio" || history.Action == "poi_play") await IncrementStatAsync("TotalPlay");
         
         // Write-through: thêm vào TẤT CẢ history cache variants (0 reads thêm)
         foreach (var limit in new[] { 50, 100, 200, 500, 1000, 2000 })

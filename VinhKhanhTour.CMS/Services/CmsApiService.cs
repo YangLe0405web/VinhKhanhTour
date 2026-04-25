@@ -13,12 +13,20 @@ public class CmsApiService
     private List<AppHistory>? _historyCache;
     private List<AnalyticsEvent>? _analyticsCache;
     private List<LocationTrace>? _tracesCache;
+    private Dictionary<string, long>? _statsCache;
     private DateTime _lastRefresh = DateTime.MinValue;
     private readonly TimeSpan _cacheDuration = TimeSpan.FromMinutes(30);
 
     public CmsApiService(HttpClient http) => _http = http;
 
     private bool IsCacheValid() => DateTime.UtcNow - _lastRefresh < _cacheDuration;
+
+    public async Task<Dictionary<string, long>?> GetGlobalStatsAsync(bool force = false)
+    {
+        if (!force && _statsCache != null && IsCacheValid()) return _statsCache;
+        _statsCache = await _http.GetFromJsonAsync<Dictionary<string, long>>($"api/analytics/stats?force={force}");
+        return _statsCache;
+    }
 
     // ── POI ───────────────────────────────────────────
     public async Task<List<PoiModel>?> GetPoisAsync(bool force = false)
