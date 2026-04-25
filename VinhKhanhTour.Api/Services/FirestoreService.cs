@@ -131,7 +131,7 @@ public class FirestoreService
             entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30);
             var snap = await _db.Collection("analytics")
                 .OrderByDescending("Timestamp")
-                .Limit(500)
+                .Limit(2000)
                 .GetSnapshotAsync();
 
             return snap.Documents.Select(d =>
@@ -167,7 +167,7 @@ public class FirestoreService
             entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30);
             var snap = await _db.Collection("history")
                 .OrderByDescending("Timestamp")
-                .Limit(500)
+                .Limit(2000)
                 .GetSnapshotAsync();
             return snap.Documents
                 .Select(d => d.ConvertTo<AppHistory>())

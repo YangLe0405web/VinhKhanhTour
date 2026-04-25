@@ -493,13 +493,13 @@
 
         // Tạo HashSet để kiểm tra duplicate (cùng Device + EventType + PoiId trong ±10 giây)
         var historyKeys = new HashSet<string>(
-            list.Select(e => $"{e.Device}|{e.EventType}|{e.PoiId}|{e.Timestamp:yyyyMMddHHmm}")
+            list.Select(e => $"{e.Device}|{e.EventType}|{e.PoiId}|{e.Timestamp:yyyyMMddHHmmss}")
         );
 
         // 2. Nạp Analytics Event — CHỈ thêm nếu KHÔNG trùng với History
         foreach (var e in _events)
         {
-            var key = $"{e.DeviceId}|{e.EventType}|{e.PoiId}|{e.Timestamp:yyyyMMddHHmm}";
+            var key = $"{e.DeviceId}|{e.EventType}|{e.PoiId}|{e.Timestamp:yyyyMMddHHmmss}";
             if (historyKeys.Contains(key)) continue; // Bỏ qua duplicate
 
             list.Add(new UnifiedEvent
