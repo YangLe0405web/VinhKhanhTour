@@ -420,7 +420,7 @@ public class FirestoreService
         });
 
         var tours = await _db.Collection("tours").GetSnapshotAsync();
-        foreach (var doc in tours.Documents) await doc.Reference.UpdateAsync("QrScans", 0);
+        foreach (var doc in tours.Documents) await doc.Reference.SetAsync(new Dictionary<string, object> { { "QrScans", 0 } }, SetOptions.MergeAll);
 
         ClearAllCache();
     }
@@ -435,5 +435,6 @@ public class FirestoreService
         await doc.SetAsync(new System.Collections.Generic.Dictionary<string, object> { { "TotalQr", totalQr }, { "TotalPlay", totalPlay } }, Google.Cloud.Firestore.SetOptions.Overwrite);
     }
 }
+
 
 
