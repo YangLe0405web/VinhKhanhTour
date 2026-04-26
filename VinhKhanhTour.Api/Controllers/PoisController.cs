@@ -118,7 +118,7 @@ public class PoisController : ControllerBase
     {
         var (data, contentType) = await _storage.GetAudioAsync(id, lang);
         if (data == null) return NotFound("Audio not found");
-        return File(data, contentType ?? "audio/mpeg");
+        return File(data, contentType ?? "audio/mpeg", enableRangeProcessing: true);
     }
 
     // GET api/pois/{id}/check-access?deviceId=...
